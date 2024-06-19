@@ -1,0 +1,725 @@
+from io import TextIOWrapper
+import os
+import platform
+import shutil
+import numpy as np
+import re
+
+from dataclasses import dataclass
+
+from gui_configuration import Diagram, TuPlotDiagram, TuStatDiagram
+
+
+@dataclass
+class TuInp:
+  """
+  Dataclass that records all the needed fields describing the configuration
+  for a diagram as specified in an .inp plot configuration file.
+  """
+  file_name: str = ""
+  plot_index: int = 1
+  is_tuplot: bool = True
+  iplot: str = '1'
+  pli_name: str = ""
+  idnf: str = ""
+  diagram_config: str = ""
+  ikon: str = ""
+
+  diagr_type: Diagram = None
+
+  def configure_tuplot_inp_fields(self, info: dict):
+    """
+    Method that configure the fields of this dataclass instance for the
+    'TuPlot' case by getting the needed information from the input
+    dictionary that holds the plot configuration of a single diagram.
+    """
+    # Set the default file name for the 'TuPlot' case
+    self.file_name = "TuPlot.inp"
+    # Set the .pli file name
+    self.pli_name = info['PLI']
+    # Set the plot number (IDNF)
+    self.idnf = info['IDNF']
+    # Set the type of diagram
+    self.diagr_type = TuPlotDiagram(number=self.idnf, idga=info['IDGA'])
+    # Set the keyword stating the end of the plot/diagram/file
+    self.ikon = info['IKON']
+
+    # --------------------------------------------------
+    # Store the diagram configuration as a single string
+    # --------------------------------------------------
+    # Store the IDNF value (diagram number), followed by the IDGA value (diagram type),
+    # followed by NKN (nuber of curves to plot)
+    self.diagram_config += info['IDNF'] + " " + info['IDGA'] + " " + info['NKN'] + "\n"
+    # Store on the same line:
+    # . IANT1 value (Y, N), valid for plot 113, indicates the temperature distribution is considered
+    # . IANT2 value (C, F), valid for plots 102-108, indicates the stresses are considered for cladding (C) or fuel (F)
+    # . IANT3 value (Y, N), driver for printing the input data and X-Y table (Y) or nothing (N)
+    self.diagram_config += info['IANT1'] + " " + info['IANT2'] + " " + info['IANT3'] + "\n"
+    # Store the curves number in increasing order:
+    # . IDGA = 1, it is a list of the selected curves Kn-s
+    # . IDGA = 2/3, it is equal to 1
+    self.diagram_config += info['KN'] + "\n"
+    # Store the curves slices in increasing order:
+    # . IDGA = 1/2, it is equal to 1
+    # . IDGA = 3, it is a list of the selected curves slices
+    self.diagram_config += info['NLSUCH'] + "\n"
+    # Store the time instants at which the curves are plotted or the start/end values (depending on plot group)
+    self.diagram_config += info["TIME"] + "\n"
+    # Store the NMAS value, stating if a custom scaling is present (value fixed at 0, i.e. no custom extrema)
+    self.diagram_config += info["NMAS"] + "\n"
+
+  def configure_tustat_inp_fields(self, info: dict):
+    """
+    Method that configure the fields of this dataclass instance for the
+    'TuStat' case by getting the needed information from the input
+    dictionary that holds the plot configuration of a single diagram.
+    """
+    # Set the default file name for the 'TuStat' case
+    self.file_name = "TuStat.inp"
+    # Set the .pli file name
+    self.pli_name = info['PLI']
+    # Set the plot number (DIAGNR)
+    self.idnf = info['DIAGNR']
+    # Set the type of diagram
+    self.diagr_type = TuStatDiagram(number=self.idnf)
+    # Set the flag stating the diagram is not a 'TuPlot' case
+    self.is_tuplot = False
+    # Set the keyword stating the end of the plot/diagram/file
+    self.ikon = info['CONTIN']
+
+    # --------------------------------------------------
+    # Store the diagram configuration as a single string
+    # --------------------------------------------------
+    # Store the DIAGNR value (diagram number)
+    self.diagram_config += info['DIAGNR'] + "\n"
+    # Store the number of required section/slice
+    self.diagram_config += info['NAXIAL'] + "\n"
+    # Store the time instants at which the curves are plotted
+    self.diagram_config += info["TIME"] + "\n"
+    # Store the number of intervals of the statistical distribution (INTERV)
+    self.diagram_config += info["INTERV"] + "\n"
+    # Store the type of distribution (DISTR)
+    self.diagram_config += info["DISTR"] + "\n"
+
+
+class InpHandler():
+  """
+  Class for handling the functionalities devoted to reading and writing a plot
+  configuration .inp file.
+  """
+  def __init__(self, inp_path: str):
+    """
+    Construct an instance of this class by receiving the path to the .inp file.
+    """
+    # Store the paths to the .inp file (to read or write) and its directory
+    self.inp_path = inp_path
+    self.inp_dir = os.path.dirname(self.inp_path)
+
+  def read_inp_file(self):
+    """
+    Method that reads an input .inp file and interprets its content according to
+    the specific 'TuPlot' or 'TuStat' subroutine it was created from.
+    """
+    # Declare a list of dataclasses holding the configuration values for
+    # each diagram declared in the loaded input file
+    self.diagrams_list: list[TuInp] = list()
+    # Declare an index representing the plot index number
+    plot_index = 0
+
+    # Open the file for reading
+    with open(self.inp_path, 'r') as inp:
+      # Read each line
+      for line in inp:
+        # Strip any whitespace
+        line = line.strip()
+        # Skip any existing comment line starting with a '+'
+        if line.startswith('+'):
+          continue
+
+        # Get the beginning of a plot description
+        if "IDEN" in line:
+          # Update the plot index number
+          plot_index += 1
+          # Extract and store all the information describing the plot configuration of a single diagram
+          self._extract_diagram_info(plot_index, inp)
+
+  def save_inp_file(self, diagrams: list[TuInp]):
+    """
+    Method that saves 1 or more plot configuration diagrams on a single .inp file.
+    The plots configuration are provided as a list of 'TuInp' dataclasses storing
+    all the needed information to be written on file.
+    """
+    # Save the .inp file containing the plots configuration options
+    with open(self.inp_path, 'w') as f:
+      # Loop over all the dataclasses of the list
+      for diagr in diagrams:
+        # Write the lines of the file
+        f.write('IDEN\n')
+        f.write(diagr.iplot + '\n')
+        f.write(diagr.pli_name + '\n')
+        f.write(diagr.diagram_config)
+        f.write(diagr.ikon + '\n')
+
+  def save_loaded_inp(self):
+    """
+    Method that saves the loaded .inp file in the current working directory
+    if its name is different from 'TuPlot.inp' or 'TuStat.inp', as the post-
+    processing TU executables requires these specific file names.
+    """
+    # Check if all stored diagrams configurations refers to the same kind of diagrams,
+    # i.e. all TuPlot or TuStat ones. If not the case, raise an exception.
+    if not all(diagr.is_tuplot == self.diagrams_list[0].is_tuplot for diagr in self.diagrams_list):
+      raise Exception("ERROR: The loaded .inp file contains mixed-type diagrams.")
+    # Check if any of the .pli files mentioned in the .inp file is missing
+    for diagr in self.diagrams_list:
+      # Instantiate the class that extracts the .pli file content. It also checks
+      # the file existence and retrieve the DAT file names whose presence needs
+      # to be checked as well.
+      if os.path.dirname(diagr.pli_name):
+        plireader = PliReader(diagr.pli_name)
+      else:
+        plireader = PliReader(os.path.join(self.inp_dir, diagr.pli_name))
+      # Extract the information from the .pli file
+      plireader.extract_sim_info()
+      # Check if any of the DAT files is missing
+      check_file_existence(os.path.join(self.inp_dir, plireader.mac_path), 'mac')
+      check_file_existence(os.path.join(self.inp_dir, plireader.mic_path), 'mic')
+      # Check the .sta file existence only if required, i.e if the 'ISTATI' field is '1'
+      if plireader.opt_dict['ISTATI'] == 1:
+        check_file_existence(os.path.join(self.inp_dir, plireader.sta_path), 'sta')
+
+    # Declare a string holding the .inp filename (with default to 'TuPlot')
+    filename = "TuPlot.inp"
+    # Get the name of the loaded .inp file
+    inp_name = os.path.basename(self.inp_path).split(os.sep)[-1]
+    # Re-declare the file name if 'TuStat' case
+    if not self.diagrams_list[0].is_tuplot:
+      filename = "TuStat.inp"
+
+    # Return if the loaded .inp file name does not differ from the default one
+    if inp_name == filename: return os.path.join(self.inp_dir, filename)
+
+    # Change the .inp file path instance variable to reflect the standard file name required
+    # by the plotting executables
+    self.inp_path = os.path.join(self.inp_dir, filename)
+
+    # Save the .inp file containing the plots configuration options in the output folder
+    self.save_inp_file(self.diagrams_list)
+
+    # Return the path to the saved .inp file
+    return os.path.join(self.inp_dir, filename)
+
+  def _extract_diagram_info(self, plot_index: int, inp_file_handle: TextIOWrapper):
+    """
+    Method that extract from the given 'TextIOWrapper' instance, given by opening the
+    .inp file for reading, all the information about the plot configuration of a single
+    diagram. These are used to set the fields of an instance of the 'TuInp' dataclass
+    which is added to the instance variable list storing all the present diagrams.
+    """
+    # Declare a new dataclass recording the plot configuration fields
+    inp_config = TuInp()
+    # Store the basic information
+    inp_config.file_name = self.inp_path
+    inp_config.plot_index = plot_index
+
+    # Read the IPLOT field line and store it
+    inp_config.iplot = inp_file_handle.readline().strip()
+    # Read the .pli name field line and store it
+    inp_config.pli_name = inp_file_handle.readline().strip()
+
+    # Read the line containing the 'IDNF' value in order to interpret the plot:
+    # . if this line contains 3 values, the .inp file corresponds to a TuPlot case
+    # . if this line contains 1 value only, the .inp file corresponds to a TuStat case
+    inp_config.diagram_config += inp_file_handle.readline()
+    if len(inp_config.diagram_config.split()) == 1:
+      # Only one value --> TuStat case
+      inp_config.is_tuplot = False
+      # Declare the dataclass for the TuStat case
+      inp_config.diagr_type = TuStatDiagram(inp_config.diagram_config.split()[0])
+    else:
+      # Declare the dataclass for the TuPlot case
+      inp_config.diagr_type = TuPlotDiagram(number=inp_config.diagram_config.split()[0],
+                                            idga=inp_config.diagram_config.split()[1])
+      # Call the dataclass method for evaluating the group corresponding to the plot number
+      inp_config.diagr_type.define_group_from_num()
+
+    # Get the plot number
+    inp_config.idnf = inp_config.diagram_config.split()[0]
+
+    # Loop over all the lines until the diagram end tag is reached
+    for line in inp_file_handle:
+      # Exit the loop if the diagram section has ended
+      if line.startswith('+') or any(substring in line for substring in ['D', 'I', 'E']):
+        print("##### DIAGRAM END #####")
+        # Store the 'IKON' field value
+        inp_config.ikon = line.strip()
+        # Add the built dataclass to the list of diagrams
+        self.diagrams_list.append(inp_config)
+        # Return since diagram reading has finished
+        return
+
+      # Store the diagram configuration
+      inp_config.diagram_config += line
+
+
+def check_file_existence(file_path: str, file_extension: str):
+  """
+  Function that can be accessed globally for checking if the given
+  file path exists and is a file. If not, the function raises an
+  exception.
+  """
+  if not os.path.isfile(file_path):
+    # If the file does not exists, throw an exception
+    raise Exception(f"Error: the .{file_extension} file does not exist at the specified path.")
+
+
+class DatGenerator():
+  """
+  Class that interfaces the plot configuration set in the GUI, and provided
+  as the .inp file, with the tuplotgui executable.
+  The result is the creation of the output .dat file containing the X-Y data
+  to be plotted.
+  """
+  def __init__(self, plotexec_path: str, inp_path: str, plots_num: int, cwd: str, output_files_name: str):
+    # Set the instance attributes
+    self.plotexec_path = plotexec_path
+
+    # Set the input file path after checking the file existence
+    if os.path.isfile(inp_path):
+      self.inp_path = inp_path
+      # Extract the .inp file directory
+      self.inp_dir = os.path.dirname(inp_path)
+    else:
+      # If the file does not exists, throw an exception
+      raise Exception("Error: the .inp file does not exist at the specified path.")
+
+    # Set the output directory after checking its existence
+    if os.path.isdir(cwd):
+      self.output_path = cwd
+    else:
+      raise Exception(f"Error: the output '{cwd}' folder does not exist at the specified path.")
+
+    # Given the number of diagrams to produce, build a list of output file names
+    self.dat_paths = list()
+    self.plt_paths = list()
+    self.out_paths = list()
+
+    # Build the paths to the output files that will be written by running the executable
+    for i in range(plots_num):
+      if platform.system() == "Linux":
+        self.dat_paths.append(os.path.join(self.inp_dir, output_files_name + str(i + 1).zfill(2) + ".dat"))
+        self.plt_paths.append(os.path.join(self.inp_dir, output_files_name + str(i + 1).zfill(2) + ".plt"))
+        self.out_paths.append(os.path.join(self.inp_dir, output_files_name + ".out"))
+      elif platform.system() == "Windows":
+        self.dat_paths.append(os.path.join(self.inp_dir, output_files_name + ".dat"))
+        self.plt_paths.append(os.path.join(self.inp_dir, output_files_name + ".plt"))
+        self.out_paths.append(os.path.join(self.inp_dir, output_files_name + ".out"))
+
+      print("DIR --> " + self.inp_dir)
+      print("DAT --> " + self.dat_paths[i])
+      print("PLT --> " + self.plt_paths[i])
+      print("OUT --> " + self.out_paths[i])
+
+  def run(self):
+    """
+    Method that runs the tuplotgui executable by feeding it with the .inp file.
+    Since the executable needs the input file to be in the same folder, if the
+    input path differs from the executable one, the .inp file is temporarily copied
+    into the run folder.
+    After running the executable, if no errors arose, the output files (.dat, .plt
+    and .out files) are moved into the working directory.
+    """
+    # The current working directory is changed to the one of the .inp file
+    os.chdir(os.path.dirname(self.inp_path))
+    print("CURRENT WD: " + os.getcwd())
+
+    # if os.path.dirname(self.tuplotgui_path) != os.path.dirname(self.inp_path):
+    #   # Copy the input file into the tuplotgui executable folder, i.e. the current working directory
+    #   shutil.copy2(src=self.inp_path, dst=os.getcwd())
+
+    # Assemble the command for running the executable
+    command = self.plotexec_path + " " + os.path.basename(self.inp_path).split(os.sep)[-1]
+    # Run the tuplotgui executable by passing the input file
+    print("RUN: " + command)
+    os.system(command)
+
+    # Check for the presence of all of the output files
+    for i in range(len(self.dat_paths)):
+      if (os.path.isfile(self.dat_paths[i]) and os.path.isfile(self.plt_paths[i])):
+        # Move the output files into the user-specified working directory
+        shutil.move(self.dat_paths[i], os.path.join(self.output_path, os.path.basename(self.dat_paths[i]).split(os.sep)[-1]))
+        shutil.move(self.plt_paths[i], os.path.join(self.output_path, os.path.basename(self.plt_paths[i]).split(os.sep)[-1]))
+
+        # Change the paths of the output files to the ones where they have just been moved
+        self.dat_paths[i] = os.path.join(self.output_path, os.path.basename(self.dat_paths[i]).split(os.sep)[-1])
+        self.plt_paths[i] = os.path.join(self.output_path, os.path.basename(self.plt_paths[i]).split(os.sep)[-1])
+      else:
+        # If any of the output files does not exist, raise an exception
+        raise Exception("Error: something wrong with the output extraction.\
+                        One of the output files has not been produced.")
+      # Handle the .out file case: given how the executables have been compiled, this file could not be present
+      if os.path.isfile(self.out_paths[i]):
+        # Move the output file into the user-specified working directory
+        shutil.move(self.out_paths[i], os.path.join(self.output_path, os.path.basename(self.out_paths[i]).split(os.sep)[-1]))
+        # Change the path of the output file to the one where it has just been moved
+        self.out_paths[i] = os.path.join(self.output_path, os.path.basename(self.out_paths[i]).split(os.sep)[-1])
+      else:
+        # Set an empty string as the .out file path in case it has not been produced
+        self.out_paths[i] = ""
+
+      print("OUTPUT FILES: " + self.dat_paths[i] + ", " + self.plt_paths[i] + ", " + self.out_paths[i])
+
+    # Remove the .inp file copied in the tuplotgui executable folder
+    # os.remove(os.path.join(os.getcwd(), os.path.basename(self.inp_path).split('/')[-1]))
+
+    # Restore the previous working directory
+    os.chdir(self.output_path)
+
+
+class PliReader():
+  """
+  Class that interprets the content of the .pli file produced by the TU simulation. It contains
+  information useful for extracting data from the .mac e .mic files.
+  """
+  def __init__(self, pli_path: str):
+    """
+    Build an instance of the 'PliReader' class that interprets the content of the .pli
+    file produced by the TU simulation.
+    It receives as parameter the path to the .pli file to read and checks the actual
+    existence of the file.
+    """
+    # Check the .pli file existence
+    check_file_existence(pli_path, 'pli')
+    self.pli_path = pli_path
+    self.pli_folder = os.path.dirname(pli_path)
+
+  def extract_sim_info(self):
+    """
+    Method that reads the content of the .pli file and extracts the values of the
+    relevant items.
+    """
+    # Open the .pli file in reading mode
+    with open(self.pli_path, 'r') as f:
+      # Read line-by-line
+      for line in f:
+        # Get the line where the options are printed
+        if (("M3" in line) and ("ISTRUK" in line)):
+          # Split the line to get the list of option names
+          options = line.split()
+          # Advance to the next line and get the list of the option values
+          options_values = f.readline().split()
+          # Check if the two lists have the same size
+          if (len(options) != len(options_values)):
+            # Raise an exception
+            raise Exception("Error: no match between the options and their values")
+
+          # Build a dictionary holding the name of the options VS their values
+          self.opt_dict = {options[i]: options_values[i] for i in range(len(options))}
+        else:
+          # Search for the lines where the paths of the .mic and .mac files and their record length are present
+          if (re.search("^\w+.mic\s+", line)):
+            # Save the path to the .mic file
+            self.mic_path = line.split()[0]
+            # Advance to the next line to get the .mic record length
+            self.mic_recordLength = f.readline().split()[0]
+          elif(re.search("^\w+.mac\s+", line)):
+            # Save the path to the .mac file
+            self.mac_path = line.split()[0]
+            # Advance to the next line to get the .mac record length
+            self.mac_recordLength = f.readline().split()[0]
+          elif(re.search("^\w+.sta\s+", line)):
+            # Save the path to the .sta file
+            self.sta_path = line.split()[0]
+            # Advance to the next line to get the .sta record length
+            self.sta_recordLength = f.readline().split()[0]
+            # Advance to the next line to get the .sta micro-step dataset record length
+            self.sta_micStep = f.readline().split()[0]
+            # Advance to the next line to get the .sta macro-step dataset record length
+            self.sta_macStep = f.readline().split()[0]
+            # Advance to the next line to get the .sta statistic dataset record length
+            self.sta_dataset = f.readline().split()[0]
+
+    # Extract the number of axial sections depending on the ISLICE field
+    if self.opt_dict['ISLICE'] == 1:
+      self.axial_steps = int(self.opt_dict['M3'])
+    else:
+      self.axial_steps = int(self.opt_dict['M3']) + 1
+
+
+class DaReader():
+  """
+  Base class for all the ones that interpret the content of a direct-access file produced
+  by the TU simulation.
+  It provides methods to be overridden by its subclasses.
+  """
+  def __init__(self, da_path: str, extension: str):
+    """
+    Build an instance of the 'DaReader' class. It receives as parameter the path to the
+    direct-access file to read and checks its actual existence.
+    """
+    # Check the direct-access file existence
+    check_file_existence(da_path, extension)
+    # Store the direct-access file path
+    self.da_path = da_path
+
+  def extract_time_hsms(self, record_length):
+    """
+    Method that extracts from the direct-access file the simulation time instants
+    as arrays for hours, seconds and milliseconds respectively. These arrays are
+    saved as instance attributes and returned as a tuple.
+    """
+    da_data = self.read_tu_data(record_length)
+    # Build the time arrays by extracting the values for hours, seconds (both as integers)
+    # and milliseconds
+    self.time_h = [int(h) for h in da_data[::, 0]]
+    self.time_s = [int(s) for s in da_data[::, 1]]
+    self.time_ms = da_data[::, 2]
+    # Return the tuple of times
+    return (self.time_h, self.time_s, self.time_ms)
+
+  def read_tu_data(self, record_length):
+    """
+    Method that opens the direct-access file and re-elaborate its content, originally stored
+    as a one-line array. Given the record length, the array is reshaped as a 2D array having:
+    . as rows, the values at each time for each igrob-slice
+    . as columns, the values of the quantities calculated for each m2(igrob)-slice element
+    Subclasses can override this method providing their own implementation in case the one
+    proposed is not valid (case of a .sta file).
+    """
+    try:
+      with open(self.da_path, 'rb') as f:
+        # Read all the data as a 1D array of floating point values
+        data = np.fromfile(f, dtype='float32', count=-1)
+        # Reshape the data as a 2D array
+        data = data.reshape(int(data.size / record_length), record_length)
+        # Return the array
+        return data
+    except:
+      error_msg = f"Error while extracting the data from the '{self.da_path}' file."
+      raise Exception(error_msg)
+
+
+class MacReader(DaReader):
+  """
+  Class that interprets the content of the .mac file produced by the TU simulation. It contains
+  the radially dependent quantities at every simulation time for every (i, j)-th element of the
+  domain.
+  """
+  def __init__(self, mac_path: str, n_slices: int):
+    """
+    Build an instance of the 'MacReader' class that interprets the content of the .mac
+    file produced by the TU simulation.
+    It receives as parameter the path to the .mac file to read and checks the actual
+    existence of the file.
+    """
+    # Call the superclass constructor
+    super().__init__(mac_path, 'mac')
+
+    # Store the number of slices
+    self.n_slices = n_slices
+
+  def extract_xtime_hsms(self, record_length):
+    """
+    Method that extracts from the .mac file the simulation time instants as arrays
+    for hours, seconds and milliseconds respectively. These values are provided
+    for each slice, hence the extracted arrays are filtered every n-slices values,
+    saved as instance attributes and returned as a tuple.
+    """
+    # Extract all the occurrences of the times
+    (h, s, ms) = self.extract_time_hsms(record_length)
+    # Filter the time values every n-slices and store their values
+    self.time_h = h[::self.n_slices]
+    self.time_s = s[::self.n_slices]
+    self.time_ms = ms[::self.n_slices]
+
+    # Return the tuple of times
+    return (self.time_h, self.time_s, self.time_ms)
+
+
+class MicReader(DaReader):
+  """
+  Class that interprets the content of the .mic file produced by the TU simulation.
+  For every micro-step (TU internal step) several quantities are stored, that are
+  section/slice dependent variables and special quantities.
+  """
+  def __init__(self, mic_path: str):
+    """
+    Build an instance of the 'MicReader' class that interprets the content of the .mic
+    file produced by the TU simulation.
+    It receives as parameter the path to the .mic file to read and checks the actual
+    existence of the file.
+    """
+    # Call the superclass constructor
+    super().__init__(mic_path, 'mic')
+
+
+class StaReader(DaReader):
+  """
+  Class that interprets the content of the .sta file produced by the TU simulation.
+  For every time step (choosen by users) several quantities are stored.
+  """
+  def __init__(self, sta_path: str, ibyte):
+    """
+    Build an instance of the 'MicReader' class that interprets the content of the .mic
+    file produced by the TU simulation.
+    It receives as parameter the path to the .mic file to read and checks the actual
+    existence of the file.
+    """
+    # Call the superclass constructor
+    super().__init__(sta_path, 'sta')
+
+    # Store the ibyte value
+    self.ibyte = ibyte
+
+  def extract_time_hsms(self, record_length: int, axial_steps: int, sta_dataset_length: int):
+    """
+    Method that overrides the superclass method for extracting the time steps from a generic
+    direct-access file.
+    This provides an implementation specific to the case of a .sta file for getting the time
+    steps as arrays for hours, seconds and milliseconds respectively.
+    These arrays are saved as instance attributes and returned as a tuple.
+    """
+    # Extract an array of all the data stored in the .sta file
+    sta_data = self.read_tu_data(record_length, axial_steps, sta_dataset_length)
+    # Get all the values of the time
+    all_times = np.array(sta_data[:, 0, 0:3]).tolist()
+    # Filter out any time duplicate
+    list_of_times = list()
+    for t in all_times:
+      if t not in list_of_times:
+        list_of_times.append(t)
+
+    # Build the time arrays by extracting the values for hours, seconds (both as integers)
+    # and milliseconds
+    self.time_h = [int(h[0]) for h in list_of_times]
+    self.time_s = [int(s[1]) for s in list_of_times]
+    self.time_ms = [ms[2] for ms in list_of_times]
+    # Return the tuple of times
+    return (self.time_h, self.time_s, self.time_ms)
+
+  def read_tu_data(self, record_length: int, axial_steps: int, sta_dataset_length: int):
+    """
+    Method that overrides the superclass method for extracting the content of a generic
+    direct-access file.
+    This provides an implementation specific to the case of a .sta file for re-elaborating
+    its content, originally stored as a one-line array. Given the dimensions provided as
+    input, the array is re-shaped as a 3D one.
+    """
+    try:
+      # Open the file for reading
+      with open(self.da_path, 'rb') as f:
+        # Handle the case the data is stored as 4 or 8 byte values
+        if self.ibyte == 4:
+          sta_data1 = np.fromfile(f, dtype=np.float32, count=-1)
+          sta_data = np.array(sta_data1, dtype=np.float64)
+        elif self.ibyte == 8:
+          sta_data = np.fromfile(f, dtype=np.float64, count=-1)
+        else:
+          error_msg = "The byte lenght of data in the '.sta' and '.sti' binary files \
+                      needs to be 4 or 8."
+          raise Exception(error_msg)
+
+      # Determine the length of the X dimension of the reshaped array
+      x_dim = int(sta_dataset_length / (axial_steps + 1))
+      # Reshape the data in the .sta file as a 3D array and return it
+      return np.reshape(sta_data, (x_dim, axial_steps+1, record_length))
+    except:
+      error_msg = "Error while extracting the data from the '.sta' file."
+      raise Exception(error_msg)
+
+
+if __name__ == "__main__":
+  # Flag stating which class is being tested:
+  #   1-DatGenerator
+  #   2-MicReader
+  #   3-PliReader
+  #   4-MacReader
+  #   5-StaReader
+  #   6-InpHandler (loading .inp)
+  test = 1
+
+  match test:
+    case 1:
+      print("Testing the interface to Tuplotgui executable")
+
+      # Get the absolute path of the current file
+      abspath = os.path.abspath(__file__)
+      # Get the file directory path
+      dname = os.path.dirname(abspath)
+
+      # Instantiate the class interfacing input with tuplotgui executable
+      inp_to_dat = DatGenerator(os.path.join(dname, "bin/tuplotgui_nc"),
+                                "../Input/TuPlot.inp",
+                                1,
+                                "../Output",
+                                'TuPlot')
+      # Run the tuplotgui executable
+      inp_to_dat.run()
+
+    case 2:
+      print("Testing the interface to .mic file")
+      # Instantiate the PliReader class
+      plireader = PliReader("../Input/rodcd.pli")
+      # Extract the information from the .pli file
+      plireader.extract_sim_info()
+
+      # Instantiate the MicReader class
+      micreader = MicReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mic_path)
+      # Extract the time values
+      (h, s, ms) = micreader.extract_time_hsms(int(plireader.mic_recordLength))
+      print(h, s, ms)
+    case 3:
+      # PliReader case
+      print("Testing the interface to the .pli file")
+      # Instantiate the PliReader class
+      plireader = PliReader("../Input/rodcd.pli")
+      print("Path to the .pli file: " + plireader.pli_path)
+      # Extract the information from the .pli file
+      plireader.extract_sim_info()
+
+      print(plireader.opt_dict)
+      print(plireader.mic_path, plireader.mic_recordLength)
+      print(plireader.mac_path, plireader.mac_recordLength)
+      print(plireader.sta_path, plireader.sta_recordLength, plireader.sta_micStep, plireader.sta_macStep)
+
+    case 4:
+      print("Testing the interface to .mac file")
+      # Instantiate the PliReader class
+      plireader = PliReader("../Input/rodcd.pli")
+      # Extract the information from the .pli file
+      plireader.extract_sim_info()
+
+      # Instantiate the MacReader class
+      macreader = MacReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mac_path,
+                            int(plireader.opt_dict['M3']))
+      # Extract the time values
+      (h, s, ms) = macreader.extract_xtime_hsms(int(plireader.mac_recordLength))
+      print(h, s, ms)
+
+    case 5:
+      print("Testing the interface to .sta file")
+      # Instantiate the PliReader class
+      plireader = PliReader("../Input/TuStatCase/222r007n.pli")
+      # Extract the information from the .pli file
+      plireader.extract_sim_info()
+
+      # Instantiate the StaReader class
+      stareader = StaReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.sta_path,
+                            int(plireader.opt_dict['IBYTE']))
+      # stareader.read_tu_data(int(plireader.sta_recordLength), int(plireader.opt_dict['M3']), int(plireader.sta_dataset))
+      # Extract the time values
+      (h, s, ms) = stareader.extract_time_hsms(
+        record_length=int(plireader.sta_recordLength),
+        axial_steps=plireader.axial_steps,
+        sta_dataset_length=int(plireader.sta_dataset))
+      print(h, s, ms)
+
+    case 6:
+      print("Testing the interface to .inp file")
+      # Instantiate the 'InpHandler' class
+      inpreader = InpHandler("../Input/TuPlot_2diagrams.inp")
+      # Read the loaded .inp file and extract its content
+      inpreader.read_inp_file()
+      # Save the content of the read .inp file into a file whose name complies with
+      # what needed by the plotting executables
+      inpreader.save_loaded_inp()

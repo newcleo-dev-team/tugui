@@ -1,0 +1,270 @@
+201 Axial Forces
+KN= 1 - PJ(l)
+KN= 2 - FJ(l)
+
+202 Average stresses in the cladding
+KN= 1 - average radial stress
+KN= 2 - average tangential stress
+KN= 3 - average axial stress
+KN= 4 - average equivalent stress
+KN= 5 - Burst stress Sigburst
+
+203 Uranium-Plutonium Concentrations
+KN= 1 - total Pu concentration in section or slice l
+KN= 2 - average Pu-238 concentration in section or slice l
+KN= 3 - average Pu-239 concentration in section or slice l
+KN= 4 - average Pu-240 concentration in section or slice l
+KN= 5 - average Pu-241 concentration in section or slice l
+KN= 6 - average Pu-242 concentration in section or slice l
+
+204 Thickness of Zones
+KN= 1 - Oxide thickness outer clad, SOXIDE(l,1 )
+KN= 2 - Oxide thickness inner clad, SOXIDE_in(l,1 )
+KN= 3 - Dummy variable 204/3
+KN= 4 - Inner radius of HBS-transition zone. HBSwidth (l,1)
+KN= 5 - Inner  radius  of fully eveloped HBS zone,HBSwidth (l,2)
+
+205 Specific Enthalpy (J/g)
+KN= 1 - Entha_F(l,1), average specific enthalpy of the fuel
+KN= 2 - Entha_C(l,1), average specific enthalpy of the cladding
+KN= 3 - Entha_S(l,1), average specific enthalpy of the structure
+KN= 4 - Enthlpy_max_f(l), maximum specific enthalpy of the fuel
+KN= 5 - Enthlpy_max_c(l), maximum specific enthalpy of the cladding
+
+206 Difference Specific Enthalpy (J/g)
+KN= 1 - Enthalpy fuel related to TTRANS
+KN= 2 - Enthalpy cladding related to TTRANS
+
+207 Specific Injected Energy (J/g)
+KN= 1 - EnInj_F(l)
+KN= 2 - EnInj_C(l)
+KN= 3 - EnInj_S(l)
+
+208 Average Strains in the Cladding (%)
+KN= 1 - Effective creep strain
+KN= 2 - Sum of the effective creep strain increments
+KN= 3 - Effective plastic strain
+KN= 4 - Sum of the effective plastic strain increments
+KN= 5 - Permanent tangential strain
+KN= 6 - Total tangential strain at O/M interface
+
+209 Helium Concentrations (µmol/mm)
+KN= 1 - Total Helium produced
+KN= 2 - He from alpha decay
+KN= 3 - He from O-16(n,alpha)C-13 reaction
+KN= 4 - He from ternary fission
+
+211 Fission Gases Xe + Kr (µmol/mm)
+KN= 1 - Fission gas created in section or slice l
+KN= 2 - Fission gas in the grain in section or slice l
+KN= 3 - Fission gas on the grain boundary in section or slice l
+KN= 4 - Fission gas release in porosity of "HBS" in section or slice l
+KN= 5 - Fission gas release in section or slice l
+
+212 Fission gas release
+KN= 1 - Fractional fission gas release in section or slice l
+
+213 Temperature
+KN= 1 - TEBI(l) Fuel central temperature
+KN= 2 - TEBA(l) Outer fuel temperature
+KN= 3 - TEHI(l) Inner cladding temperature
+KN= 4 - TEHA(l) Outer cladding temperature
+KN= 5 - TETAK(l,1) Coolant temperature
+KN= 6 - TETYIN(l,1) Prescribed bypass temperature - WERT(20)
+KN= 7 - AvTempFu(l) Average fuel temperature at slice l
+KN= 8 - AvTempCl(l) Average cladding temperature at slice l
+KN= 9 - maximum fuel temperature at slice l
+
+214 Geometry
+KN= 1 - ZKRAD
+KN= 2 - RBA(l)
+KN= 3 - RHI(l)
+KN= 4 - RHA(l)
+KN= 5 - GEFUEG (l,2); outer radius of the columnar-grain zone
+KN= 6 - GEFUEG (l,3); outer radius of the equiaxed-grain zone
+KN= 7 - Radial Position of maximum temperature
+
+215 Deformation
+KN= 1 - RBI(l) - REFBI(l)
+KN= 2 - RBA(l) - REFBA(l)
+KN= 3 - RHI(l) - REFHI(l)
+KN= 4 - RHA(l) - REFHA(l)
+KN= 5 - RBI(l) at time t - REFBJ(l) at time t = 0
+
+216 Heat transfer coefficient
+KN= 1 - ALPHAL(l)
+KN= 2 - HGAP(l)
+
+217 Heat flux
+KN= 1 - Q2BH(l,1)
+KN= 2 - Q2HK(l,1)
+KN= 3 - Q2KS(l,1)
+KN= 4 - Q2SB(l,1)
+
+218 Melt radius fuel
+KN= 1 - Solidus inner RMELT(l,1,1,1)
+KN= 2 - Liquidus inner RMELT(l,2,1,1)
+KN= 3 - Solidus outer RMELT(l,1,2,1)
+KN= 4 - Liquidus outer RMELT(l,2,2,1)
+
+219 Melt radius cladding
+KN= 1 - Solidus inner RMELT(l,1,1,2)
+KN= 2 - Liquidus inner RMELT(l,2,1,2)
+KN= 3 - Solidus outer RMELT(l,1,2,2)
+KN= 4 - Liquidus outer RMELT(l,2,2,2)
+
+220 Status of coolant (liquid or gaseous)
+KN= 1 - CHIK(l)
+
+221 Gap width between fuel and cladding
+KN= 1 - SPALTW(l)*1000
+
+222 Pressures
+KN= 1 - PKONTA(l); contact pressure between fuel and cladding
+KN= 2 - PIZKL(l); pressure in the central void
+KN= 3 - PISPL(l); pressure in the gap between fuel and cladding
+KN= 4 - PAL(l); outer pin pressure
+
+223 Am, Cm and He Concentrations
+KN= 1 - average Am-241 concentration in section or slice l
+KN= 2 - average Am-243 concentration in section or slice l
+KN= 3 - average Cm-242 concentration in section or slice l
+KN= 4 - average Cm-243 concentration in section or slice l
+KN= 5 - average Cm-244 concentration in section or slice l
+KN= 6 - average Cm-245 concentration in section or slice l
+KN= 7 - average He-4 concentration in section or slice l
+
+224 Linear rating
+KN= 1 - Q1VEK(l)
+
+225 IFBA-Concentrations
+KN= 1 - He_Cre_IFBA(l,1), Helium concentration
+KN= 2 - Conc_B10_IFBA(l,1), Borium 10 concentration
+
+226 Velocity of the coolant
+KN= 1 - WK(l) m/s
+
+227 Mass flow rate
+KN= 1 - MKVEK(l,1) kg/s
+
+228 Melt fraction in fuel and cladding
+KN= 1 - ANTLIQ(l,1)
+KN= 2 - ANTLIQ(l,2)
+
+229 Average neutron flux (neutrons/(m2s))
+KN= 1 - Average neutron FLUXL(l)
+
+230 Axial deformation
+KN= 1 - ZB(l) - ZBREF(l), l = 1,Mend
+KN= 2 - ZH(l) - ZHREF(l).l = 1,Mend; and M32 (top of Rod)
+
+231 Concentrations of gas CONGAS (KN)
+KN= 1 - Helium
+KN= 2 - Argon
+KN= 3 - Krypton
+KN= 4 - Xenon
+KN= 5 - Nitrogen
+KN= 6 - Hydrogen
+KN= 7 - Oxygen
+KN= 8 - Carbonmonoxide
+KN= 9 - Carbondioxide
+KN=10 - Water vapour
+
+232 Equivalent Cladding Reacted (%)
+KN= 1 - Equivalent Cladding Reacted ECR(l)
+
+233 Averaged fraction of Zr beta-phase (/)
+KN= 1 - Averaged fraction of Zr beta-phase CladBetaav(l)
+
+234 Th Concentration
+KN= 1 - Average Th-232 concentration in section or slice l
+
+235 U and Np Concentrations
+KN= 1 - Total Average U concentration in section or slice l
+KN= 2 - Average U-233 concentration in section or slice l
+KN= 3 - Average U-234 concentration in section or slice l
+KN= 4 - Average U-235 concentration in section or slice l
+KN= 5 - Average U-236 concentration in section or slice l
+KN= 6 - Average U-238 concentration in section or slice l
+KN= 7 - Average Np-237 concentration in section or slice l
+
+236 Xe133 (µmol/mm)
+KN= 1 - created
+KN= 2 - grains
+KN= 3 - decayed
+KN= 4 - boundary
+KN= 5 - released
+
+237 Hydrogen content in cladding ( ppm )
+KN= 1 - Hydrogen content in cladding
+
+238 Average (effective) burn-up
+KN= 1 - BRNUP1 (l) in MWd/kgHM
+KN= 2 - BRNUP_EFF1 (l) in MWd/kgHM
+
+239 Gadolinium Concentrations (at/at Gd)
+KN= 1 - total Gd concentration in section or slice l
+KN= 2 - average Gd-155 concentration in section or slice l
+KN= 3 - average Gd-157 concentration in section or slice l
+
+240 Gadolinium Concentrations (at/cm3)
+KN= 1 - total Gd concentration in section or slice l
+KN= 2 - average Gd-155 concentration in section or slice l
+KN= 3 - average Gd-157 concentration in section or slice l
+
+241 Oxidation mass gain (g/mm2)
+KN= 1 - Oxide outer clad, gmoxi(l,1 )
+KN= 2 - Oxide inner clad, gmoxi_in(l,1 )
+
+242 Xe released to free volume ( µmol )
+KN= 1 - Xe-131
+KN= 2 - Xe-132
+KN= 3 - Xe-133
+KN= 4 - Xe-134
+KN= 5 - Xe-135
+
+243 Xe release rate to coolant of defective rods ( µmol/s )
+KN= 1 - Xe-131
+KN= 2 - Xe-132
+KN= 3 - Xe-133
+KN= 4 - Xe-134
+KN= 5 - Xe-135
+
+244 I released to free volume ( µmol )
+KN= 1 - I-131
+KN= 2 - I-132
+KN= 3 - I-133
+KN= 4 - I-134
+KN= 5 - I-135
+
+245 I release rate to coolant of defective rods ( µmol/s )
+KN= 1 - I-131
+KN= 2 - I-132
+KN= 3 - I-133
+KN= 4 - I-134
+KN= 5 - I-135
+
+250 Release-to-birth ratio ( / )
+KN= 1 - Kr-85m
+KN= 2 - Kr-87
+KN= 3 - Kr-88
+KN= 4 - Te-127
+KN= 5 - Te-129m
+KN= 6 - Te-129
+KN= 7 - Te-131m
+KN= 8 - Te-132
+KN= 9 - I-131
+KN=10 - I-132
+
+251 Release-to-birth ratio ( / )
+KN= 1 - I-133
+KN= 2 - I-134
+KN= 3 - I-135
+KN= 4 - Xe-133
+KN= 5 - Xe-135m
+KN= 6 - Xe-135
+KN= 7 - Xe-138
+KN= 8 - Cs-136
+KN= 9 - Cs-138
+
+end

@@ -1,0 +1,13 @@
+Plot Information File
+Post-test computation for HALDEN experiment IFA-429                             
+       M3       ISTRUK    ISLICE    IBYTE   ISTATI    INOISE
+        10         0         1         4         0         0
+rodcd.mic                                                                       -- Name of microstep dataset
+      2813                                                                      -- Recordlength of microstep dataset
+rodcd.mac                                                                       -- Name of macrostep dataset
+      9016                                                                      -- Recordlength of macrostep dataset
+rodcd.sta                                                                       -- Name of statistic dataset
+         0                                                                      -- Recordlength of statistic dataset
+      6014                                                                      -- Records of micro-step dataset
+       450                                                                      -- Records of macro-step dataset
+         0                                                                      -- No statistic dataset created 

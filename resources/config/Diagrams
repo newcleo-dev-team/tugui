@@ -1,0 +1,147 @@
+Group  1 : Variables as a function of the Radius
+101 0/M
+102 Stress
+103 Total Strain
+104 Strain due to Swelling
+105 Strain due to Sintering
+106 Creep Strain
+107 Strain due to Relocation
+108 Plastic Strain
+109 Grain Size
+110 Burn-up
+111 Porosity
+112 Fractional Fission Gas Release
+113 Temperature
+114 Fission Gases Xe + Kr (µmol/mm3)
+115 U-Concentration ( / )
+116 U-Concentration (wt%)
+117 Enthalpy
+118 Plutonium-Concentration (at./ at.HM)
+119 Xe-Concentration (µmol/mm3)
+120 Kr-Concentration (µmol/mm3)
+121 Cs-Concentration (µmol/mm3)
+122 Nd-Concentration (µmol/mm3)
+123 Xe-Concentration(wt%)
+124 Kr-Concentration(wt%)
+125 Cs-Concentration(wt%)
+126 Nd-Concentration(wt%)
+127 Pu-Concentration(wt%)
+128 Xe / Kr Ratio ( / )
+129 He-Concentration (µmol/mm3)
+130 Hydrostatic stress (MPa)
+131 Power Density (W/mm3)
+132 Thermal Conductivity (W/mmK)
+133 Specific Heat at constant pressure (J/gK)
+134 Density (g/mm3)
+135 Zr-Beta Phase (/)
+136 Time Integral Sigma effective (h)
+137 Gd Concentration (at/cm3)
+138 Th, U and Np-Concentration (at./ at.HM)
+139 Am, Cm and He-Concentration (at./ at.HM)
+140 Gaseous swelling (only model 1)
+Group  2 : Variables as a function of the Time
+201 Axial Forces
+202 Average Stresses in the Cladding
+203 Pu-Concentrations
+204 Thickness of Zones
+205 Specific Enthalpy (J/g)
+206 Difference Specific Enthalpy (J/g)
+207 Specific Injected Energy (J/g)
+208 Average Strains in Cladding (%)
+209 He-Concentration (µmol/mm)
+211 Fission Gases Xe + Kr (µmol/mm)
+212 Fission Gas Release
+213 Temperature
+214 Geometry
+215 Deformation
+216 Heat Transfer Coefficient
+217 Heat Flux
+218 Melt Radius Fuel
+219 Melt Radius Cladding
+220 Status of Coolant (liquid or gaseous)
+221 Gap Width between Fuel and Cladding
+222 Pressures
+223 Am, Cm and He-Concentrations
+224 Linear Rating
+225 IFBA-Concentrations
+226 Velocity of the Coolant
+227 Mass Flow Rate
+228 Melt Fraction in Fuel and Cladding
+229 Average Neutron Flux (neutrons/(m2s))
+230 Axial Deformation
+231 Concentrations of gas CONGAS (KN)
+232 Equivalent Cladding Reacted
+233 Averaged fractional Zr-Beta Phase
+234 Radially averaged Th Concentration (at./ at.HM)
+235 Radially averaged U and Np Concentrations (at./ at.HM)
+236 Xe133 (µmol/mm)
+237 Hydrogen content in cladding ( ppm )
+238 Average (effective) burn-up
+239 Gd-Concentrations (at/at Gd)
+240 Gd-Concentrations (at/cm3)
+241 Oxidation mass gain (g/mm2)
+242 Xe released to free volume ( µmol )
+243 Xe release rate to coolant of defective rods ( µmol/s )
+244 I released to free volume ( µmol )
+245 I release rate to coolant of defective rods ( µmol/s )
+250 Release-to-birth ratio - Kr-85m to I-132 ( / )
+251 Release-to-birth ratio - I-133 to Cs-138 ( / )
+Group 2A : Variables as a function of the Time (integral quantities)
+252 No. of Time-step Criterion
+253 Fission Gases Xe + Kr (µmol)
+254 Fission Gas Release
+255 Gas Concentration in the Upper Plenum CGAOPL (KN)
+256 Gas Concentration in the Lower Plenum CGAUPL (KN)
+257 Total Amount of Gas in Plenum GASTOT (KN)
+258 Burnup Averaged
+259 He Release
+260 Xe / Kr Ratio
+261 Pin free volumes (mm3)
+262 Slice/section Cladding rupture lburst
+263 Helium by TUBRNP (µmol)
+264 Plenum Temperature
+265 Number of Cracks
+266 ECR Integral mean ( % )
+267 Xe133 by SCIANTIX (µmol)
+268 Helium by SCIANTIX (µmol)
+269 Xe133 by DefFGR (µmol)
+270 Xe134 by DefFGR (µmol)
+Group  3 : Variables as a function of the Axial Coordinate
+301 Axial Forces
+302 Average Stresses in the Cladding
+303 Pu Concentrations
+304 Thickness of Zones
+305 Specific Enthalpy (J/g)
+306 Difference Specific Enthalpy (J/g)
+307 Specific Injected Energy (J/g)
+308 Average Strains in Cladding (%)
+309 He-Concentration (µmol/mm)
+311 Fission Gases Xe + Kr (µmol/mm)
+312 Fission Gas Release
+313 Temperature
+314 Geometry
+315 Deformation
+316 Heat Transfer Coefficient
+317 Heat Flux
+318 Melt Radius Fuel
+319 Melt Radius Cladding
+320 Status of Coolant (liquid or gaseous)
+321 Gap Width between Fuel and Cladding
+322 Pressures
+323 Am, Cm and He-Concentrations
+324 Linear Rating
+325 IFBA-Concentrations
+326 Velocity of the Coolant
+327 Mass Flow Rate
+328 Melt Fraction in Fuel and Cladding
+329 Average Neutron Flux (neutrons/(m2s))
+330 Axial Deformation
+331 Concentrations of gas CONGAS (KN)
+332 Equivalent Cladding Reacted
+333 Averaged fractional Zr-Beta Phase
+334 Radially averaged Th Concentration (at./ at.HM)
+335 Radially averaged U and Np Concentrations (at./ at.HM)
+336 Hydrogen content in cladding ( ppm )
+338 Average burn-up
+339 Gd-Concentrations (at/at Gd)
+340 Gd-Concentrations (at/cm3)

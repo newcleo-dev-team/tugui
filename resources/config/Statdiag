@@ -1,0 +1,60 @@
+091 Average U-235 Concentration ( )
+092 Average total Pu Concentraion ( )
+093 Fractional Fission Gas Release (/)
+094 Inner Fuel Temperature (°C)
+095 Outer Fuel Temperature (°C)
+096 Inner Cladding Temperature (°C)
+097 Outer Cladding Temperature (°C)
+098 Coolant Temperature (°C)
+099 Averaged Burn-up (MWd / t)
+100 State of the Coolant
+101 Inner Fuel Radius (mm)
+102 Outer Fuel Radius (mm)
+103 Inner Cladding Radius (mm)
+104 Outer Cladding Radius (mm)
+105 Radial Gap Width (\mm)
+106 Contact Pressure Fuel-Cladding (Mpa)
+107 Local Central Void Pressure (Mpa)
+108 Local Gap Pressure (Mpa)
+109 Outer Cladding Oxide Thickness (mm)
+110 Average Effective Creep Strain (%)
+111 Sum of Effective Creep Strain Increments (%)
+112 Average Effective Plastic Strain (%)
+113 Sum of Effective Plastic Strain Increments (%)
+114 Average Permanent Tangential Strain (%)
+115 Time of Burst (s)
+116 Hydrogen concentration in cladding ( ppm )
+117 Heat Transfer Coefficient (Cladding Coolant)
+118 Heat Transfer Coefficient (Fuel-Cladding)
+119 Burst Stress Sigburst (MPa)
+120 Cladding Tangential Stress (MPa)
+121 Inner Fuel Melt Radius Solidus (mm)
+122 Inner Fuel Melt Radius Liquidus (mm)
+123 Outer Fuel Melt Radius Solidus (mm)
+124 Outer Fuel Melt Radius Liquidus (mm)
+125 Inner Cladding Melt Radius Solidus (mm)
+126 Inner Cladding Melt Radius Liquidus (mm)
+127 Outer Cladding Melt Radius Solidus (mm)
+128 Outer Cladding Melt Radius Liquidus (mm)
+129 Inner Cladding Oxide Thickness (mm)
+130 Equivalent Cladding Reacted ECR (/)
+131 Dummy-Diagram
+132 Dummy-Diagram
+133 Dummy-Diagram
+134 Dummy-Diagram
+135 Dummy-Diagram
+136 Dummy-Diagram
+137 Dummy-Diagram
+138 Dummy-Diagram
+139 Axial Deformation Fuel (mm)
+140 Axial Deformation Cladding (mm)
+141 Fractional Fission Gas Release (/)
+142 Integral Mean Equivalent Cladding Reacted (%)
+143 Dummy-Diagram
+144 Dummy-Diagram
+145 Dummy-Diagram
+146 Dummy-Diagram
+147 Dummy-Diagram
+148 Dummy-Diagram
+149 Dummy-Diagram
+150 Dummy-Diagram

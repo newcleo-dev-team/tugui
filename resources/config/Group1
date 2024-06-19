@@ -1,0 +1,206 @@
+101 O/M Ratio
+KN= 1 - Dummy variable 101/1
+KN= 2 - OZUM3 (igrob,i)
+
+102 Stress   SIGMA(igrob,i,KN,I)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+KN= 4 - equivalent
+
+103 Total strain   ETA (igrob,i,KN,1)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+104 Strain due to swelling   ETA(igrob,i,KN,7)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+105 Strain due to sintering    ETA (igrob,i,KN,9)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+106 Creep strain   ETA(igrob,i,KN,5)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+107 Strain due to relocation   ETA(igrob,i,KN,10)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+108 Plastic strain    ETA(igrob,i,KN,8)
+KN= 1 - radial
+KN= 2 - tangential
+KN= 3 - axial
+
+109 Grain size
+KN= 1 - KORNGR (igrob,i)
+
+110 Burn-up
+KN= 1 - BRNUP3 (igrob,i) in MWd/kgHM
+KN= 2 - BRNUP_EFF3 (igrob,i) in MWd/kgHM
+
+111 Porosity
+KN= 1 - POROSI (igrob,i), total porosity
+KN= 2 - GASPOR (igrob,i), gaseous porosity
+KN= 3 - SINPOR (igrob,i), porosity due to sintering
+KN= 4 - PorHBS (igrob,i), porosity in "High Burnup Structure"
+
+112 Fission gas release
+KN= 1 - Fractional fission gas release (/)
+
+
+113 Temperature
+KN= 1 - TETA (igrob,i)
+
+114 Fission Gases Xe + Kr (µmol/mm3)
+KN= 1 - Fission gas created
+KN= 2 - Fission gas in the grain
+KN= 3 - Fission gas on the grain boundary
+KN= 4 - Fission gas in porosity of "High Burnup Structure"
+KN= 5 - Fission gas released
+
+115 Uranium Concentrations (/)
+KN= 1 - Fractional U-235 concentration
+KN= 2 - Fractional U-238 concentration
+
+116 Uranium Concentrations (wt%)
+KN= 1 - U-235 concentration
+KN= 2 - U-238 concentration
+
+117 Enthalpy
+KN= 1 - Entha_L (igrob,i,1) (J/g)
+KN= 2 - Entha_L (igrob,i,1) (cal/g)
+
+118 Plutonium Concentrations ( at/at HM )
+KN= 1 - CPTOT; radial distribution of the total Pu concentration
+KN= 2 - Pu238local; radial distribution of the Pu-238 concentration
+KN= 3 - Pu239local; radial distribution of the Pu-239 concentration
+KN= 4 - Pu240local; radial distribution of the Pu-240 concentration
+KN= 5 - Pu241local; radial distribution of the Pu-241 concentration
+KN= 6 - Pu242local; radial distribution of the Pu-242 concentration
+
+119 Xenon Concentrations ( µmol/mm3 )
+KN= 1 - FPCRE3(1,igrob,I,1); radial distribution of the Xe concentr. created
+KN= 2 - FPGRN3(1,igrob,I,1); radial distribution of the Xe concentr. in the grains
+KN= 3 - FPGRB3(1,igrob,i,1); radial distribution of the Xe concentr. on the grain boundaries
+KN= 4 - FpPorHBS3(1,igrob,i,1); radial distribution of the Xe in the porosity of the HBS-structure
+
+120 Krypton Concentrations ( µmol/mm3)
+KN= 1 - FPCRE3(2,igrob,i,1); radial distribution of the Kr concentration created
+KN= 2 - FPGRN3(2,igrob,i,1); radial distribution of the Kr concentration in the grains
+KN= 3 - FPGRB3(2,igrob,i,1); radial distribution of the Kr concentration on the grain boundaries
+KN= 4 - FpPorHBS3(2,igrob,i,1); radial distribution of the Kr concentration in the porosity of the HBS-structure
+
+121 Caesium Concentrations ( µmol/mm3)
+KN= 1 - FPCRE3(3,igrob,i,1); radial distribution of the Cs concentration created
+KN= 2 - FPGRN3(3,igrob,i,1); radial distribution of the Cs concentration in the grains
+KN= 3 - FPGRB3(3,igrob,i,1); radial distribution of the Cs concentration on the grain boundaries
+
+122 Neodymium Concentrations ( µmol/mm3)
+KN= 1 - FPCRE3(4,igrob,i,1); radial distribution of the Nd concentration created
+KN= 2 - FPGRN3(4,igrob,i,1); radial distribution of the Nd concentration in the grains
+KN= 3 - FPGRB3(4,igrob,i,1); radial distribution of the Nd concentration on the grain boundaries
+
+123 Xenon Concentrations ( wt% )
+KN= 1 - FPCRE3(1,igrob,i,1); radial distribution of the Xe concentration created
+KN= 2 - FPGRN3(1,igrob,i,1); radial distribution of the Xe concentration in the grains
+KN= 3 - FPGRB3(1,igrob,i,1); radial distribution of the Xe concentration on the grain boundaries
+KN= 4 - FpPorHBS3(1,igrob,i,1); radial distribution of the Xe concentration in the porosity of the HBS-structure
+
+124 Krypton Concentrations ( wt% )
+KN= 1 - FPCRE3(2,igrob,i,1); radial distribution of the Kr concentration created
+KN= 2 - FPGRN3(2,igrob,i,1); radial distribution of the Kr concentration in the grains
+KN= 3 - FPGRB3(2,igrob,i,1); radial distribution of the Kr concentration on the grain boundaries
+KN= 4 - FpPorHBS3(2,igrob,i,1); radial distribution of the Kr concentration in the porosity of the HBS-structure
+
+125 Caesium Concentrations ( wt% )
+KN= 1 - FPCRE3(3,igrob.i,1); radial distribution of the Cs concentration created
+KN= 2 - FPGRN3(3,igrob,i,1); radial distribution of the Cs concentration in the grains
+KN= 3 - FPGRB3(3,igrob,i,1); radial distribution of the Cs concentration on the grain boundaries
+
+126 Neodymium Concentrations ( wt% )
+KN= 1 - FPCRE3(4,igrob,i,1); radial distribution of the Nd concentration created
+KN= 2 - FPGRN3(4,igrob,i,1); radial distribution of the Nd concentration in the grains
+KN= 3 - FPGRB3(4,igrob,i,1); radial distribution of the Nd concentration on the grain boundaries
+
+127 Plutonium Concentrations ( wt% )
+KN= 1 - Total Pu concentration
+KN= 2 - Pu-239 concentration
+KN= 3 - Pu-240 concentration
+KN= 4 - Pu-241 concentration
+KN= 5 - Pu-242 concentration
+
+128 Xenon / Krypton Ratio ( / )
+KN= 1 - Xe / Kr in grain
+KN= 2 - Xe / Kr on grainboundary
+KN= 3 - Xe / Kr in High Burnup Structure
+KN= 4 - Xe / Kr in fuel
+
+129 Helium Concentrations ( µmol/mm3)
+KN= 1 - FPCRE3(5,igrob,i,1); radial distribution of the He concentration created
+KN= 2 - FPGRN3(5,igrob,i,1); radial distribution of the He concentration in the grains
+KN= 3 - FPGRB3(5,igrob,i,1); radial distribution of the He concentration on the grain boundaries
+
+130 Hydrostatic stress (MPa)
+KN= 1 - Hydrostatic stress acting on the fuel
+KN= 2 - Fpgrnslt3 (1, igrob, i, 1)
+KN= 3 - Fpgrnbbl3 (1, igrob, i, 1)
+KN= 4 - Fpgrnbblcnc3 (igrob, i, 1)
+KN= 5 - Fpgrnbblrad (igrob,i, 1)
+
+131 Power Density ( W/mm3 )
+KN= 1 - Q3VEK(igrob,i,1); radial power density distribution
+
+132 Thermal Conductivity ( W / mm K)
+KN= 1 - LAVEK(igrob,i,1); radial distribution of the thermal conductivity
+
+133 Specific Heat at constant pressure ( J/gK)
+KN= 1 - CPVEK(igrob,i,l); radial distribution
+
+134 Density ( g/mm3)
+KN= 1 - ROVEK(igrob,i,1); radial distribution of the density
+
+135 Zr Beta-phase ( / )
+KN= 1 - Fractional Zr Beta-phase CladBeta(igrob,i,1); radial distribution of the Beta-phase
+
+136 Time Integral Sigma Effective ( hours)
+KN= 1 - SigEffTime(igrob,i,1); radial distribution of the Time integral of the effective Stress
+
+137 Gd Concentrations ( at/cm3 )
+KN= 1 -     Gd155; radial distribution of the Gd-155 concentration
+KN= 2 -     Gd157; radial distribution of the Gd-157 concentration
+
+138 U and Np Concentrations ( at/at HM )
+KN= 1 - Th232local; radial distribution of the Th-232 concentration
+KN= 2 -  U (Total); radial distribution of the total U concentration
+KN= 3 -  U233local; radial distribution of the  U-233 concentration
+KN= 4 -  U234local; radial distribution of the  U-234 concentration
+KN= 5 -  U236local; radial distribution of the  U-236 concentration
+KN= 6 - Np237local; radial distribution of the Np-237 concentration
+
+139 Am, Cm and He Concentrations ( at/at HM )
+KN= 1 -     Am241local; radial distribution of the Am-241 concentration
+KN= 2 -     Am243local; radial distribution of the Am-243 concentration
+KN= 3 -     Cm242local; radial distribution of the Cm-242 concentration
+KN= 4 -     Cm243local; radial distribution of the Cm-243 concentration
+KN= 5 -     Cm244local; radial distribution of the Cm-244 concentration
+KN= 6 -     Cm245local; radial distribution of the Cm-245 concentration
+KN= 7 -     He4 total; radial distribution of the   He-4 concentration
+KN= 8 -     He from alpha decay
+KN= 9 -     He from O-16(n,alpha)C-13 reaction
+KN=10 -     He from ternary fission
+
+140 Gaseous swelling (only model 1)
+KN= 1 - Total gaseous swelling (/)
+KN= 2 - Intragranular gaseous swelling (/)
+KN= 3 - Grain boundary gaseous swelling (/)
+KN= 4 - Sciantix total swelling (/)
+KN= 5 - Sciantix GB swelling (/)
+end
+

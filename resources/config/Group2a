@@ -1,0 +1,120 @@
+252 No. of Timestep Criterion
+KN= 1 - Minimum of required time-steps TimeAn(i)
+
+253 Fission Gases (Xe + Kr) (µmol)
+KN= 1 - Integral fission gas created
+KN= 2 - Integral fission gas in the grains
+KN= 3 - Integral fission gas on the grain boundaries
+KN= 4 - Integral fission gas in porosity of "High Burnup Structure"
+KN= 5 - Integral fission gas released
+
+254 Fission gas release
+KN= 1 - Fractional fission gas release (integral) (/)
+
+255 Gas concentrations in the upper plenum CGAOPL(KN)
+KN= 1 - Helium
+KN= 2 - Argon
+KN= 3 - Krypton
+KN= 4 - Xenon
+KN= 5 - Nitrogen
+KN= 6 - Hydrogen
+KN= 7 - Oxygen
+KN= 8 - Carbonmonoxide
+KN= 9 - Carbondioxide
+KN=10 - Water vapour
+
+256 Gas concentrations in the lower plenum CGAUPL(KN)
+KN= 1 - Helium
+KN= 2 - Argon
+KN= 3 - Krypton
+KN= 4 - Xenon
+KN= 5 - Nitrogen
+KN= 6 - Hydrogen
+KN= 7 - Oxygen
+KN= 8 - Carbonmonoxide
+KN= 9 - Carbondioxide
+KN=10 - Water vapour
+
+257 Total amount of gas in plenum GASTOT(KN)
+KN= 1 - Helium
+KN= 2 - Argon
+KN= 3 - Krypton
+KN= 4 - Xenon
+KN= 5 - Nitrogen
+KN= 6 - Hydrogen
+KN= 7 - Oxygen
+KN= 8 - Carbonmonoxide
+KN= 9 - Carbondioxide
+KN=10 - Water vapour
+
+258 Rod Average Burnup
+KN= 1 - Burnup MWd/kgU
+KN= 2 - Burnup MWd/kgUO2
+KN= 3 - Burnup FIMA
+KN= 4 - Effective Burnup MWd/kgU
+KN= 5 - Effective Burnup MWd/kgUO2
+
+259 Helium Release
+KN= 1 - He Release
+
+260 Xenon / Krypton Ratio
+KN= 1 - Xe / Kr in plenum
+
+261 Pin free volumes
+KN= 1 - Lower plenum
+KN= 2 - Upper plenum
+KN= 3 - Radial gap
+KN= 4 - Central void
+KN= 5 - Dishing
+KN= 6 - Cracks and Relocation
+KN= 7 - Total free volume
+
+262 Cladding Rupture
+KN= 1 - Ruptured slice/section
+KN= 2 - Dummy variable 261/2
+
+263 Helium by TUBRNP (µmol)
+KN= 1 - Total
+KN= 2 - alpha decay
+KN= 3 - O-16(n,alpha)C-13 reaction
+KN= 4 - ternary fission
+KN= 5 - released
+KN= 6 - absorbed
+
+264 Plenum Temperature
+KN= 1 - Temperature lower Plenum
+KN= 2 - Temperature upper Plenum
+
+265 Number of Cracks
+KN= 1 - cracks in fuel
+
+266 ECR Integral mean (%)
+KN= 1 - ECR Integral mean
+
+267 Xe133 by SCIANTIX (µmol)
+KN= 1 - created
+KN= 2 - grains
+KN= 3 - decayed
+KN= 4 - boundary
+KN= 5 - released
+
+268 Helium by SCIANTIX (µmol)
+KN= 1 - Created
+KN= 2 - In grains
+KN= 3 - Grain boundaries
+KN= 4 - Released
+
+269 Xe133 by DefFGR (µmol)
+KN= 1 - created
+KN= 2 - grains
+KN= 3 - boundary
+KN= 4 - released
+KN= 5 - release rate from gap to coolant (µmol/s)
+
+270 Xe134 by DefFGR (µmol)
+KN= 1 - created
+KN= 2 - grains
+KN= 3 - boundary
+KN= 4 - released
+KN= 5 - release rate from gap to coolant (µmol/s)
+end
