@@ -5,7 +5,7 @@ TuGUI
 :Contributor: 
 :Date: 11/06/2024
 
-|logo1| |logo2|
+|logo1|    |logo2|
 
 .. |logo1| image:: resources/icons/newcleologo.png
    :width: 100
