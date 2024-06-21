@@ -8,11 +8,11 @@ TuGUI
 |logo1| |logo2|
 
 .. |logo1| image:: resources/icons/newcleologo.png
-   :width: 20%
+   :width: 100
    :alt: newcleo logo
 
 .. |logo2| image:: resources/icons/jrclogo.png
-   :width: 20%
+   :width: 100
    :alt: newcleo logo
 
 
