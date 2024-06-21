@@ -5,7 +5,10 @@ TuGUI
 :Contributor: 
 :Date: 11/06/2024
 
-|logo1|    |logo2|
+.. |space| unicode:: U+00A0
+   :trim:
+
+|logo1| |space| |space| |space| |space| |space| |logo2|
 
 .. |logo1| image:: resources/icons/newcleologo.png
    :width: 100
