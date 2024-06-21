@@ -6,10 +6,10 @@ TuGUI
 :Date: 11/06/2024
 
 .. image:: resources/icons/newcleologo.png
-  :width: 50%
+  :width: 100
   :alt: newcleo logo
 .. image:: resources/icons/jrclogo.png
-  :width: 50%
+  :width: 100
   :alt: JRC logo
 
 Introduction
