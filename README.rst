@@ -5,12 +5,16 @@ TuGUI
 :Contributor: 
 :Date: 11/06/2024
 
-.. image:: resources/icons/newcleologo.png
-  :width: 100
-  :alt: newcleo logo
-.. image:: resources/icons/jrclogo.png
-  :width: 100
-  :alt: JRC logo
+|logo1| |logo2|
+
+.. |logo1| image:: resources/icons/newcleologo.png
+   :width: 20%
+   :alt: newcleo logo
+
+.. |logo2| image:: resources/icons/jrclogo.png
+   :width: 20%
+   :alt: newcleo logo
+
 
 Introduction
 ------------
