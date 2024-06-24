@@ -1,1 +1,12 @@
-tugui/__pycache__
+# Python files
+*venv/
+build/
+*.pyc
+*.egg-info
+**/__pycache__
+# Docs files and directories
+docs/_build
+# IDE files and directories
+*.code-workspace
+.idea/
+.vscode/

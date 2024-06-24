@@ -5,11 +5,10 @@ Welcome to *tugui* documentation!
 
    **T**\ rans **U**\ ranus **G**\ raphical **U**\ ser **I**\ nterface
 
-
 .. toctree::
    :maxdepth: 3
 
-   ../REAMDE.rst
+   include_readme
 
 .. only:: html
 
