@@ -8,7 +8,7 @@ Welcome to *tugui* documentation!
 .. toctree::
    :maxdepth: 3
 
-   include_readme
+   source/include_readme.rst
 
 .. only:: html
 

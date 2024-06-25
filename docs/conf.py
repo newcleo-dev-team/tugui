@@ -20,6 +20,16 @@ import subprocess
 from setup import get_info
 from typing import Any
 from typing import Dict
+from datetime import datetime
+
+# Force to adopt the EN_US locale settings to make the data treatment uniform
+import locale
+us_locale: str = 'en_US.utf8'
+try:
+    locale.setlocale(locale.LC_ALL, us_locale)
+except Exception as e:
+    raise ValueError(f"Locale '{us_locale}' not supported!\n" \
+                     "Please, install it to generate the doc!")
 
 __company__ = get_info('tugui/__init__.py', 'company')
 __author__ = get_info('tugui/__init__.py', 'author')
@@ -143,7 +153,7 @@ html_static_path = [os.path.join(srcdir, '_static')]
 html_css_files = [os.path.join('css', 'theme.css'),
                   os.path.join('css', 'eqno.css')]
 
-html_logo = os.path.join(srcdir, 'figures', 'newcleologo.png')
+html_logo = os.path.join(srcdir, 'resources/icons', 'JointLogos.png')
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -191,9 +201,9 @@ extrapackages_nwcldocs = r'\input{../../_templates/extra_nwcl.texsty}'
 preamble_nwcldocs = r'\input{../../_templates/preamble_nwcl.texsty}'
 makeindex_nwcldocs = '\\usepackage[columns=1,totoc]{idxlayout}\\makeindex'
 date_list = __date__.split(' ')
-from datetime import datetime
 date_nwcldocs = date_list[0] + "/" + \
-    str(datetime.strptime(date_list[1], '%B').month) + "/" + date_list[2]
+    str(datetime.strptime(date_list[1], "%B").month) + "/" + date_list[2]
+
 atendofbody_nwcldocs = {
     'id': id_nwcldocs,
     'ref_code': ref_code_nwcldocs,
