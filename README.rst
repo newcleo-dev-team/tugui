@@ -123,20 +123,14 @@ be enabled in the code on both Windows and Linux systems to make **TuGUI**
 work properly, that is:
 
 - ``TuPlot``:
-
-   1. open ``PostProcessors/TuPlot/TuPlot.f95`` file;
-
-   2. comment line 98 ``iMode = 1``;
-
-   3. uncomment line 102 ``iMode = 3``.
+   - open ``PostProcessors/TuPlot/TuPlot.f95`` file;
+   - comment line 98 ``iMode = 1``;
+   - uncomment line 102 ``iMode = 3``.
 
 - ``TuStat``:
-
-   1. open ``PostProcessors/TuStat/tustat.f95`` file;
-
-   2. comment line 92 ``iMode = 1``;
-
-   3. uncomment line 98 ``iMode = 3``.
+   - open ``PostProcessors/TuStat/tustat.f95`` file;
+   - comment line 92 ``iMode = 1``;
+   - uncomment line 98 ``iMode = 3``.
 
 Once applied these modifications, the user must compile both the executables
 and put them into the folder ``tugui/resources/exec`` (to be created) of the
