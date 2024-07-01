@@ -107,30 +107,31 @@ relies on the execution of one of the executables (``TuPlot`` or ``TuStat``,
 depending on the case) that extract the *X*-*Y* data for the curves to be
 plotted. In particular:
 
-- JRC-EC distributes the Windows-OS version of these executables in the
-   ``PostProcessors/TuOutGUI/Exe-Files`` of the *TRANSURANUS* code release;
-   please note that such executables may limit some functionalities of
-   **TuGUI**, since *batch mode* is not activated;
+- | JRC-EC distributes the Windows-OS version of these executables in the
+  | ``PostProcessors/TuOutGUI/Exe-Files`` of the *TRANSURANUS* code release;
+  | please note that such executables may limit some functionalities of
+  | **TuGUI**, since *batch mode* is not activated;
 
-- the FORTRAN source code of the above executables is provided as well
-   in the ``PostProcessors/TuPlot`` and ``PostProcessors/TuStat`` folders,
-   correspondingly. Linux users can compile the Linux-OS version of the same
-   executables using the ``gfortran`` compiler (*10.+* version). Windows users
-   can do the same by using appropriate FORTRAN compiler.
+- | the FORTRAN source code of the above executables is provided as well
+  | in the ``PostProcessors/TuPlot`` and ``PostProcessors/TuStat`` folders,
+  | correspondingly. Linux users can compile the Linux-OS version of the same
+  | executables using the ``gfortran`` compiler (*10.+* version). Windows users
+  | can do the same by using appropriate FORTRAN compiler.
 
 Please note: when compiling both *TuPlot* and *TuStat*, the *batch mode* must
 be enabled in the code on both Windows and Linux systems to make **TuGUI**
 work properly, that is:
 
 - ``TuPlot``:
-   a. open ``PostProcessors/TuPlot/TuPlot.f95`` file;
-   b. comment line 98 ``iMode = 1``;
-   c. uncomment line 102 ``iMode = 3``.
+   1. open ``PostProcessors/TuPlot/TuPlot.f95`` file;
+   2. comment line 98 ``iMode = 1``;
+   3. uncomment line 102 ``iMode = 3``.
 
 - ``TuStat``:
-   a. open ``PostProcessors/TuStat/tustat.f95`` file;
-   b. comment line 92 ``iMode = 1``;
-   c. uncomment line 98 ``iMode = 3``.
+   1. open ``PostProcessors/TuStat/tustat.f95`` file;
+   2. comment line 92 ``iMode = 1``;
+   3. uncomment line 98 ``iMode = 3``.
 
 Once applied these modifications, the user must compile both the executables
-and put them into the folder ``tugui/resources/exec`` of the **TuGUI** project.
+and put them into the folder ``tugui/resources/exec`` (to be created) of the
+**TuGUI** project.
