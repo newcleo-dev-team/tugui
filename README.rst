@@ -1,8 +1,8 @@
 TuGUI
 =====
 
-:Author: Davide Manzione, Elena Travaglia, Daniele Tomatis
-:Contributor: 
+:Author: Davide Manzione, Elena Travaglia
+:Contributor: Daniele Tomatis, Gabriele Ottino
 :Date: 11/06/2024
 
 .. |space| unicode:: U+00A0
@@ -101,4 +101,36 @@ To open the GUI, the following command needs to be run from the command prompt:
 .. code-block:: bash
 
     python tugui/main.py
-    
+
+To generate the plots from the results of a *TRANSURANUS* simulation, **TuGUI**
+relies on the execution of one of the executables (``TuPlot`` or ``TuStat``,
+depending on the case) that extract the *X*-*Y* data for the curves to be
+plotted. In particular:
+
+- JRC-EC distributes the Windows-OS version of these executables in the
+   ``PostProcessors/TuOutGUI/Exe-Files`` of the *TRANSURANUS* code release;
+   please note that such executables may limit some functionalities of
+   **TuGUI**, since *batch mode* is not activated;
+
+- the FORTRAN source code of the above executables is provided as well
+   in the ``PostProcessors/TuPlot`` and ``PostProcessors/TuStat`` folders,
+   correspondingly. Linux users can compile the Linux-OS version of the same
+   executables using the ``gfortran`` compiler (*10.+* version). Windows users
+   can do the same by using appropriate FORTRAN compiler.
+
+Please note: when compiling both *TuPlot* and *TuStat*, the *batch mode* must
+be enabled in the code on both Windows and Linux systems to make **TuGUI**
+work properly, that is:
+
+- ``TuPlot``:
+   a. open ``PostProcessors/TuPlot/TuPlot.f95`` file;
+   b. comment line 98 ``iMode = 1``;
+   c. uncomment line 102 ``iMode = 3``.
+
+- ``TuStat``:
+   a. open ``PostProcessors/TuStat/tustat.f95`` file;
+   b. comment line 92 ``iMode = 1``;
+   c. uncomment line 98 ``iMode = 3``.
+
+Once applied these modifications, the user must compile both the executables
+and put them into the folder ``tugui/resources/exec`` of the **TuGUI** project.
