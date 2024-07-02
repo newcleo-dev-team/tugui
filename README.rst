@@ -125,3 +125,10 @@ work properly, that is:
 Once applied these modifications, the user must compile both the executables
 and put them into the folder ``tugui/resources/exec`` (to be created) of the
 **TuGUI** project.
+
+How to Contribute
+-----------------
+
+For anyone wishing to contribute to the development of the project, report
+issues or problems with the software, or request support, please refer to this
+`web page <https://github.com/newcleo-dev-team/tugui/blob/master/CONTRIBUTIONS.rst>`_.
