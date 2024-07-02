@@ -1,23 +1,13 @@
 TuGUI
 =====
 
+.. image:: resources/icons/newcleologo_hd.png
+   :width: 100
+   :alt: newcleo logo
+
 :Author: Davide Manzione, Elena Travaglia
 :Contributor: Daniele Tomatis, Gabriele Ottino
 :Date: 11/06/2024
-
-.. |space| unicode:: U+00A0
-   :trim:
-
-|logo1| |space| |space| |space| |space| |space| |logo2|
-
-.. |logo1| image:: resources/icons/newcleologo.png
-   :width: 100
-   :alt: newcleo logo
-
-.. |logo2| image:: resources/icons/jrclogo.png
-   :width: 100
-   :alt: newcleo logo
-
 
 Introduction
 ------------
