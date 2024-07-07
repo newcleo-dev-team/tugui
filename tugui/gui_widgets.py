@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from typing import Union
 
 
 class CustomNotebook(ttk.Notebook):
@@ -10,7 +11,7 @@ class CustomNotebook(ttk.Notebook):
   to build a notebook with tabs presenting a button for closing each one of
   them.
   """
-  __initialized = False
+  __initialized: bool = False
 
   def __init__(self, *args, **kwargs):
     # Initialize the custom style of the notebook, if not yet done
@@ -22,12 +23,12 @@ class CustomNotebook(ttk.Notebook):
     kwargs["style"] = "CustomNotebook"
     # Call the superclass constructor
     ttk.Notebook.__init__(self, *args, **kwargs)
-    self._active = None
+    self._active: Union[bool, None] = None
     # Bind the mouse events to the execution of corresponding methods
     self.bind("<ButtonPress-1>", self.on_close_press, True)
     self.bind("<ButtonRelease-1>", self.on_close_release)
 
-  def on_close_press(self, event):
+  def on_close_press(self, event: tk.Event) -> Union[str, None]:
     """
     Method that is called when the mouse button is pressed over
     the close button.
@@ -44,7 +45,7 @@ class CustomNotebook(ttk.Notebook):
       self._active = index
       return "break"
 
-  def on_close_release(self, event):
+  def on_close_release(self, event: tk.Event) -> None:
     """
     Method that is called when the mouse button is released after having
     pressed over the close button.
@@ -80,7 +81,7 @@ class CustomNotebook(ttk.Notebook):
     self.state(["!pressed"])
     self._active = None
 
-  def __initialize_custom_style(self):
+  def __initialize_custom_style(self) -> None:
     # Declare a new Style instance
     style = ttk.Style()
     # Store the images representing the different states of the close button
