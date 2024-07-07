@@ -6,6 +6,8 @@ build/
 **/__pycache__
 # Docs files and directories
 docs/_build
+# Exe files
+resources/exec
 # IDE files and directories
 *.code-workspace
 .idea/
