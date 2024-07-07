@@ -9,17 +9,17 @@ class IDGA(Enum):
   """
   Enumeration storing the different types of plots (field "Type").
   """
-  IDGA_1 = "1 - Different Curve Numbers"
-  IDGA_2 = "2 - Different Times"
-  IDGA_3 = "3 - Different Slices"
+  IDGA_1: str = "1 - Different Curve Numbers"
+  IDGA_2: str = "2 - Different Times"
+  IDGA_3: str = "3 - Different Slices"
 
 class IANT(Enum):
   """
   Enumeration storing the different types of IANT field.
   """
-  IANT_1 = "IANT 1"
-  IANT_2 = "IANT 2"
-  IANT_3 = "IANT 3"
+  IANT_1: str = "IANT 1"
+  IANT_2: str = "IANT 2"
+  IANT_3: str = "IANT 3"
 
 @dataclass
 class Diagram():
@@ -36,7 +36,7 @@ class TuPlotDiagram(Diagram):
   group: str = 'Radius'
   idga: str = '1'
 
-  def define_group_from_num(self):
+  def define_group_from_num(self) -> None:
     """
     Method that evaluates the group value based on the diagram number and
     set the corresponding class attribute.
@@ -74,12 +74,12 @@ class GuiPlotFieldsConfigurator():
   """
   def __init__(self):
     # Build the paths to the configuration files
-    self.diagr_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Diagrams")
-    self.g1_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group1")
-    self.g2_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2")
-    self.g2a_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2a")
-    self.g3_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group3")
-    self.stat_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Statdiag")
+    self.diagr_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Diagrams")
+    self.g1_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group1")
+    self.g2_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2")
+    self.g2a_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2a")
+    self.g3_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group3")
+    self.stat_path: str = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Statdiag")
 
     # Check the configuration files existence into the application "config" folder
     self.check_config_file_existence(self.diagr_path, "Diagrams")
@@ -102,7 +102,7 @@ class GuiPlotFieldsConfigurator():
     self.build_nVsKn(self.g3_path, numberVsKn, "^3\d\d")
 
     # Instantiate the dictionary holding the plots "Group" Vs the dictionary of corresponding "Number"-s VS "Kn"-s
-    self.groupVSnumVsKn = dict()
+    self.groupVSnumVsKn: dict = dict()
     # Initialize a string holding the "Group" name
     group_name = ""
 
@@ -135,7 +135,7 @@ class GuiPlotFieldsConfigurator():
       self.groupVSnumVsKn[group_name] = numVskn
 
       # Build a dictionary of plot "Group" VS the available "Type" values
-      self.groupVStype = {
+      self.groupVStype: dict = {
         list(self.groupVSnumVsKn.keys())[0]: ["1 - Different Curve Numbers", "2 - Different Times", "3 - Different Slices"],
         list(self.groupVSnumVsKn.keys())[1]: ["1 - Different Curve Numbers", "3 - Different Slices"],
         list(self.groupVSnumVsKn.keys())[2]: ["1 - Different Curve Numbers"],
@@ -143,13 +143,13 @@ class GuiPlotFieldsConfigurator():
       }
 
     # Build a tuple storing the available options for specific plot "Number"-s
-    self.iant1 = ([113], ["Temperature-distribution will be drawn over the fuel, the cladding and the structure"])
-    self.iant2 = ([102, 103, 104, 105, 106, 107, 108],
-                  ["The radial stresses and strains are only drawn for the cladding",
-                   "The radial stresses and strains are only drawn for the fuel"])
+    self.iant1: tuple = ([113], ["Temperature-distribution will be drawn over the fuel, the cladding and the structure"])
+    self.iant2: tuple = ([102, 103, 104, 105, 106, 107, 108],
+                         ["The radial stresses and strains are only drawn for the cladding",
+                         "The radial stresses and strains are only drawn for the fuel"])
 
     # Build a map between the IDGA enumeration and their index
-    self.idgaVSi = {
+    self.idgaVSi: dict = {
       IDGA(IDGA['IDGA_1']).value: 1,
       IDGA(IDGA['IDGA_2']).value: 2,
       IDGA(IDGA['IDGA_3']).value: 3,
@@ -165,7 +165,7 @@ class GuiPlotFieldsConfigurator():
     # print("##\n", p)
 
     # Build the dictionary of plot number VS their descriptive string for the statistical case
-    self.sta_numVSdescription = dict()
+    self.sta_numVSdescription: dict = dict()
     with open(self.stat_path, 'r', encoding="cp1252") as st:
       # Process the file line by line
       for line in st:
@@ -184,20 +184,20 @@ class GuiPlotFieldsConfigurator():
     # current OS
     if platform.system() == "Linux":
       print("LINUX HERE!")
-      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui_nc")
-      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui_nc")
+      self.tuplot_path: str = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui_nc")
+      self.tustat_path: str = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui_nc")
       self.check_exe_file_existence(self.tuplot_path, "tuplotgui_nc")
       self.check_exe_file_existence(self.tustat_path, "tustatgui_nc")
     elif platform.system() == "Windows":
       print("WINDOWS HERE!")
-      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
-      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
+      self.tuplot_path: str = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
+      self.tustat_path: str = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
       self.check_exe_file_existence(self.tuplot_path, "TuPlotGUI.exe")
       self.check_exe_file_existence(self.tustat_path, "TuStatGUI.exe")
 
     print("###\nExecutables files are present in the \"../resources/exec\" folder\n###")
 
-  def build_nVsKn(self, group_file: str, group_dict: dict, search_num: str):
+  def build_nVsKn(self, group_file: str, group_dict: dict, search_num: str) -> None:
     """
     Method that, given the "Group" file to read (its path), it fills the input dictionary with:
     . keys, being the line indicating the plot "Number"
@@ -227,7 +227,7 @@ class GuiPlotFieldsConfigurator():
               kns.append(line.strip())
 
 
-  def check_config_file_existence(self, path2check: str, filename: str):
+  def check_config_file_existence(self, path2check: str, filename: str) -> None:
     """
     Method that raises an exception if the given path does not correspond to an
     existing file.
@@ -236,7 +236,7 @@ class GuiPlotFieldsConfigurator():
       # Raise an exception
       raise FileNotFoundError("Error: missing \"" + filename + "\" configuration file")
 
-  def check_exe_file_existence(self, path2check: str, filename: str):
+  def check_exe_file_existence(self, path2check: str, filename: str) -> None:
     """
     Method that raises an exception if the given path does not correspond to an
     existing executable file with right permission.
