@@ -16,25 +16,6 @@ from gui_configuration import IANT, GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, LabelImage
 from shutil import copyfile
 
-class BaseWindow(ThemedTk):
-  """
-  Base window without anything. It allows to set the window title, as well as
-  its dimensions. Given the screen size, the window is placed in the center.
-  """
-  def __init__(self, window_title, width, height):
-    # Call the superclass constructor
-    super().__init__()
-
-    # Set the window title
-    self.title(window_title)
-    # Set the theme to use
-    self.configure(theme='radiance')
-    # Set the top-left coordinate of the window so that the app is placed in the screen center
-    left = int(self.winfo_screenwidth() / 2 - width / 2)
-    top = int(self.winfo_screenheight() / 2 - height / 2)
-    # Set the window geometry
-    self.geometry(f"{width}x{height}+{left}+{top}")
-
 
 class EntryVariable:
   """
@@ -129,7 +110,7 @@ class StatusBar(ttk.Frame):
     self.set_text("")
 
 
-class TuPostProcessingGui(BaseWindow):
+class TuPostProcessingGui(ThemedTk):
   """
   Class that builds a GUI for enabling the user to plot the quantities produced by
   a TU simulation. Two plot types are available:
@@ -144,11 +125,15 @@ class TuPostProcessingGui(BaseWindow):
   . the plot area (right side) where the selected curves are shown
   . a status bar (bottom window) showing log messages.
   """
-  def __init__(self, window_title, height, width):
+  def __init__(self, window_title, width, height):
     """
     App windows's constructor
     """
-    super().__init__(window_title, height, width)
+    # Call the superclass constructor
+    super().__init__()
+
+    # Initialize the main GUI window
+    self.__initialize_gui_window__(window_title, width, height)
 
     # Get the absolute path of the current file
     abspath = os.path.abspath(__file__)
@@ -272,6 +257,22 @@ class TuPostProcessingGui(BaseWindow):
     self.bind('<<InpLoaded>>', func=lambda event: self.display_inp_plots())
     # Bind the <<DatPltLoaded>> virtual event to the plot creation
     self.bind('<<DatPltLoaded>>', func=lambda event: self.display_plot())
+
+  def __initialize_gui_window__(self, title, width, height):
+    """
+    Method that sets the GUI window title, as well as its dimensions, in terms
+    of width and height. Given the screen size, the window is placed in the center
+    of the screen, independently of its dimensions.
+    """
+    # Set the window title
+    self.title(title)
+    # Set the theme to use
+    self.configure(theme='radiance')
+    # Set the top-left coordinate of the window so that the app is placed in the screen center
+    left = int(self.winfo_screenwidth() / 2 - width / 2)
+    top = int(self.winfo_screenheight() / 2 - height / 2)
+    # Set the window geometry
+    self.geometry(f"{width}x{height}+{left}+{top}")
 
   def display_plot(self):
     """
