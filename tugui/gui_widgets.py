@@ -1,7 +1,101 @@
 import os
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from PIL import Image, ImageTk
+
+
+class EntryVariable:
+  """
+  Class defining a variable having a corresponding Entry object. Its value
+  is validated when set.
+  """
+  def __init__(self, frame: tk.Frame, width: int, col: int, row: int, end: str) -> None:
+    """
+    Constructor requiring the Frame object onto which putting the Entry.
+    The Entry width, as well as the column and row indices are passed to
+    configure the Entry object within the frame.
+    """
+    # Instantiate the string variable
+    self.var = tk.StringVar()
+    # Instantiate the entry field
+    self.entry = ttk.Entry(frame, width = width, textvariable=self.var)
+    # Place the entry in the frame grid
+    self.entry.grid(column = col, row = row, sticky = 'ew')
+
+    # Register the validation funtion of the Entry widget
+    valid_entry = (self.entry.register(self.validate), '%P')
+    # Configure the entry for checking the validity of its content when the
+    # widget looses focus
+    self.entry.configure(validate='focusout', validatecommand=valid_entry)
+
+    # Entry file extension
+    self.entry_extension = end
+
+  def validate(self, event=None, newval: str = ""):
+    """
+    Method that checks if the entry is valid. The "end" parameter indicates the
+    extension to check against.
+    """
+    # Check the entry value against the allowed extension
+    if re.match(r"^.*\." + self.entry_extension + "$", newval) is not None:
+      # The entry is valid if a match is found
+      print("The entry is valid!")
+      self.entry.configure(foreground="#343638")
+      return True
+    else:
+      # If no match is found, handle the invalid case only if the entry value is not empty
+      if newval != "":
+        self.on_invalid()
+        return False
+
+  def on_invalid(self):
+    """
+    Show the error message if the data is not valid.
+    """
+    error_message = "The entry is not valid: please provide a path to a file with the valid \"" + self.entry_extension + "\" extension!"
+    print(error_message)
+    # Highlight the entry color in red
+    self.entry.configure(foreground="red")
+    # Show the error message as a pop-up window
+    messagebox.showerror("Error", error_message)
+
+
+class StatusBar(ttk.Frame):
+  """
+  Class describing a Frame where a label is shown. This represents a status bar
+  that provides useful log to the user.
+  """
+  def __init__(self, container, color: str = 'light gray'):
+    # Initialize the Style object
+    s = ttk.Style()
+    # Configure the style for the status bar frame
+    s.configure('self.TFrame', background=color, border=1, borderwidth=1, relief=tk.GROOVE)
+    # Configure the style for the status bar label
+    s.configure('self.TLabel', background=color)
+
+    # Call the superclass initializer passing the built style
+    super().__init__(container, style='self.TFrame')
+
+    # Declare an empty label providing the status messages
+    self.label = ttk.Label(self, text="", style='self.TLabel')
+    # Align the label on the left
+    self.label.pack(side=tk.LEFT, padx=3, pady=3)
+
+    # Configure the status bar in order to fill all the space in the horizontal direction
+    self.grid(sticky='ew')
+
+  def set_text(self, new_text):
+    """
+    Method that allow the modification of the status bar text.
+    """
+    self.label.configure(text=new_text)
+
+  def clear_label(self):
+    """
+    Method that clears any text already present in the label status bar.
+    """
+    self.set_text("")
 
 
 class CustomNotebook(ttk.Notebook):
