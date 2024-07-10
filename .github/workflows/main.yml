@@ -1,0 +1,31 @@
+# Test all scripts in tests/ and doc compilation
+name: main_actions
+
+on: push
+
+jobs:
+  test_all_tests:
+    runs-on: [ubuntu-latest]
+    defaults: 
+      run:
+        working-directory: ./tests    
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install ttkthemes
+      - run: pip install pandas
+      - run: pip install matplotlib
+      - run: python3 -m unittest test_gui_window_basic.py -v
+
+  test_documentation:
+    if: contains( github.ref, 'master')
+    runs-on: ubuntu-latest
+    defaults: 
+      run:
+        working-directory: ./docs
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt-get install python3-sphinx
+      - run: pip install sphinx-rtd-theme
+      - run: pip install myst-parser
+      - run: pip install sphinxcontrib-bibtex
+      - run: make html
