@@ -16,6 +16,8 @@ from gui_configuration import IANT, GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, LabelImage
 from shutil import copyfile
 
+ERROR_LEVEL: bool = 0
+
 class BaseWindow(ThemedTk):
   """
   Base window without anything. It allows to set the window title, as well as
@@ -167,8 +169,8 @@ class TuPostProcessingGui(BaseWindow):
     try:
       self.guiconfig = GuiPlotFieldsConfigurator()
     except Exception as e:
-      # Intercept any exception produced by running the configuration logic
-      messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      # Intercept any exception produced by running the configuration logic according to the selected error level
+      if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       # Quit the application as this case represents a fatal error
       self.quit_app()
       # Propagate the caught exception
