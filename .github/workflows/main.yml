@@ -11,6 +11,7 @@ jobs:
         working-directory: ./tests    
     steps:
       - uses: actions/checkout@v3
+      - run: sudo apt-get install python3-tk
       - run: pip install ttkthemes
       - run: pip install pandas
       - run: pip install matplotlib
