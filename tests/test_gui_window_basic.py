@@ -1,7 +1,9 @@
+import os
 import sys
 from tkinter import TclError
 import unittest
 
+sys.path.insert(0, os.path.abspath('..'))
 from tugui.main import TuPostProcessingGui
 
 class TestGUI(unittest.TestCase):
