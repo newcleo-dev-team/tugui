@@ -1,13 +1,13 @@
-from io import TextIOWrapper
 import os
 import platform
 import shutil
 import numpy as np
 import re
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
 from gui_configuration import Diagram, TuPlotDiagram, TuStatDiagram
+from io import TextIOWrapper
 
 
 @dataclass
@@ -446,7 +446,7 @@ class PliReader():
       self.axial_steps = int(self.opt_dict['M3']) + 1
 
 
-class DaReader():
+class DaReader(ABC):
   """
   Base class for all the ones that interpret the content of a direct-access file produced
   by the TU simulation.
@@ -461,6 +461,50 @@ class DaReader():
     check_file_existence(da_path, extension)
     # Store the direct-access file path
     self.da_path = da_path
+    # Initialize the time values read from the direct-access file
+    self.time_h = list()
+    self.time_s = list()
+    self.time_ms : list[int] = list()
+    # Call the ABC constructor
+    super().__init__()
+
+  @abstractmethod
+  def extract_time_hsms(self, record_length: str) -> tuple[list[int], list[int], list[int]]:
+    """
+    Method that extracts from the direct-access file the simulation time instants
+    as arrays for hours, seconds and milliseconds respectively. These arrays are
+    saved as instance attributes and returned as a tuple.
+    """
+
+  @abstractmethod
+  def read_tu_data(self, record_length):
+    """
+    Method that opens the direct-access file and re-elaborate its content, originally stored
+    as a one-line array. Given the record length, the array is reshaped as a 2D array having:
+    . as rows, the values at each time for each igrob-slice
+    . as columns, the values of the quantities calculated for each m2(igrob)-slice element
+    Subclasses can override this method providing their own implementation in case the one
+    proposed is not valid (case of a .sta file).
+    """
+
+
+class MicReader(DaReader):
+  """
+  Class that interprets the content of the .mic file produced by the TU simulation.
+  For every micro-step (TU internal step) several quantities are stored, that are
+  section/slice dependent variables and special quantities.
+  """
+  def __init__(self, mic_path: str):
+    """
+    Build an instance of the 'MicReader' class that interprets the content of the .mic
+    file produced by the TU simulation.
+    It receives as parameter the path to the .mic file to read and checks the actual
+    existence of the file.
+    """
+    # Store the file extension
+    self.extension = 'mic'
+    # Call the superclass constructor
+    super().__init__(mic_path, self.extension)
 
   def extract_time_hsms(self, record_length):
     """
@@ -499,7 +543,7 @@ class DaReader():
       raise Exception(error_msg)
 
 
-class MacReader(DaReader):
+class MacReader(MicReader):
   """
   Class that interprets the content of the .mac file produced by the TU simulation. It contains
   the radially dependent quantities at every simulation time for every (i, j)-th element of the
@@ -512,8 +556,10 @@ class MacReader(DaReader):
     It receives as parameter the path to the .mac file to read and checks the actual
     existence of the file.
     """
+    # Store the file extension
+    self.extension = 'mac'
     # Call the superclass constructor
-    super().__init__(mac_path, 'mac')
+    super().__init__(mac_path)
 
     # Store the number of slices
     self.n_slices = n_slices
@@ -534,23 +580,6 @@ class MacReader(DaReader):
 
     # Return the tuple of times
     return (self.time_h, self.time_s, self.time_ms)
-
-
-class MicReader(DaReader):
-  """
-  Class that interprets the content of the .mic file produced by the TU simulation.
-  For every micro-step (TU internal step) several quantities are stored, that are
-  section/slice dependent variables and special quantities.
-  """
-  def __init__(self, mic_path: str):
-    """
-    Build an instance of the 'MicReader' class that interprets the content of the .mic
-    file produced by the TU simulation.
-    It receives as parameter the path to the .mic file to read and checks the actual
-    existence of the file.
-    """
-    # Call the superclass constructor
-    super().__init__(mic_path, 'mic')
 
 
 class StaReader(DaReader):
