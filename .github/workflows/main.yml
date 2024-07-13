@@ -8,14 +8,14 @@ jobs:
     runs-on: [ubuntu-latest]
     defaults: 
       run:
-        working-directory: ./tests    
+        working-directory: ./    
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt-get install python3-tk
       - run: pip install ttkthemes
       - run: pip install pandas
       - run: pip install matplotlib
-      - run: python3 -m unittest test_gui_window_basic.py -v
+      - run: python3 -m unittest tests/test_gui_window_basic.py -v
 
   test_documentation:
     if: contains( github.ref, 'master')
