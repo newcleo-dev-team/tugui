@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import InpHandler, MicReader, StaReader, DatGenerator, TuInp, PliReader, MacReader
+from tu_interface import InpHandler, MicReader, StaReader, DatGenerator, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
 from gui_configuration import IANT, GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, LabelImage, EntryVariable, StatusBar
 from shutil import copyfile
@@ -278,14 +278,15 @@ class TuPostProcessingGui(ThemedTk):
       # Set the default name of the files the plotting executable will create
       output_files_name = "TuStat"
 
-    # Instantiate the class interfacing the .inp file with plot executable
-    inp_to_dat = DatGenerator(plotexec_path=executable_path,
-                              inp_path=self.loaded_inp_file,
-                              plots_num=len(inpreader.diagrams_list),
-                              cwd=self.output_dir,
-                              output_files_name=output_files_name)
-    # Run the tuplotgui executable for creating the .dat and .plt files
-    inp_to_dat.run()
+    # Run the function that deals with instantiating the dataclass storing the needed
+    # information for the plotting executable to be run
+    inp_to_dat = init_DatGenerator(plotexec_path=executable_path,
+                                   inp_path=self.loaded_inp_file,
+                                   plots_num=len(inpreader.diagrams_list),
+                                   cwd=self.output_dir,
+                                   output_files_name=output_files_name)
+    # Run the plotting executable for creating the .dat and .plt files
+    run_plot_files_generation(inp_to_dat)
 
     # For each diagram configuration create a new PlotFigure object and plot the curves
     for i in range(0, len(inpreader.diagrams_list)):
@@ -640,14 +641,15 @@ class TuPostProcessingGui(ThemedTk):
     # Store the .inp filename
     self.inp_filename = inp_path
 
-    # Instantiate the class interfacing input with the given plotting executable
-    inp_to_dat = DatGenerator(plotexec_path=executable_path,
-                              inp_path=inp_path,
-                              plots_num=1,
-                              cwd=self.output_dir,
-                              output_files_name=output_files_name)
+    # Run the function that deals with instantiating the dataclass storing the needed
+    # information for the plotting executable to be run
+    inp_to_dat = init_DatGenerator(plotexec_path=executable_path,
+                                   inp_path=inp_path,
+                                   plots_num=1,
+                                   cwd=self.output_dir,
+                                   output_files_name=output_files_name)
     # Run the plotting executable for creating the .dat and .plt files
-    inp_to_dat.run()
+    run_plot_files_generation(inp_to_dat)
 
     # Store the currently .dat and .plt output files (first element in the
     # corresponding lists as only one plot is handled here)
