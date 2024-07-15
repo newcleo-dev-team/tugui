@@ -5,7 +5,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 
 from gui_configuration import IANT, IDGA, GuiPlotFieldsConfigurator
-from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, PlotSettingsField
+from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
 from gui_widgets import OnOffClickableLabel, WidgetTooltip, SquareButton, CustomNotebook
 
@@ -538,7 +538,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Build the frame
     self.additional_frame = self._build_frame(container, row)
     # Add a field for allowing the setting of the IANT1/2 choice
-    self.iant_entry = PlotSettingsField(self.additional_frame, 0, label, values)
+    self.iant_entry = LabelledCombobox(self.additional_frame, 0, label, values)
     # Store the value of the IANT enumeration
     self.iant = iant
     # Update the row index
@@ -552,17 +552,17 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     the specific implementation of the widgets for the frame provided as input.
     """
     # Build the "Group" setup made of a label and a combobox, disabled by default
-    self.group = PlotSettingsField(config_area, 0, "Group: ", tuple(self.gui_config.groupVSnumVsKn.keys()), tk.DISABLED)
+    self.group = LabelledCombobox(config_area, 0, "Group: ", tuple(self.gui_config.groupVSnumVsKn.keys()), tk.DISABLED)
     # Increase the combobox width a little bit to better show items
     self.group.cbx.configure(width=25)
 
     # Build the "Number" setup made of a label and a combobox, disabled until the "Group" field is undefined
-    number = PlotSettingsField(config_area, 1, "Number: ", list(), tk.DISABLED)
+    number = LabelledCombobox(config_area, 1, "Number: ", list(), tk.DISABLED)
     # Declare a variable holding the "Number" field choosen value
     self.number_var = number.var
 
     # Build the "Type" setup made of a label and a combobox, disabled until the "Group" field is undefined
-    type = PlotSettingsField(config_area, 2, "Type: ", list(), tk.DISABLED)
+    type = LabelledCombobox(config_area, 2, "Type: ", list(), tk.DISABLED)
     # Declare a variable holding the "Type" field choosen value
     self.type_var = type.var
 
@@ -734,17 +734,17 @@ class TuStatTabContentBuilder(TabContentBuilder):
     the specific implementation of the widgets for the frame provided as input.
     """
     # Build the "Diagram Nr." setup made of a label and a combobox
-    self.diagram = PlotSettingsField(config_area, 0, "Diagram Nr.: ", self.gui_config.sta_numVSdescription.values())
+    self.diagram = LabelledCombobox(config_area, 0, "Diagram Nr.: ", self.gui_config.sta_numVSdescription.values())
     # Build the "Slice" setup made of a label and a combobox, disabled until the "Diagram Nr." field is undefined
-    self.slice = PlotSettingsField(config_area, 1, "Slice: ", cbx_list=list(), state=tk.DISABLED)
+    self.slice = LabelledCombobox(config_area, 1, "Slice: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Time" setup made of a label and a combobox, disabled until the "Diagram Nr." field is undefined
-    self.time = PlotSettingsField(config_area, 2, "Time: ", cbx_list=list(), state=tk.DISABLED)
+    self.time = LabelledCombobox(config_area, 2, "Time: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Number of intervals" setup made of a label and a combobox, disabled until
     # the "Diagram Nr." field is undefined
-    self.n_intervals = PlotSettingsField(config_area, 3, "Number of intervals: ", cbx_list=list(), state=tk.DISABLED)
+    self.n_intervals = LabelledCombobox(config_area, 3, "Number of intervals: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Type of distribution" setup made of a label and a combobox, disabled until
     # the "Diagram Nr." field is undefined
-    self.distribution = PlotSettingsField(config_area, 4, "Type of distribution: ", cbx_list=list(), state=tk.DISABLED)
+    self.distribution = LabelledCombobox(config_area, 4, "Type of distribution: ", cbx_list=list(), state=tk.DISABLED)
 
     # Bind the activation of all the configuration fields to the "Diagram Nr." field item selection
     self.diagram.cbx.bind('<<IsSet>>', func=lambda event: self._activate_fields())
