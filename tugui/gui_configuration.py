@@ -5,6 +5,8 @@ import re
 
 from dataclasses import dataclass
 
+from plot_settings import GroupType
+
 class IDGA(Enum):
   """
   Enumeration storing the different types of plots (field "Type").
@@ -22,40 +24,29 @@ class IANT(Enum):
   IANT_3 = "IANT 3"
 
 @dataclass
-class Diagram():
+class DiagramCharacteristics():
   """
-  Dataclass providing a record storing the basic features of a diagram.
+  Dataclass providing a record storing the characteristics of either a
+  TuPlot or a TuStat diagram.
   """
-  number: str = '000'
+  group: GroupType = None
+  number: str = ''
+  idga: str = ''
 
-@dataclass
-class TuPlotDiagram(Diagram):
+def define_diagram_group(diagr_char: DiagramCharacteristics):
   """
-  Dataclass providing a record storing the features of a TuPlot diagram.
+  Function that, given the instance of the 'DiagramCharacteristics' dataclass,
+  evaluates the group value based on the diagram number.
+  It then sets the corresponding attribute.
   """
-  group: str = 'Radius'
-  idga: str = '1'
-
-  def define_group_from_num(self):
-    """
-    Method that evaluates the group value based on the diagram number and
-    set the corresponding class attribute.
-    """
-    if int(self.number) >= 101 and int(self.number) <= 140:
-      self.group = 'Radius'
-    elif int(self.number) >= 201 and int(self.number) <= 251:
-      self.group = 'Time'
-    elif int(self.number) >= 252 and int(self.number) <= 270:
-      self.group = 'Time Integral'
-    elif int(self.number) >= 301 and int(self.number) <= 340:
-      self.group = 'Axial'
-
-@dataclass
-class TuStatDiagram(Diagram):
-  """
-  Dataclass providing a record storing the features of a TuPlot diagram.
-  """
-  group: str = ''
+  if int(diagr_char.number) >= 101 and int(diagr_char.number) <= 140:
+    diagr_char.group = GroupType.group1
+  elif int(diagr_char.number) >= 201 and int(diagr_char.number) <= 251:
+    diagr_char.group = GroupType.group2
+  elif int(diagr_char.number) >= 252 and int(diagr_char.number) <= 270:
+    diagr_char.group = GroupType.group2A
+  elif int(diagr_char.number) >= 301 and int(diagr_char.number) <= 340:
+    diagr_char.group = GroupType.group3
 
 
 class GuiPlotFieldsConfigurator():

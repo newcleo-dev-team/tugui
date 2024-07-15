@@ -7,7 +7,7 @@ import re
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from gui_configuration import Diagram, TuPlotDiagram, TuStatDiagram
+from gui_configuration import DiagramCharacteristics, define_diagram_group
 from io import TextIOWrapper
 
 
@@ -26,7 +26,7 @@ class TuInp:
   diagram_config: str = ""
   ikon: str = ""
 
-  diagr_type: Diagram = None
+  diagr_type: DiagramCharacteristics = None
 
   def configure_tuplot_inp_fields(self, info: dict):
     """
@@ -41,7 +41,7 @@ class TuInp:
     # Set the plot number (IDNF)
     self.idnf = info['IDNF']
     # Set the type of diagram
-    self.diagr_type = TuPlotDiagram(number=self.idnf, idga=info['IDGA'])
+    self.diagr_type = DiagramCharacteristics(number=self.idnf, idga=info['IDGA'])
     # Set the keyword stating the end of the plot/diagram/file
     self.ikon = info['IKON']
 
@@ -82,7 +82,7 @@ class TuInp:
     # Set the plot number (DIAGNR)
     self.idnf = info['DIAGNR']
     # Set the type of diagram
-    self.diagr_type = TuStatDiagram(number=self.idnf)
+    self.diagr_type = DiagramCharacteristics(number=self.idnf)
     # Set the flag stating the diagram is not a 'TuPlot' case
     self.is_tuplot = False
     # Set the keyword stating the end of the plot/diagram/file
@@ -229,20 +229,20 @@ class InpHandler():
     inp_config.pli_name = inp_file_handle.readline().strip()
 
     # Read the line containing the 'IDNF' value in order to interpret the plot:
-    # . if this line contains 3 values, the .inp file corresponds to a TuPlot case
+    # . if this line contains 3 values, the .inp file corresponds to a 'TuPlot' case
     # . if this line contains 1 value only, the .inp file corresponds to a TuStat case
     inp_config.diagram_config += inp_file_handle.readline()
     if len(inp_config.diagram_config.split()) == 1:
-      # Only one value --> TuStat case
+      # Only one value --> 'TuStat' case
       inp_config.is_tuplot = False
-      # Declare the dataclass for the TuStat case
-      inp_config.diagr_type = TuStatDiagram(inp_config.diagram_config.split()[0])
+      # Declare the dataclass for the 'TuStat' case
+      inp_config.diagr_type = DiagramCharacteristics(number=inp_config.diagram_config.split()[0])
     else:
-      # Declare the dataclass for the TuPlot case
-      inp_config.diagr_type = TuPlotDiagram(number=inp_config.diagram_config.split()[0],
-                                            idga=inp_config.diagram_config.split()[1])
-      # Call the dataclass method for evaluating the group corresponding to the plot number
-      inp_config.diagr_type.define_group_from_num()
+      # Declare the dataclass for the 'TuPlot' case
+      inp_config.diagr_type = DiagramCharacteristics(number=inp_config.diagram_config.split()[0],
+                                                     idga=inp_config.diagram_config.split()[1])
+      # Call the function for evaluating the group corresponding to the plot number
+      define_diagram_group(inp_config.diagr_type)
 
     # Get the plot number
     inp_config.idnf = inp_config.diagram_config.split()[0]

@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import InpHandler, MicReader, StaReader, DatGenerator, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
+from tu_interface import InpHandler, MicReader, StaReader, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
 from gui_configuration import IANT, GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, LabelImage, EntryVariable, StatusBar
 from shutil import copyfile
