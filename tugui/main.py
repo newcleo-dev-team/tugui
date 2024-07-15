@@ -11,7 +11,7 @@ from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import InpHandler, MicReader, StaReader, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
-from gui_configuration import IANT, GuiPlotFieldsConfigurator
+from gui_configuration import IANT, init_GuiPlotFieldsConfigurator_attrs
 from gui_widgets import CustomNotebook, LabelImage, EntryVariable, StatusBar
 from shutil import copyfile
 
@@ -54,9 +54,9 @@ class TuPostProcessingGui(ThemedTk):
     # self.tk.call('wm', 'iconphoto', self._w, icon)
     # self.iconphoto(True, PhotoImage(file=os.path.join(os.getcwd(), "resources/tuoutgui.ico")))
 
-    # Instantiate the GuiPlotFieldsConfigurator class in a try-except
+    # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
     try:
-      self.guiconfig = GuiPlotFieldsConfigurator()
+      self.guiconfig = init_GuiPlotFieldsConfigurator_attrs()
     except Exception as e:
       # Intercept any exception produced by running the configuration logic
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
