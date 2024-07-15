@@ -66,22 +66,16 @@ dependencies must be satisfied:
 - ``myst-parser`` :math:`>= 3.0.1`
 - ``sphinxcontrib-bibtex`` :math:`>= 2.5.0`
 
-Documentation
--------------
+How to Install
+--------------
 
-The Sphinx documentation can be built in *html* and *LaTeX* formats by
-executing the following command in the folder ``docs/``:
-
-  .. code-block:: bash
-
-      make html
+To install the *tugui* application, please be sure that all the dependencies
+are met, and then clone the repository at
+https://github.com/newcleo-dev-team/tugui using the following command:
 
   .. code-block:: bash
-
-      make latexpdf
-
-To see the available templates for generating the documentation in *PDF*
-format and to choose among them, please look at the ``docs/conf.py`` file.
+    
+    git clone https://github.com/newcleo-dev-team/tugui.
 
 How to Use
 ----------
@@ -125,6 +119,23 @@ work properly, that is:
 Once applied these modifications, the user must compile both the executables
 and put them into the folder ``tugui/resources/exec`` (to be created) of the
 **TuGUI** project.
+
+Documentation
+-------------
+
+The Sphinx documentation can be built in *html* and *LaTeX* formats by
+executing the following command in the folder ``docs/``:
+
+  .. code-block:: bash
+
+      make html
+
+  .. code-block:: bash
+
+      make latexpdf
+
+To see the available templates for generating the documentation in *PDF*
+format and to choose among them, please look at the ``docs/conf.py`` file.
 
 How to Contribute
 -----------------
