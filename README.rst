@@ -82,7 +82,7 @@ How to Use
 
 To open the GUI, the following command needs to be run from the command prompt:
 
-.. code-block:: bash
+  .. code-block:: bash
 
     python tugui/main.py
 
