@@ -911,7 +911,7 @@ class TuPostProcessingGui(BaseWindow):
     if not filenames: return
     # Check if the selected file has the correct extension
     for files in filenames:
-      if not files.endswith('.dat') or not files.endswith('.plt'):
+      if not files.endswith('.dat') and not files.endswith('.plt'):
         messagebox.showerror("Error", "Error: one of the selected files has not the correct 'dat' or 'plt' extension.")
 
     # Store the selected files as an instance attribute
