@@ -227,11 +227,9 @@ class TuPostProcessingGui(BaseWindow):
     # Instantiate a Frame object holding the logos
     logo_frame = ttk.Frame(self)
     logo_frame.grid(column=1, row=0, sticky='nse')
-    # Add newcleo and JRC logos
+    # Add newcleo logo
     newcleo_logo = LabelImage(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/newcleologo.png"))
     newcleo_logo.grid(column=0, row=0, sticky='nsew')
-    jrc_logo = LabelImage(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/jrclogo.png"))
-    jrc_logo.grid(column=1, row=0, sticky='nsew')
 
     ###############################################################################
     # Build the plot configuration area for the two types of plot (TUPlot e TUStat)
