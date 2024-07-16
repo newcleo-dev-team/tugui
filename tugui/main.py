@@ -871,6 +871,9 @@ class TuPostProcessingGui(BaseWindow):
     filename = self.select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
+    # Check if the selected file has the correct extension
+    if filename.split('.')[-1] != 'inp':
+      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
