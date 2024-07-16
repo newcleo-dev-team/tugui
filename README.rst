@@ -116,7 +116,8 @@ work properly, that is:
    - comment line 92 ``iMode = 1``;
    - uncomment line 98 ``iMode = 3``.
 
-Once applied these modifications, the user must compile both the executables
+Once applied these modifications, the user must compile both the executables,
+call them ``tuplotgui`` and ``tustatgui`` respectively, 
 and put them into the folder ``tugui/resources/exec`` (to be created) of the
 **TuGUI** project.
 
