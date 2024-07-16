@@ -371,7 +371,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     if toggle:
       self._buttons[name].deselect()
     # Add a tooltip for the button
-    _backend_tk.ToolTip.createToolTip(self._buttons[name], tooltip)
+    _backend_tk.add_tooltip(self._buttons[name], tooltip)
 
 
 class PlotCursor():
