@@ -434,7 +434,7 @@ class TuPostProcessingGui(ThemedTk):
     # Set the list of slice names for the TuStat tab
     self.tustat_tab.set_slice_list(self.slice_settings)
     # Set the list providing the times of the statistical simulation
-    self.tustat_tab.set_times(self.sta_times)
+    self.tustat_tab.set_times(sta_times=self.sta_times)
     # Pass the herein-defined method to call whenever the "Run" button of the TuStat tab is pressed
     self.tustat_tab.run_plot(self.run_tuStat)
 
@@ -458,7 +458,7 @@ class TuPostProcessingGui(ThemedTk):
     # Set the list of slice names for the TuPlot tab
     self.tuplot_tab.set_slice_list(self.slice_settings)
     # Set the lists providing the macro and micro time
-    self.tuplot_tab.set_times(self.macro_time, self.micro_time)
+    self.tuplot_tab.set_times(macro_time=self.macro_time, micro_time=self.micro_time)
     # Pass the herein-defined method to call whenever the "Run" button of the TuPlot object is pressed
     self.tuplot_tab.run_plot(self.run_tuPlot)
 

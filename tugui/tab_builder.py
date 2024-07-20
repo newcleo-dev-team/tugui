@@ -4,13 +4,14 @@ from tkinter import ttk
 
 from ttkthemes import ThemedTk
 
+from abc import ABC, abstractmethod
 from gui_configuration import GuiPlotFieldsConfigurator, init_GuiPlotFieldsConfigurator_attrs
 from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
 from gui_widgets import OnOffClickableLabel, WidgetTooltip, SquareButton, CustomNotebook
 from support import IDGA, IANT
 
-class TabContentBuilder(ttk.Frame):
+class TabContentBuilder(ttk.Frame, ABC):
   """
   Class that builds the content of a tab of the given notebook instance, in terms of
   its widgets. It inherits from a frame object and presents two areas:
@@ -81,6 +82,15 @@ class TabContentBuilder(ttk.Frame):
     """
     self.slice_settings = slices
 
+  @abstractmethod
+  def set_times(self, **kwargs):
+    """
+    Abstract method that allows to set the instance attributes that corresponds
+    to the simulation step times.
+    This method, being an interface, will be overridden by subclasses providing
+    their specific implementation.
+    """
+
   def _add_new_plot_figure(self, plot_name: str):
     """
     Method that adds a new 'PlotFigure' object to this instance notebook.
@@ -122,6 +132,7 @@ class TabContentBuilder(ttk.Frame):
     # Change focus to the just created tab
     self.plotTabControl.select(self.plotTabControl.index('end')-1)
 
+  @abstractmethod
   def _build_configuration_fields(self, config_area: ttk.LabelFrame):
     """
     Abstract method for building the plot configuration fields area, provided as
@@ -410,13 +421,21 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuPlot')
 
-  def set_times(self, macro_time: list, micro_time: list):
+  def set_times(self, **kwargs):
     """
     Method that allows to set the instance attributes for the simulation
     macro and micro step times.
     """
-    self.macro_time = macro_time
-    self.micro_time = micro_time
+    # Check if the correct arguments have been passed to the method
+    if not 'macro_time' in kwargs:
+      raise Exception("Error in passing arguments to this function. The macro step times\
+                      'macro_time' argument is missing.")
+    if not 'micro_time' in kwargs:
+      raise Exception("Error in passing arguments to this function. The micro step times\
+                      'mairo_time' argument is missing.")
+    # Store the times in the corresponding instance attributes
+    self.macro_time = kwargs['macro_time']
+    self.micro_time = kwargs['micro_time']
 
   def _activate_additional_settings(self, box_to_check: ttk.Combobox, container: ttk.Frame, row: int):
     """
@@ -678,12 +697,17 @@ class TuStatTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuStat')
 
-  def set_times(self, sta_time: list):
+  def set_times(self, **kwargs):
     """
     Method that allows to set the instance attribute for the step times
     of the statistical simulation.
     """
-    self.sta_time = sta_time
+    # Check if the correct argument has been passed to the method
+    if not 'sta_time' in kwargs:
+      raise Exception("Error in passing arguments to this function. The statistical step times\
+                      'sta_time' argument is missing.")
+    # Store the times in the corresponding instance attributes
+    self.sta_time =  kwargs['sta_time']
 
   def _activate_fields(self, event=None):
     """
