@@ -374,7 +374,7 @@ class OnOffClickableLabel(ttk.Frame):
     self._lbl.unbind('<Button-1>', self.click_event)
 
 
-class WidgetTooltip(object):
+class WidgetTooltip():
   """
   Class that provides a tooltip for a given widget passed as argument to
   this class constructor.
