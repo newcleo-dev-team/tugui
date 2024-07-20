@@ -703,11 +703,11 @@ class TuStatTabContentBuilder(TabContentBuilder):
     of the statistical simulation.
     """
     # Check if the correct argument has been passed to the method
-    if not 'sta_time' in kwargs:
+    if not 'sta_times' in kwargs:
       raise Exception("Error in passing arguments to this function. The statistical step times\
                       'sta_time' argument is missing.")
     # Store the times in the corresponding instance attributes
-    self.sta_time =  kwargs['sta_time']
+    self.sta_time =  kwargs['sta_times']
 
   def _activate_fields(self, event=None):
     """
