@@ -259,24 +259,29 @@ class SquareButton(ttk.Frame):
     self._btn.configure(text=new_text)
 
 
-class LabelImage(ttk.Label):
+def provide_label_image(container, img_path: str) -> ttk.Label:
   """
-  Class that provides a label filled with an image.
+  Method that provides a label filled with an image. It builds an instance
+  of the 'ttk.Label' class by receiving the contaniner to put the label
+  into, as well as the path to the image file to load and assign to the
+  label.
+  The loaded image is added as an attribute to the 'ttk.Label' instance so
+  to keep a reference to it and prevent it to be garbage collected, thus
+  allowing to be correctly shown.
   """
-  def __init__(self, container, img_path: str):
-    """
-    Construct an instance of the 'LabelImage' class by receiving the
-    contaniner to put the label into, as well as the path to the
-    image file to load and assign to the label.
-    """
-    # Call the superclass constructor by passing the container
-    super().__init__(container)
-    # Load the image
-    self.label_image = Image.open(img_path)
-    self.label_image = ImageTk.PhotoImage(self.label_image)
+  # Instantiate the 'ttk.Label' class
+  label = ttk.Label(container)
+  # Load the image
+  label_image = Image.open(img_path)
+  label_image = ImageTk.PhotoImage(label_image)
+  # Configure the label by assigning the image to it
+  label.configure(image=label_image)
+  # Add an attribute to the label to keep a reference to the image and prevent it
+  # from being garbage collected
+  label.image = label_image
 
-    # Configure the label by assigning the image to it
-    self.configure(image=self.label_image)
+  # Return the label
+  return label
 
 
 class OnOffClickableLabel(ttk.Frame):

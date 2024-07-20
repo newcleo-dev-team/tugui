@@ -12,7 +12,7 @@ from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import InpHandler, MicReader, StaReader, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
 from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
-from gui_widgets import CustomNotebook, LabelImage, EntryVariable, StatusBar
+from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
 from shutil import copyfile
 
@@ -118,9 +118,9 @@ class TuPostProcessingGui(ThemedTk):
     logo_frame = ttk.Frame(self)
     logo_frame.grid(column=1, row=0, sticky='nse')
     # Add newcleo and JRC logos
-    newcleo_logo = LabelImage(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/newcleologo.png"))
+    newcleo_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/newcleologo.png"))
     newcleo_logo.grid(column=0, row=0, sticky='nsew')
-    jrc_logo = LabelImage(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/jrclogo.png"))
+    jrc_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/jrclogo.png"))
     jrc_logo.grid(column=1, row=0, sticky='nsew')
 
     ###############################################################################
