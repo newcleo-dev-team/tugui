@@ -28,79 +28,91 @@ class TuInp:
 
   diagr_type: DiagramCharacteristics = None
 
-  def configure_tuplot_inp_fields(self, info: dict):
-    """
-    Method that configure the fields of this dataclass instance for the
-    'TuPlot' case by getting the needed information from the input
-    dictionary that holds the plot configuration of a single diagram.
-    """
-    # Set the default file name for the 'TuPlot' case
-    self.file_name = "TuPlot.inp"
-    # Set the .pli file name
-    self.pli_name = info['PLI']
-    # Set the plot number (IDNF)
-    self.idnf = info['IDNF']
-    # Set the type of diagram
-    self.diagr_type = DiagramCharacteristics(number=self.idnf, idga=info['IDGA'])
-    # Set the keyword stating the end of the plot/diagram/file
-    self.ikon = info['IKON']
+def configure_tuplot_inp_fields(info: dict):
+  """
+  Function that builds and configures the fields of the 'TuInp' dataclass
+  for the 'TuPlot' case. This is done by getting the needed information
+  from the input dictionary that holds the plot configuration of a single
+  diagram.
+  """
+  # Instantiate the 'TuInp' dataclass
+  tuinp = TuInp()
+  # Set the default file name for the 'TuPlot' case
+  tuinp.file_name = "TuPlot.inp"
+  # Set the .pli file name
+  tuinp.pli_name = info['PLI']
+  # Set the plot number (IDNF)
+  tuinp.idnf = info['IDNF']
+  # Set the type of diagram
+  tuinp.diagr_type = DiagramCharacteristics(number=tuinp.idnf, idga=info['IDGA'])
+  # Set the keyword stating the end of the plot/diagram/file
+  tuinp.ikon = info['IKON']
 
-    # --------------------------------------------------
-    # Store the diagram configuration as a single string
-    # --------------------------------------------------
-    # Store the IDNF value (diagram number), followed by the IDGA value (diagram type),
-    # followed by NKN (nuber of curves to plot)
-    self.diagram_config += info['IDNF'] + " " + info['IDGA'] + " " + info['NKN'] + "\n"
-    # Store on the same line:
-    # . IANT1 value (Y, N), valid for plot 113, indicates the temperature distribution is considered
-    # . IANT2 value (C, F), valid for plots 102-108, indicates the stresses are considered for cladding (C) or fuel (F)
-    # . IANT3 value (Y, N), driver for printing the input data and X-Y table (Y) or nothing (N)
-    self.diagram_config += info['IANT1'] + " " + info['IANT2'] + " " + info['IANT3'] + "\n"
-    # Store the curves number in increasing order:
-    # . IDGA = 1, it is a list of the selected curves Kn-s
-    # . IDGA = 2/3, it is equal to 1
-    self.diagram_config += info['KN'] + "\n"
-    # Store the curves slices in increasing order:
-    # . IDGA = 1/2, it is equal to 1
-    # . IDGA = 3, it is a list of the selected curves slices
-    self.diagram_config += info['NLSUCH'] + "\n"
-    # Store the time instants at which the curves are plotted or the start/end values (depending on plot group)
-    self.diagram_config += info["TIME"] + "\n"
-    # Store the NMAS value, stating if a custom scaling is present (value fixed at 0, i.e. no custom extrema)
-    self.diagram_config += info["NMAS"] + "\n"
+  # --------------------------------------------------
+  # Store the diagram configuration as a single string
+  # --------------------------------------------------
+  # Store the IDNF value (diagram number), followed by the IDGA value (diagram type),
+  # followed by NKN (nuber of curves to plot)
+  tuinp.diagram_config += info['IDNF'] + " " + info['IDGA'] + " " + info['NKN'] + "\n"
+  # Store on the same line:
+  # . IANT1 value (Y, N), valid for plot 113, indicates the temperature distribution is considered
+  # . IANT2 value (C, F), valid for plots 102-108, indicates the stresses are considered for cladding (C) or fuel (F)
+  # . IANT3 value (Y, N), driver for printing the input data and X-Y table (Y) or nothing (N)
+  tuinp.diagram_config += info['IANT1'] + " " + info['IANT2'] + " " + info['IANT3'] + "\n"
+  # Store the curves number in increasing order:
+  # . IDGA = 1, it is a list of the selected curves Kn-s
+  # . IDGA = 2/3, it is equal to 1
+  tuinp.diagram_config += info['KN'] + "\n"
+  # Store the curves slices in increasing order:
+  # . IDGA = 1/2, it is equal to 1
+  # . IDGA = 3, it is a list of the selected curves slices
+  tuinp.diagram_config += info['NLSUCH'] + "\n"
+  # Store the time instants at which the curves are plotted or the start/end values (depending on plot group)
+  tuinp.diagram_config += info["TIME"] + "\n"
+  # Store the NMAS value, stating if a custom scaling is present (value fixed at 0, i.e. no custom extrema)
+  tuinp.diagram_config += info["NMAS"] + "\n"
 
-  def configure_tustat_inp_fields(self, info: dict):
-    """
-    Method that configure the fields of this dataclass instance for the
-    'TuStat' case by getting the needed information from the input
-    dictionary that holds the plot configuration of a single diagram.
-    """
-    # Set the default file name for the 'TuStat' case
-    self.file_name = "TuStat.inp"
-    # Set the .pli file name
-    self.pli_name = info['PLI']
-    # Set the plot number (DIAGNR)
-    self.idnf = info['DIAGNR']
-    # Set the type of diagram
-    self.diagr_type = DiagramCharacteristics(number=self.idnf)
-    # Set the flag stating the diagram is not a 'TuPlot' case
-    self.is_tuplot = False
-    # Set the keyword stating the end of the plot/diagram/file
-    self.ikon = info['CONTIN']
+  # Return the built dataclass instance
+  return tuinp
 
-    # --------------------------------------------------
-    # Store the diagram configuration as a single string
-    # --------------------------------------------------
-    # Store the DIAGNR value (diagram number)
-    self.diagram_config += info['DIAGNR'] + "\n"
-    # Store the number of required section/slice
-    self.diagram_config += info['NAXIAL'] + "\n"
-    # Store the time instants at which the curves are plotted
-    self.diagram_config += info["TIME"] + "\n"
-    # Store the number of intervals of the statistical distribution (INTERV)
-    self.diagram_config += info["INTERV"] + "\n"
-    # Store the type of distribution (DISTR)
-    self.diagram_config += info["DISTR"] + "\n"
+def configure_tustat_inp_fields(info: dict):
+  """
+  Function that builds and configures the fields of the 'TuInp' dataclass
+  for the 'TuStat' case. This is done by getting the needed information
+  from the input dictionary that holds the plot configuration of a single
+  diagram.
+  """
+  # Instantiate the 'TuInp' dataclass
+  tuinp = TuInp()
+  # Set the default file name for the 'TuStat' case
+  tuinp.file_name = "TuStat.inp"
+  # Set the .pli file name
+  tuinp.pli_name = info['PLI']
+  # Set the plot number (DIAGNR)
+  tuinp.idnf = info['DIAGNR']
+  # Set the type of diagram
+  tuinp.diagr_type = DiagramCharacteristics(number=tuinp.idnf)
+  # Set the flag stating the diagram is not a 'TuPlot' case
+  tuinp.is_tuplot = False
+  # Set the keyword stating the end of the plot/diagram/file
+  tuinp.ikon = info['CONTIN']
+
+  # --------------------------------------------------
+  # Store the diagram configuration as a single string
+  # --------------------------------------------------
+  # Store the DIAGNR value (diagram number)
+  tuinp.diagram_config += info['DIAGNR'] + "\n"
+  # Store the number of required section/slice
+  tuinp.diagram_config += info['NAXIAL'] + "\n"
+  # Store the time instants at which the curves are plotted
+  tuinp.diagram_config += info["TIME"] + "\n"
+  # Store the number of intervals of the statistical distribution (INTERV)
+  tuinp.diagram_config += info["INTERV"] + "\n"
+  # Store the type of distribution (DISTR)
+  tuinp.diagram_config += info["DISTR"] + "\n"
+
+  # Return the built dataclass instance
+  return tuinp
 
 
 class InpHandler():

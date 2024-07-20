@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import InpHandler, MicReader, StaReader, TuInp, MacReader, init_DatGenerator, init_PliReader, run_plot_files_generation
+from tu_interface import InpHandler, MicReader, StaReader, TuInp, MacReader, configure_tuplot_inp_fields, configure_tustat_inp_fields, init_DatGenerator, init_PliReader, run_plot_files_generation
 from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
@@ -556,9 +556,8 @@ class TuPostProcessingGui(ThemedTk):
           times = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
           inp_info["TIME"] = "\n".join(i for i in times)
 
-      # Instantiate the 'TuInp' dataclass for storing the plot configuration
-      tuplot_inp = TuInp()
-      tuplot_inp.configure_tuplot_inp_fields(inp_info)
+      # Build and configure the 'TuInp' dataclass for storing the plot configuration
+      tuplot_inp = configure_tuplot_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
       active_plotFigure = self.tuplot_tab.get_active_plotFigure()
@@ -610,9 +609,8 @@ class TuPostProcessingGui(ThemedTk):
         # Index 1 corresponds to "Probabilistic density"
         inp_info["DISTR"] = "d"
 
-      # Instantiate the 'TuInp' dataclass for storing the plot configuration
-      tustat_inp = TuInp()
-      tustat_inp.configure_tustat_inp_fields(inp_info)
+      # Build and configure the 'TuInp' dataclass for storing the plot configuration
+      tustat_inp = configure_tustat_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
       active_plotFigure = self.tustat_tab.get_active_plotFigure()
