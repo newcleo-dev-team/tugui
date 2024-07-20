@@ -4,10 +4,11 @@ from tkinter import ttk
 
 from ttkthemes import ThemedTk
 
-from gui_configuration import IANT, IDGA, GuiPlotFieldsConfigurator, init_GuiPlotFieldsConfigurator_attrs
+from gui_configuration import GuiPlotFieldsConfigurator, init_GuiPlotFieldsConfigurator_attrs
 from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
 from gui_widgets import OnOffClickableLabel, WidgetTooltip, SquareButton, CustomNotebook
+from support import IDGA, IANT
 
 class TabContentBuilder(ttk.Frame):
   """
@@ -435,14 +436,14 @@ class TuPlotTabContentBuilder(TabContentBuilder):
         # Rebuild the frame for the additional configuration fields and add one for
         # allowing the setting of the temperature distribution choice
         row_index = self._build_iant_field(
-          container, row, "Temp. distr.: ", self.gui_config.iant1[1], row_index, IANT.IANT_1)
+          container, row, "Temp. distr.: ", self.gui_config.iant1[1], row_index, IANT.IANT_1.description)
       elif any(str(i) in self.number_var.get() for i in self.gui_config.iant2[0]):
         # Plot numbers 102-108
         print(self.number_var.get())
         # Rebuild the frame for the additional configuration fields and add one for
         # allowing the setting of the radiation stress choice
         row_index = self._build_iant_field(
-          container, row, "Rad. Struct.: ", self.gui_config.iant2[1], row_index, IANT.IANT_2)
+          container, row, "Rad. Struct.: ", self.gui_config.iant2[1], row_index, IANT.IANT_2.description)
       else:
         # Destroy the additional fields
         print("DESTROY")
@@ -609,9 +610,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
       time_to_show = self.micro_time
 
     # Handle the different curve types (IDGA value)
-    if (self.type_var.get() == IDGA['IDGA_1'].value):
+    if (self.type_var.get() == IDGA.IDGA_1.description):
       # Case of curves for different Kn-s --> IDGA 1
-      print("IDGA is: " + IDGA['IDGA_1'].value)
+      print("IDGA is: " + IDGA.IDGA_1.description)
       # Configure the fields
       self.plt_sett_cfg.configure_fields(
           "Slice: ", self.slice_settings,
@@ -620,9 +621,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
       # Set the fields type (1. Slice, 2. Time, 3. Kn)
       self.plt_sett_cfg.set_fields_type(FieldType['type3'], FieldType['type2'], FieldType['type1'])
 
-    elif (self.type_var.get() == IDGA['IDGA_2'].value):
+    elif (self.type_var.get() == IDGA.IDGA_2.description):
         # Case of curves for different times --> IDGA 2
-        print("IDGA is: " + IDGA['IDGA_2'].value)
+        print("IDGA is: " + IDGA.IDGA_2.description)
 
         # Configure the fields
         self.plt_sett_cfg.configure_fields(
@@ -632,9 +633,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
         # Set the fields type (1. Slice, 2. Kn, 3. Time)
         self.plt_sett_cfg.set_fields_type(FieldType['type3'], FieldType['type1'], FieldType['type2'])
 
-    elif (self.type_var.get() == IDGA['IDGA_3'].value):
+    elif (self.type_var.get() == IDGA.IDGA_3.description):
         # Case of curves for different slices --> IDGA 3
-        print("IDGA is: " + IDGA['IDGA_3'].value)
+        print("IDGA is: " + IDGA.IDGA_3.description)
 
         # Configure the fields
         self.plt_sett_cfg.configure_fields(

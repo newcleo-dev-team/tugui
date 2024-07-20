@@ -8,22 +8,8 @@ from dataclasses import dataclass, field
 from typing import Dict, Tuple, List
 
 from plot_settings import GroupType
+from support import IDGA
 
-class IDGA(Enum):
-  """
-  Enumeration storing the different types of plots (field "Type").
-  """
-  IDGA_1 = "1 - Different Curve Numbers"
-  IDGA_2 = "2 - Different Times"
-  IDGA_3 = "3 - Different Slices"
-
-class IANT(Enum):
-  """
-  Enumeration storing the different types of IANT field.
-  """
-  IANT_1 = "IANT 1"
-  IANT_2 = "IANT 2"
-  IANT_3 = "IANT 3"
 
 @dataclass
 class DiagramCharacteristics():
@@ -166,9 +152,9 @@ def init_GuiPlotFieldsConfigurator_attrs() -> GuiPlotFieldsConfigurator:
 
     # Build a map between the IDGA enumeration and their index
     gui_config.idgaVSi = {
-      IDGA(IDGA['IDGA_1']).value: 1,
-      IDGA(IDGA['IDGA_2']).value: 2,
-      IDGA(IDGA['IDGA_3']).value: 3,
+      IDGA.IDGA_1.description: IDGA.IDGA_1.index,
+      IDGA.IDGA_2.description: IDGA.IDGA_2.index,
+      IDGA.IDGA_3.description: IDGA.IDGA_3.index
     }
 
     print(gui_config.idgaVSi)

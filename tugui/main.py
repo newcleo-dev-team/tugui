@@ -11,8 +11,9 @@ from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import InpHandler, MicReader, StaReader, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
-from gui_configuration import IANT, init_GuiPlotFieldsConfigurator_attrs
+from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
 from gui_widgets import CustomNotebook, LabelImage, EntryVariable, StatusBar
+from support import IANT
 from shutil import copyfile
 
 
@@ -474,6 +475,9 @@ class TuPostProcessingGui(ThemedTk):
     self.focus_set()
 
     try:
+      # Get the index corresponding to the IDGA option selected by users
+      idga_indx = self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()]
+
       # Instantiate the class dealing with the .inp file generation based on the made choices
       # inp_generator = TuPlotInpGenerator(self.plireader.pli_path)
       # Build a dictionary of the needed information for building the .inp file by providing
@@ -481,7 +485,7 @@ class TuPostProcessingGui(ThemedTk):
       inp_info = {
         "PLI": os.path.basename(self.plireader.pli_path).split(os.sep)[-1],
         "IDNF": self.tuplot_tab.number_var.get().split(' ')[0],
-        "IDGA": str(self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()]),
+        "IDGA": str(idga_indx),
         "NKN": str(len(self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values)),
         "IANT1": "N",
         "IANT2": "F",
@@ -495,17 +499,17 @@ class TuPostProcessingGui(ThemedTk):
 
       # Overwrite the default entry for the temperature distribution if plot 113
       if hasattr(self.tuplot_tab, 'iant'):
-        if self.tuplot_tab.iant == IANT.IANT_1:
+        if self.tuplot_tab.iant == IANT.IANT_1.description:
           # TODO check why the manual says this field shoud be 'Y', but actually the executable fails
           inp_info["IANT1"] = "N"
-        elif self.tuplot_tab.iant == IANT.IANT_2:
+        elif self.tuplot_tab.iant == IANT.IANT_2.description:
           # Overwrite the default entry for the radial stresses, if plot 102-108
           if hasattr(self.tuplot_tab, 'iant_entry'):
             if self.tuplot_tab.iant_entry.cbx.current() == 0:
               inp_info["IANT2"] = "C"
 
       # If the plot type (IDGA) is 1, put the list of selected Kn-s in the dictionary
-      if self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()] == 1:
+      if idga_indx == 1:
         # Get the list of strings identifying the chosen Kn-s
         kn_list = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
         # Extract the Kn numbers only if the list is not empty
@@ -521,7 +525,7 @@ class TuPostProcessingGui(ThemedTk):
           inp_info["KN"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
 
       # Overwrite the default entry for the NLSUCH item
-      if self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()] == 3:
+      if idga_indx == 3:
         # Get the number of selected slices
         slice_list = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
         # Extract the slice numbers only if the list is not empty
@@ -536,7 +540,7 @@ class TuPostProcessingGui(ThemedTk):
           inp_info["NLSUCH"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
 
       # Overwrite the default TIME (IASTUN/IASEC/FAMILY) entries on the basis of the selected time(s)
-      if self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()] == 1 or self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()] == 3:
+      if idga_indx == 1 or idga_indx == 3:
         # Curves at a specific time instant, i.e. one time for plot type 1 (different Kn-s) and 3 (different slices)
         if self.tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.tuplot_tab.plt_sett_cfg.group == GroupType.group3:
           # Only one time for group 1 (Radius) and 3 (Axial)
@@ -546,7 +550,7 @@ class TuPostProcessingGui(ThemedTk):
           # Start and end times for group 2 (Time) and 2A (TimeIntegral)
           # Get the start/end times from field2
           inp_info["TIME"] = "\n".join([self.tuplot_tab.plt_sett_cfg.field2.time1, self.tuplot_tab.plt_sett_cfg.field2.time2])
-      elif self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()] == 2:
+      elif idga_indx == 2:
         # Curves for different time instants, list of times for plot type 1 (different Kn-s) and 3 (different slices)
         if self.tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.tuplot_tab.plt_sett_cfg.group == GroupType.group3:
           # Get the list of selected time instants from field3
