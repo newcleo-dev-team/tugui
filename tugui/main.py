@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import InpHandler, MicReader, StaReader, TuInp, PliReader, MacReader, init_DatGenerator, run_plot_files_generation
+from tu_interface import InpHandler, MicReader, StaReader, TuInp, MacReader, init_DatGenerator, init_PliReader, run_plot_files_generation
 from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
@@ -351,10 +351,9 @@ class TuPostProcessingGui(ThemedTk):
 
     # Instantiate the PliReader class for retrieving info from the .pli file
     try:
-      self.plireader = PliReader(self.pli_entry.var.get())
+      # Extract the information from the .pli file and instantiate the 'PliReader' class
+      self.plireader = init_PliReader(self.pli_entry.var.get())
       print("Path to the .pli file: " + self.plireader.pli_path)
-      # Extract the information from the .pli file
-      self.plireader.extract_sim_info()
 
       # Instantiate the MacReader class
       self.macreader = MacReader(

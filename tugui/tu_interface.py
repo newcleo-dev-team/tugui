@@ -1,7 +1,7 @@
 import os
 import platform
 import shutil
-from typing import List
+from typing import Dict, List
 import numpy as np
 import re
 
@@ -407,75 +407,92 @@ def run_plot_files_generation(datGen: DatGenerator):
   # Return the updated dataclass
   return datGen
 
-
+@dataclass
 class PliReader():
   """
-  Class that interprets the content of the .pli file produced by the TU simulation. It contains
+  Datalass that interprets the content of the .pli file produced by the TU simulation. It contains
   information useful for extracting data from the .mac e .mic files.
   """
-  def __init__(self, pli_path: str):
-    """
-    Build an instance of the 'PliReader' class that interprets the content of the .pli
-    file produced by the TU simulation.
-    It receives as parameter the path to the .pli file to read and checks the actual
-    existence of the file.
-    """
-    # Check the .pli file existence
-    check_file_existence(pli_path, 'pli')
-    self.pli_path = pli_path
-    self.pli_folder = os.path.dirname(pli_path)
+  pli_path: str = ''
+  pli_folder: str = ''
+  opt_dict: Dict[str, str] = field(default_factory=dict)
+  mic_path: str = ''
+  mac_path: str = ''
+  sta_path: str = ''
+  mic_recordLength: str = ''
+  mac_recordLength: str = ''
+  sta_recordLength: str = ''
+  sta_micStep: str = ''
+  sta_macStep: str = ''
+  sta_dataset: str = ''
+  axial_steps: str = ''
 
-  def extract_sim_info(self):
-    """
-    Method that reads the content of the .pli file and extracts the values of the
-    relevant items.
-    """
-    # Open the .pli file in reading mode
-    with open(self.pli_path, 'r') as f:
-      # Read line-by-line
-      for line in f:
-        # Get the line where the options are printed
-        if (("M3" in line) and ("ISTRUK" in line)):
-          # Split the line to get the list of option names
-          options = line.split()
-          # Advance to the next line and get the list of the option values
-          options_values = f.readline().split()
-          # Check if the two lists have the same size
-          if (len(options) != len(options_values)):
-            # Raise an exception
-            raise Exception("Error: no match between the options and their values")
 
-          # Build a dictionary holding the name of the options VS their values
-          self.opt_dict = {options[i]: options_values[i] for i in range(len(options))}
-        else:
-          # Search for the lines where the paths of the .mic and .mac files and their record length are present
-          if (re.search("^\w+.mic\s+", line)):
-            # Save the path to the .mic file
-            self.mic_path = line.split()[0]
-            # Advance to the next line to get the .mic record length
-            self.mic_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.mac\s+", line)):
-            # Save the path to the .mac file
-            self.mac_path = line.split()[0]
-            # Advance to the next line to get the .mac record length
-            self.mac_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.sta\s+", line)):
-            # Save the path to the .sta file
-            self.sta_path = line.split()[0]
-            # Advance to the next line to get the .sta record length
-            self.sta_recordLength = f.readline().split()[0]
-            # Advance to the next line to get the .sta micro-step dataset record length
-            self.sta_micStep = f.readline().split()[0]
-            # Advance to the next line to get the .sta macro-step dataset record length
-            self.sta_macStep = f.readline().split()[0]
-            # Advance to the next line to get the .sta statistic dataset record length
-            self.sta_dataset = f.readline().split()[0]
+def init_PliReader(pli_path: str) -> PliReader:
+  """
+  Function that initialize the 'PliReader' dataclass by providing all the needed
+  information that come by interpreting the content of the .pli file produced by
+  the TU simulation.
+  It receives as parameter the path to the .pli file to read and checks the actual
+  existence of the file. Then, the function builds and populates the fields of an
+  instance of the 'PliReader' dataclass and returns it in the end.
+  """
+  # Check the .pli file existence
+  check_file_existence(pli_path, 'pli')
+  # Get the path to the .pli file directory
+  pli_dir = os.path.dirname(pli_path)
+  # Instantiate the 'PliReader' class
+  pli_reader = PliReader(pli_path=pli_path, pli_folder=pli_dir)
 
-    # Extract the number of axial sections depending on the ISLICE field
-    if self.opt_dict['ISLICE'] == 1:
-      self.axial_steps = int(self.opt_dict['M3'])
-    else:
-      self.axial_steps = int(self.opt_dict['M3']) + 1
+  # Open the .pli file in reading mode
+  with open(pli_path, 'r') as f:
+    # Read line-by-line
+    for line in f:
+      # Get the line where the options are printed
+      if (("M3" in line) and ("ISTRUK" in line)):
+        # Split the line to get the list of option names
+        options = line.split()
+        # Advance to the next line and get the list of the option values
+        options_values = f.readline().split()
+        # Check if the two lists have the same size
+        if (len(options) != len(options_values)):
+          # Raise an exception
+          raise Exception("Error: no match between the options and their values")
+
+        # Build a dictionary holding the name of the options VS their values
+        pli_reader.opt_dict = {options[i]: options_values[i] for i in range(len(options))}
+      else:
+        # Search for the lines where the paths of the .mic and .mac files and their record length are present
+        if (re.search("^\w+.mic\s+", line)):
+          # Save the path to the .mic file
+          pli_reader.mic_path = line.split()[0]
+          # Advance to the next line to get the .mic record length
+          pli_reader.mic_recordLength = f.readline().split()[0]
+        elif(re.search("^\w+.mac\s+", line)):
+          # Save the path to the .mac file
+          pli_reader.mac_path = line.split()[0]
+          # Advance to the next line to get the .mac record length
+          pli_reader.mac_recordLength = f.readline().split()[0]
+        elif(re.search("^\w+.sta\s+", line)):
+          # Save the path to the .sta file
+          pli_reader.sta_path = line.split()[0]
+          # Advance to the next line to get the .sta record length
+          pli_reader.sta_recordLength = f.readline().split()[0]
+          # Advance to the next line to get the .sta micro-step dataset record length
+          pli_reader.sta_micStep = f.readline().split()[0]
+          # Advance to the next line to get the .sta macro-step dataset record length
+          pli_reader.sta_macStep = f.readline().split()[0]
+          # Advance to the next line to get the .sta statistic dataset record length
+          pli_reader.sta_dataset = f.readline().split()[0]
+
+  # Extract the number of axial sections depending on the ISLICE field
+  if pli_reader.opt_dict['ISLICE'] == 1:
+    pli_reader.axial_steps = int(pli_reader.opt_dict['M3'])
+  else:
+    pli_reader.axial_steps = int(pli_reader.opt_dict['M3']) + 1
+
+  # Return the built instance
+  return pli_reader
 
 
 class DaReader(ABC):
@@ -720,10 +737,8 @@ if __name__ == "__main__":
 
     case 2:
       print("Testing the interface to .mic file")
-      # Instantiate the PliReader class
-      plireader = PliReader("../Input/rodcd.pli")
-      # Extract the information from the .pli file
-      plireader.extract_sim_info()
+      # Extract the information from the .pli file and instantiate the 'PliReader' class
+      plireader = init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the MicReader class
       micreader = MicReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mic_path)
@@ -733,8 +748,8 @@ if __name__ == "__main__":
     case 3:
       # PliReader case
       print("Testing the interface to the .pli file")
-      # Instantiate the PliReader class
-      plireader = PliReader("../Input/rodcd.pli")
+      # Extract the information from the .pli file and instantiate the 'PliReader' class
+      plireader = init_PliReader("../Input/rodcd.pli")
       print("Path to the .pli file: " + plireader.pli_path)
       # Extract the information from the .pli file
       plireader.extract_sim_info()
@@ -746,10 +761,8 @@ if __name__ == "__main__":
 
     case 4:
       print("Testing the interface to .mac file")
-      # Instantiate the PliReader class
-      plireader = PliReader("../Input/rodcd.pli")
-      # Extract the information from the .pli file
-      plireader.extract_sim_info()
+      # Extract the information from the .pli file and instantiate the 'PliReader' class
+      plireader = init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the MacReader class
       macreader = MacReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mac_path,
@@ -760,10 +773,8 @@ if __name__ == "__main__":
 
     case 5:
       print("Testing the interface to .sta file")
-      # Instantiate the PliReader class
-      plireader = PliReader("../Input/TuStatCase/222r007n.pli")
-      # Extract the information from the .pli file
-      plireader.extract_sim_info()
+      # Extract the information from the .pli file and instantiate the 'PliReader' class
+      plireader = init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the StaReader class
       stareader = StaReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.sta_path,
