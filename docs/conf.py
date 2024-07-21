@@ -72,7 +72,7 @@ the graphical user interface to support post-processing \
 of results obtained with the \\sphinxstylestrong{TRANSURANUS} \
 fuel performance code.'
 authors_for_latex = 'Davide Manzione, , , , Elena Travaglia, , , , '
-reviewers_for_latex = ', , , , '
+reviewers_for_latex = 'Gabriele Ottino, , , , '
 approvers_for_latex = 'Daniele Tomatis, , , '
 
 ###########################
@@ -153,7 +153,7 @@ html_static_path = [os.path.join(srcdir, '_static')]
 html_css_files = [os.path.join('css', 'theme.css'),
                   os.path.join('css', 'eqno.css')]
 
-html_logo = os.path.join(srcdir, 'resources/icons', 'JointLogos.png')
+html_logo = os.path.join(srcdir, 'resources/icons', 'newcleologo_hd.png')
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

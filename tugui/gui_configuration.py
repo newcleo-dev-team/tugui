@@ -179,10 +179,10 @@ def init_GuiPlotFieldsConfigurator_attrs() -> GuiPlotFieldsConfigurator:
     # current OS
     if platform.system() == "Linux":
       print("LINUX HERE!")
-      gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui_nc")
-      gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui_nc")
-      check_exe_file_existence(gui_config.tuplot_path, "tuplotgui_nc")
-      check_exe_file_existence(gui_config.tustat_path, "tustatgui_nc")
+      gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
+      gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
+      check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
+      check_exe_file_existence(gui_config.tustat_path, "tustatgui")
     elif platform.system() == "Windows":
       print("WINDOWS HERE!")
       gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
