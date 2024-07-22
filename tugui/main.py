@@ -10,13 +10,12 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import InpHandler, MicReader, StaReader, TuInp, MacReader, configure_tuplot_inp_fields, configure_tustat_inp_fields, init_DatGenerator, init_PliReader, run_plot_files_generation
+from tu_interface import DatGenerator, InpHandler, MicReader, StaReader, TuInp, MacReader, configure_tuplot_inp_fields, configure_tustat_inp_fields, init_PliReader
 from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
 from shutil import copyfile
 
-ERROR_LEVEL: bool = 0
 
 class TuPostProcessingGui(ThemedTk):
   """
@@ -60,8 +59,8 @@ class TuPostProcessingGui(ThemedTk):
     try:
       self.guiconfig = init_GuiPlotFieldsConfigurator_attrs()
     except Exception as e:
-      # Intercept any exception produced by running the configuration logic according to the selected error level
-      if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      # Intercept any exception produced by running the configuration logic
+      messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       # Quit the application as this case represents a fatal error
       self.quit_app()
       # Propagate the caught exception
@@ -118,9 +117,11 @@ class TuPostProcessingGui(ThemedTk):
     # Instantiate a Frame object holding the logos
     logo_frame = ttk.Frame(self)
     logo_frame.grid(column=1, row=0, sticky='nse')
-    # Add newcleo logo
+    # Add newcleo and JRC logos
     newcleo_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/newcleologo.png"))
     newcleo_logo.grid(column=0, row=0, sticky='nsew')
+    jrc_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/jrclogo.png"))
+    jrc_logo.grid(column=1, row=0, sticky='nsew')
 
     ###############################################################################
     # Build the plot configuration area for the two types of plot (TUPlot e TUStat)
@@ -278,15 +279,16 @@ class TuPostProcessingGui(ThemedTk):
       # Set the default name of the files the plotting executable will create
       output_files_name = "TuStat"
 
-    # Run the function that deals with instantiating the dataclass storing the needed
-    # information for the plotting executable to be run
-    inp_to_dat = init_DatGenerator(plotexec_path=executable_path,
-                                   inp_path=self.loaded_inp_file,
-                                   plots_num=len(inpreader.diagrams_list),
-                                   cwd=self.output_dir,
-                                   output_files_name=output_files_name)
-    # Run the plotting executable for creating the .dat and .plt files
-    run_plot_files_generation(inp_to_dat)
+    # Run the method that deals with instantiating the dataclass storing the needed
+    # information for the plotting executable to be run. The corresponding executable
+    # is run afterwards and the paths to the output .dat and .plt files, stored in the
+    # returned object, are updated.
+    inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+      plotexec_path=executable_path,
+      inp_path=self.loaded_inp_file,
+      plots_num=len(inpreader.diagrams_list),
+      cwd=self.output_dir,
+      output_files_name=output_files_name)
 
     # For each diagram configuration create a new PlotFigure object and plot the curves
     for i in range(0, len(inpreader.diagrams_list)):
@@ -641,15 +643,16 @@ class TuPostProcessingGui(ThemedTk):
     # Store the .inp filename
     self.inp_filename = inp_path
 
-    # Run the function that deals with instantiating the dataclass storing the needed
-    # information for the plotting executable to be run
-    inp_to_dat = init_DatGenerator(plotexec_path=executable_path,
-                                   inp_path=inp_path,
-                                   plots_num=1,
-                                   cwd=self.output_dir,
-                                   output_files_name=output_files_name)
-    # Run the plotting executable for creating the .dat and .plt files
-    run_plot_files_generation(inp_to_dat)
+    # Run the method that deals with instantiating the dataclass storing the needed
+    # information for the plotting executable to be run. The corresponding executable
+    # is run afterwards and the paths to the output .dat and .plt files, stored in the
+    # returned object, are updated.
+    inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+      plotexec_path=executable_path,
+      inp_path=inp_path,
+      plots_num=1,
+      cwd=self.output_dir,
+      output_files_name=output_files_name)
 
     # Store the currently .dat and .plt output files (first element in the
     # corresponding lists as only one plot is handled here)
@@ -780,9 +783,6 @@ class TuPostProcessingGui(ThemedTk):
     filename = self.select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
-    # Check if the selected file has the correct extension
-    if filename.split('.')[-1] != 'inp':
-      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
@@ -818,10 +818,6 @@ class TuPostProcessingGui(ThemedTk):
 
     # Do nothing if no .dat-.plt files have been selected
     if not filenames: return
-    # Check if the selected file has the correct extension
-    for files in filenames:
-      if not files.endswith('.dat') and not files.endswith('.plt'):
-        messagebox.showerror("Error", "Error: one of the selected files has not the correct 'dat' or 'plt' extension.")
 
     # Store the selected files as an instance attribute
     self.loaded_dat_files = [f for f in filenames if f.endswith(".dat")]

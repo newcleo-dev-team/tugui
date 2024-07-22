@@ -300,60 +300,71 @@ class DatGenerator():
   plt_paths: List[str] = field(default_factory=list)
   out_paths: List[str] = field(default_factory=list)
 
+  @staticmethod
+  def init_DatGenerator_and_run_exec(plotexec_path: str, inp_path: str, plots_num: int, cwd: str, output_files_name: str):
+    """
+    Static method that initialize the 'DatGenerator' dataclass by providing all the needed
+    information received as input to this function.
+    Some checks are performed beforehands, that is on the existence of the .inp file
+    at the specified path and of the output directory.
+    Given the specific OS, the paths of the output .dat, .plt and .out files are built
+    accordingly.
+    Afterwards, a function is called to run the plotting executable which produces the
+    output files in the specified working directory, while updating the paths to the output
+    .dat and .plt files.
 
-def init_DatGenerator(plotexec_path: str, inp_path: str, plots_num: int, cwd: str, output_files_name: str):
-  """
-  Function that initialize the 'DatGenerator' dataclass by providing all the needed
-  information received as input to this function.
-  Some checks are performed beforehands, that is on the existence of the .inp file
-  at the specified path and of the output directory.
-  Given the specific OS, the paths of the output .dat, .plt and .out files are built
-  accordingly.
-  The function returns an object of the 'DatGenerator' dataclass.
-  """
-  # Check the input .inp file existence; raise an Exception if not found
-  if not os.path.isfile(inp_path):
-    # The file does not exist, hence raise an exception
-    raise Exception("Error: the .inp file does not exist at the specified path.")
-  # Get the path to the .inp file directory
-  inp_dir = os.path.dirname(inp_path)
+    Hence, this method returns an object of the 'DatGenerator' dataclass.
+    """
+    # Check the input .inp file existence; raise an Exception if not found
+    if not os.path.isfile(inp_path):
+      # The file does not exist, hence raise an exception
+      raise Exception("Error: the .inp file does not exist at the specified path.")
+    # Get the path to the .inp file directory
+    inp_dir = os.path.dirname(inp_path)
 
-  # Check the output directory existence; raise an Exception if not found
-  if not os.path.isdir(cwd):
-    # The output directory does not exist, hence raise an exception
-    raise Exception(f"Error: the output '{cwd}' folder does not exist at the specified path.")
+    # Check the output directory existence; raise an Exception if not found
+    if not os.path.isdir(cwd):
+      # The output directory does not exist, hence raise an exception
+      raise Exception(f"Error: the output '{cwd}' folder does not exist at the specified path.")
 
-  # Given the number of diagrams to produce, build a list of output file names
-  dat_paths = list()
-  plt_paths = list()
-  out_paths = list()
+    # Given the number of diagrams to produce, build a list of output file names
+    dat_paths = list()
+    plt_paths = list()
+    out_paths = list()
 
-  # Build the paths to the output files that will be written by running the executable
-  for i in range(plots_num):
-    if platform.system() == "Linux":
-      dat_paths.append(os.path.join(inp_dir, output_files_name + str(i + 1).zfill(2) + ".dat"))
-      plt_paths.append(os.path.join(inp_dir, output_files_name + str(i + 1).zfill(2) + ".plt"))
-      out_paths.append(os.path.join(inp_dir, output_files_name + ".out"))
-    elif platform.system() == "Windows":
-      dat_paths.append(os.path.join(inp_dir, output_files_name + ".dat"))
-      plt_paths.append(os.path.join(inp_dir, output_files_name + ".plt"))
-      out_paths.append(os.path.join(inp_dir, output_files_name + ".out"))
+    # Build the paths to the output files that will be written by running the executable
+    for i in range(plots_num):
+      if platform.system() == "Linux":
+        dat_paths.append(os.path.join(inp_dir, output_files_name + str(i + 1).zfill(2) + ".dat"))
+        plt_paths.append(os.path.join(inp_dir, output_files_name + str(i + 1).zfill(2) + ".plt"))
+        out_paths.append(os.path.join(inp_dir, output_files_name + ".out"))
+      elif platform.system() == "Windows":
+        dat_paths.append(os.path.join(inp_dir, output_files_name + ".dat"))
+        plt_paths.append(os.path.join(inp_dir, output_files_name + ".plt"))
+        out_paths.append(os.path.join(inp_dir, output_files_name + ".out"))
 
-    print("DIR --> " + inp_dir)
-    print("DAT --> " + dat_paths[i])
-    print("PLT --> " + plt_paths[i])
-    print("OUT --> " + out_paths[i])
+      print("DIR --> " + inp_dir)
+      print("DAT --> " + dat_paths[i])
+      print("PLT --> " + plt_paths[i])
+      print("OUT --> " + out_paths[i])
 
-  # Return an object of the 'DatGenerator' class, built with the given data
-  return DatGenerator(
-    plotexec_path=plotexec_path,
-    inp_path=inp_path,
-    inp_dir=inp_dir,
-    output_path=cwd,
-    dat_paths=dat_paths,
-    plt_paths=plt_paths,
-    out_paths=out_paths
-  )
+    # Buil an object of the 'DatGenerator' class with the given data
+    dat_gen = DatGenerator(
+      plotexec_path=plotexec_path,
+      inp_path=inp_path,
+      inp_dir=inp_dir,
+      output_path=cwd,
+      dat_paths=dat_paths,
+      plt_paths=plt_paths,
+      out_paths=out_paths
+    )
+
+    # Call the function that runs the plotting executables, given the information
+    # stored within the 'DatGenerator' dataclass
+    run_plot_files_generation(dat_gen)
+
+    # Return an object of the 'DatGenerator' class, built with the given data
+    return dat_gen
 
 
 def run_plot_files_generation(datGen: DatGenerator):
@@ -373,10 +384,6 @@ def run_plot_files_generation(datGen: DatGenerator):
   # The current working directory is changed to the one of the .inp file
   os.chdir(os.path.dirname(datGen.inp_path))
   print("CURRENT WD: " + os.getcwd())
-
-  # if os.path.dirname(self.tuplotgui_path) != os.path.dirname(self.inp_path):
-  #   # Copy the input file into the tuplotgui executable folder, i.e. the current working directory
-  #   shutil.copy2(src=self.inp_path, dst=os.getcwd())
 
   # Assemble the command for running the executable
   command = datGen.plotexec_path + " " + os.path.basename(datGen.inp_path).split(os.sep)[-1]
@@ -409,9 +416,6 @@ def run_plot_files_generation(datGen: DatGenerator):
       datGen.out_paths[i] = ""
 
     print("OUTPUT FILES: " + datGen.dat_paths[i] + ", " + datGen.plt_paths[i] + ", " + datGen.out_paths[i])
-
-  # Remove the .inp file copied in the tuplotgui executable folder
-  # os.remove(os.path.join(os.getcwd(), os.path.basename(self.inp_path).split('/')[-1]))
 
   # Restore the previous working directory
   os.chdir(datGen.output_path)
@@ -737,16 +741,16 @@ if __name__ == "__main__":
       # Get the file directory path
       dname = os.path.dirname(abspath)
 
-      # Run the function that deals with instantiating the dataclass storing the needed
-      # information for the plotting executable to be run
-      inp_to_dat = init_DatGenerator(plotexec_path=os.path.join(dname, "bin/tuplotgui_nc"),
-                                    inp_path="../tests/input/TuPlot.inp",
-                                    plots_num=1,
-                                    cwd="../tests/output",
-                                    output_files_name='TuPlot')
-      # Run the plotting executable for creating the .dat and .plt files
-      run_plot_files_generation(inp_to_dat)
-
+      # Run the method that deals with instantiating the dataclass storing the needed
+      # information for the plotting executable to be run. The corresponding executable
+      # is run afterwards and the paths to the output .dat and .plt files, stored in the
+      # returned object, are updated.
+      inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+        plotexec_path=os.path.join(dname, "bin/tuplotgui_nc"),
+        inp_path="../tests/input/TuPlot.inp",
+        plots_num=1,
+        cwd="../tests/output",
+        output_files_name='TuPlot')
     case 2:
       print("Testing the interface to .mic file")
       # Extract the information from the .pli file and instantiate the 'PliReader' class
