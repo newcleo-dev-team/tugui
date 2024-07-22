@@ -98,12 +98,12 @@ class GuiPlotFieldsConfigurator():
     gui_config.stat_path = os.path.join(config, "Statdiag")
 
     # Check the configuration files existence into the application "config" folder
-    gui_config._check_config_file_existence(gui_config.diagr_path, "Diagrams")
-    gui_config._check_config_file_existence(gui_config.g1_path, "Group1")
-    gui_config._check_config_file_existence(gui_config.g2_path, "Group2")
-    gui_config._check_config_file_existence(gui_config.g2a_path, "Group2a")
-    gui_config._check_config_file_existence(gui_config.g3_path, "Group3")
-    gui_config._check_config_file_existence(gui_config.g3_path, "Statdiag")
+    gui_config.__check_config_file_existence(gui_config.diagr_path, "Diagrams")
+    gui_config.__check_config_file_existence(gui_config.g1_path, "Group1")
+    gui_config.__check_config_file_existence(gui_config.g2_path, "Group2")
+    gui_config.__check_config_file_existence(gui_config.g2a_path, "Group2a")
+    gui_config.__check_config_file_existence(gui_config.g3_path, "Group3")
+    gui_config.__check_config_file_existence(gui_config.g3_path, "Statdiag")
 
     print("###\nConfiguration files are present in the \"resources/config\" folder\n###")
 
@@ -112,10 +112,10 @@ class GuiPlotFieldsConfigurator():
     # ----------------------------------------------------
     # Open the different 'Group' files and fill the dictionary 'Number'-'Kn'
     numberVsKn = dict()
-    gui_config._build_nVsKn(gui_config.g1_path, numberVsKn, "^1\d\d")
-    gui_config._build_nVsKn(gui_config.g2_path, numberVsKn, "^2\d\d")
-    gui_config._build_nVsKn(gui_config.g2a_path, numberVsKn, "^2\d\d")
-    gui_config._build_nVsKn(gui_config.g3_path, numberVsKn, "^3\d\d")
+    gui_config.__build_nVsKn(gui_config.g1_path, numberVsKn, "^1\d\d")
+    gui_config.__build_nVsKn(gui_config.g2_path, numberVsKn, "^2\d\d")
+    gui_config.__build_nVsKn(gui_config.g2a_path, numberVsKn, "^2\d\d")
+    gui_config.__build_nVsKn(gui_config.g3_path, numberVsKn, "^3\d\d")
 
     # Instantiate the dictionary holding the plots "Group" Vs the dictionary of corresponding "Number"-s VS "Kn"-s
     gui_config.groupVSnumVsKn = dict()
@@ -195,21 +195,21 @@ class GuiPlotFieldsConfigurator():
         print("LINUX HERE!")
         gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
         gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
-        gui_config._check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
-        gui_config._check_exe_file_existence(gui_config.tustat_path, "tustatgui")
+        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
+        gui_config.__check_exe_file_existence(gui_config.tustat_path, "tustatgui")
       elif platform.system() == "Windows":
         print("WINDOWS HERE!")
         gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
         gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
-        gui_config._check_exe_file_existence(gui_config.tuplot_path, "TuPlotGUI.exe")
-        gui_config._check_exe_file_existence(gui_config.tustat_path, "TuStatGUI.exe")
+        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "TuPlotGUI.exe")
+        gui_config.__check_exe_file_existence(gui_config.tustat_path, "TuStatGUI.exe")
 
       print("###\nExecutables files are present in the \"../resources/exec\" folder\n###")
 
     # Return the configured 'GuiPlotFieldsConfigurator' dataclass
     return gui_config
 
-  def _check_config_file_existence(self, path2check: str, filename: str):
+  def __check_config_file_existence(self, path2check: str, filename: str):
     """
     Function that raises an exception if the given path does not correspond to an
     existing file.
@@ -218,19 +218,19 @@ class GuiPlotFieldsConfigurator():
       # Raise an exception
       raise FileNotFoundError("Error: missing \"" + filename + "\" configuration file")
 
-  def _check_exe_file_existence(self, path2check: str, filename: str):
+  def __check_exe_file_existence(self, path2check: str, filename: str):
     """
     Function that raises an exception if the given path does not correspond to an
     existing executable file with right permission.
     """
     # Check the executable file existence
-    self._check_config_file_existence(path2check, filename)
+    self.__check_config_file_existence(path2check, filename)
     # Check that the file has execution permission
     if (not os.access(path2check, os.X_OK)):
       # Raise an exception
       raise PermissionError("Error: the \"" + filename + "\" does not have execution permission")
 
-  def _build_nVsKn(self, group_file: str, group_dict: dict, search_num: str):
+  def __build_nVsKn(self, group_file: str, group_dict: dict, search_num: str):
     """
     Function that, given the 'Group' file to read (its path), it fills up the input dictionary with:
     . keys, being the line indicating the plot 'Number'
