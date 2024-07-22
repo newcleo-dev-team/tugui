@@ -261,7 +261,7 @@ class SquareButton(ttk.Frame):
 
 def provide_label_image(container, img_path: str) -> ttk.Label:
   """
-  Method that provides a label filled with an image. It builds an instance
+  Function that provides a label filled with an image. It builds an instance
   of the 'ttk.Label' class by receiving the contaniner to put the label
   into, as well as the path to the image file to load and assign to the
   label.
