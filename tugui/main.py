@@ -16,6 +16,7 @@ from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_
 from support import IANT
 from shutil import copyfile
 
+ERROR_LEVEL: bool = 0
 
 class TuPostProcessingGui(ThemedTk):
   """
@@ -59,8 +60,8 @@ class TuPostProcessingGui(ThemedTk):
     try:
       self.guiconfig = init_GuiPlotFieldsConfigurator_attrs()
     except Exception as e:
-      # Intercept any exception produced by running the configuration logic
-      messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      # Intercept any exception produced by running the configuration logic according to the selected error level
+      if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       # Quit the application as this case represents a fatal error
       self.quit_app()
       # Propagate the caught exception
@@ -117,11 +118,9 @@ class TuPostProcessingGui(ThemedTk):
     # Instantiate a Frame object holding the logos
     logo_frame = ttk.Frame(self)
     logo_frame.grid(column=1, row=0, sticky='nse')
-    # Add newcleo and JRC logos
+    # Add newcleo logo
     newcleo_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/newcleologo.png"))
     newcleo_logo.grid(column=0, row=0, sticky='nsew')
-    jrc_logo = provide_label_image(logo_frame, os.path.join(os.path.abspath(os.path.dirname(__file__)), "../resources/icons/jrclogo.png"))
-    jrc_logo.grid(column=1, row=0, sticky='nsew')
 
     ###############################################################################
     # Build the plot configuration area for the two types of plot (TUPlot e TUStat)
@@ -783,6 +782,9 @@ class TuPostProcessingGui(ThemedTk):
     filename = self.select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
+    # Check if the selected file has the correct extension
+    if filename.split('.')[-1] != 'inp':
+      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
@@ -818,6 +820,10 @@ class TuPostProcessingGui(ThemedTk):
 
     # Do nothing if no .dat-.plt files have been selected
     if not filenames: return
+    # Check if the selected file has the correct extension
+    for files in filenames:
+      if not files.endswith('.dat') and not files.endswith('.plt'):
+        messagebox.showerror("Error", "Error: one of the selected files has not the correct 'dat' or 'plt' extension.")
 
     # Store the selected files as an instance attribute
     self.loaded_dat_files = [f for f in filenames if f.endswith(".dat")]
