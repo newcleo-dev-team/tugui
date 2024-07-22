@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
-from tu_interface import DatGenerator, InpHandler, MicReader, PliReader, StaReader, TuInp, MacReader, configure_tuplot_inp_fields, configure_tustat_inp_fields
+from tu_interface import DatGenerator, InpHandler, MicReader, PliReader, StaReader, TuInp, MacReader
 from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
@@ -557,7 +557,7 @@ class TuPostProcessingGui(ThemedTk):
           inp_info["TIME"] = "\n".join(i for i in times)
 
       # Build and configure the 'TuInp' dataclass for storing the plot configuration
-      tuplot_inp = configure_tuplot_inp_fields(inp_info)
+      tuplot_inp = TuInp.configure_tuplot_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
       active_plotFigure = self.tuplot_tab.get_active_plotFigure()
@@ -610,7 +610,7 @@ class TuPostProcessingGui(ThemedTk):
         inp_info["DISTR"] = "d"
 
       # Build and configure the 'TuInp' dataclass for storing the plot configuration
-      tustat_inp = configure_tustat_inp_fields(inp_info)
+      tustat_inp = TuInp.configure_tustat_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
       active_plotFigure = self.tustat_tab.get_active_plotFigure()
