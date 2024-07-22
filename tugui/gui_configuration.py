@@ -21,21 +21,31 @@ class DiagramCharacteristics():
   number: str = ''
   idga: str = ''
 
-def define_diagram_group(diagr_char: DiagramCharacteristics):
-  """
-  Function that, given the instance of the 'DiagramCharacteristics' dataclass,
-  evaluates the group value based on the diagram number.
-  It then sets the corresponding attribute.
-  """
-  if int(diagr_char.number) >= 101 and int(diagr_char.number) <= 140:
-    diagr_char.group = GroupType.group1
-  elif int(diagr_char.number) >= 201 and int(diagr_char.number) <= 251:
-    diagr_char.group = GroupType.group2
-  elif int(diagr_char.number) >= 252 and int(diagr_char.number) <= 270:
-    diagr_char.group = GroupType.group2A
-  elif int(diagr_char.number) >= 301 and int(diagr_char.number) <= 340:
-    diagr_char.group = GroupType.group3
+  @staticmethod
+  def init_tuplot_DiagramCharacteristics(number: str, idga: str):
+    """
+    Method that, given the plot number and idga values, builds an instance
+    of the 'DiagramCharacteristics' dataclass and evaluates the group value
+    based on the diagram number. It then sets the corresponding attribute
+    of the built dataclass, which is returned.
 
+    N.B. This method should be called for a 'TuPlot' case diagram only.
+    """
+    # Instantiate an object of the 'DiagramCharacteristics' class by passing
+    # the values for the 'number' and the 'idga' attributes
+    diagr_char = DiagramCharacteristics(number=number, idga=idga)
+    # Set the 'group' value according to the given 'number' attribute
+    if int(diagr_char.number) >= 101 and int(diagr_char.number) <= 140:
+      diagr_char.group = GroupType.group1
+    elif int(diagr_char.number) >= 201 and int(diagr_char.number) <= 251:
+      diagr_char.group = GroupType.group2
+    elif int(diagr_char.number) >= 252 and int(diagr_char.number) <= 270:
+      diagr_char.group = GroupType.group2A
+    elif int(diagr_char.number) >= 301 and int(diagr_char.number) <= 340:
+      diagr_char.group = GroupType.group3
+
+    # Return the built 'DiagramCharacteristics' instance
+    return diagr_char
 
 @dataclass
 class GuiPlotFieldsConfigurator():

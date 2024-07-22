@@ -7,7 +7,7 @@ import re
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from gui_configuration import DiagramCharacteristics, define_diagram_group
+from gui_configuration import DiagramCharacteristics
 from io import TextIOWrapper
 
 
@@ -44,7 +44,8 @@ def configure_tuplot_inp_fields(info: dict):
   # Set the plot number (IDNF)
   tuinp.idnf = info['IDNF']
   # Set the type of diagram
-  tuinp.diagr_type = DiagramCharacteristics(number=tuinp.idnf, idga=info['IDGA'])
+  tuinp.diagr_type = DiagramCharacteristics.init_tuplot_DiagramCharacteristics(
+    number=tuinp.idnf, idga=info['IDGA'])
   # Set the keyword stating the end of the plot/diagram/file
   tuinp.ikon = info['IKON']
 
@@ -250,11 +251,11 @@ class InpHandler():
       # Declare the dataclass for the 'TuStat' case
       inp_config.diagr_type = DiagramCharacteristics(number=inp_config.diagram_config.split()[0])
     else:
-      # Declare the dataclass for the 'TuPlot' case
-      inp_config.diagr_type = DiagramCharacteristics(number=inp_config.diagram_config.split()[0],
-                                                     idga=inp_config.diagram_config.split()[1])
-      # Call the function for evaluating the group corresponding to the plot number
-      define_diagram_group(inp_config.diagr_type)
+      # Declare the dataclass for the 'TuPlot' case and evaluate its group according to
+      # the given plot number
+      inp_config.diagr_type = DiagramCharacteristics.init_tuplot_DiagramCharacteristics(
+        number=inp_config.diagram_config.split()[0],
+        idga=inp_config.diagram_config.split()[1])
 
     # Get the plot number
     inp_config.idnf = inp_config.diagram_config.split()[0]
