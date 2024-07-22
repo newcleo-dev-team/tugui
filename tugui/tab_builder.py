@@ -5,7 +5,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 
 from abc import ABC, abstractmethod
-from gui_configuration import GuiPlotFieldsConfigurator, init_GuiPlotFieldsConfigurator_attrs
+from gui_configuration import GuiPlotFieldsConfigurator
 from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
 from gui_widgets import OnOffClickableLabel, WidgetTooltip, SquareButton, CustomNotebook
@@ -790,7 +790,7 @@ if __name__ == "__main__":
   tabControl = ttk.Notebook(root)
   tabControl.pack(fill='both', expand=True)
   # Instantiate the GuiPlotFieldsConfigurator class providing the values for filling the fields
-  guiConfig = init_GuiPlotFieldsConfigurator_attrs()
+  guiConfig = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
 
   # Instatiate a TabBuilder object holding the tabs
   tab1 = TuPlotTabContentBuilder(

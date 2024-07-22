@@ -11,7 +11,7 @@ from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
 from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import DatGenerator, InpHandler, MicReader, StaReader, TuInp, MacReader, configure_tuplot_inp_fields, configure_tustat_inp_fields, init_PliReader
-from gui_configuration import init_GuiPlotFieldsConfigurator_attrs
+from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
 from shutil import copyfile
@@ -58,7 +58,7 @@ class TuPostProcessingGui(ThemedTk):
 
     # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
     try:
-      self.guiconfig = init_GuiPlotFieldsConfigurator_attrs()
+      self.guiconfig = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
     except Exception as e:
       # Intercept any exception produced by running the configuration logic according to the selected error level
       if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
