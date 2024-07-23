@@ -784,7 +784,10 @@ class TuPostProcessingGui(ThemedTk):
     if not filename: return
     # Check if the selected file has the correct extension
     if filename.split('.')[-1] != 'inp':
+      # Pop-up an error message
       messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
+      # Return to avoid loading the wrong file
+      return
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
@@ -823,7 +826,10 @@ class TuPostProcessingGui(ThemedTk):
     # Check if the selected file has the correct extension
     for files in filenames:
       if not files.endswith('.dat') and not files.endswith('.plt'):
+        # Pop-up an error message
         messagebox.showerror("Error", "Error: one of the selected files has not the correct 'dat' or 'plt' extension.")
+        # Return to avoid loading the wrong file
+        return
 
     # Store the selected files as an instance attribute
     self.loaded_dat_files = [f for f in filenames if f.endswith(".dat")]
@@ -839,7 +845,7 @@ class TuPostProcessingGui(ThemedTk):
     self.initial_dir = os.path.dirname(filenames[0])
 
     # Provide a message to the status bar
-    self.status_bar.set_text("Selected .dat/.plt file from directory: " + self.initial_dir)
+    self.status_bar.set_text("Selected .dat/.plt files from directory: " + self.initial_dir)
 
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<DatPltLoaded>>')
