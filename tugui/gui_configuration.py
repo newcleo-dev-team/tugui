@@ -184,10 +184,10 @@ class GuiPlotFieldsConfigurator():
     # current OS
     if platform.system() == "Linux":
       print("LINUX HERE!")
-      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui_nc")
-      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui_nc")
-      self.check_exe_file_existence(self.tuplot_path, "tuplotgui_nc")
-      self.check_exe_file_existence(self.tustat_path, "tustatgui_nc")
+      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
+      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
+      self.check_exe_file_existence(self.tuplot_path, "tuplotgui")
+      self.check_exe_file_existence(self.tustat_path, "tustatgui")
     elif platform.system() == "Windows":
       print("WINDOWS HERE!")
       self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
