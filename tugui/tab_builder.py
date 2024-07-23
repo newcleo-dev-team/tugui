@@ -4,12 +4,14 @@ from tkinter import ttk
 
 from ttkthemes import ThemedTk
 
-from gui_configuration import IANT, IDGA, GuiPlotFieldsConfigurator
-from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, PlotSettingsField
+from abc import ABC, abstractmethod
+from gui_configuration import GuiPlotFieldsConfigurator
+from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
 from gui_widgets import OnOffClickableLabel, WidgetTooltip, SquareButton, CustomNotebook
+from support import IDGA, IANT
 
-class TabContentBuilder(ttk.Frame):
+class TabContentBuilder(ttk.Frame, ABC):
   """
   Class that builds the content of a tab of the given notebook instance, in terms of
   its widgets. It inherits from a frame object and presents two areas:
@@ -80,6 +82,15 @@ class TabContentBuilder(ttk.Frame):
     """
     self.slice_settings = slices
 
+  @abstractmethod
+  def set_times(self, **kwargs):
+    """
+    Abstract method that allows to set the instance attributes that corresponds
+    to the simulation step times.
+    This method, being an interface, will be overridden by subclasses providing
+    their specific implementation.
+    """
+
   def _add_new_plot_figure(self, plot_name: str):
     """
     Method that adds a new 'PlotFigure' object to this instance notebook.
@@ -121,6 +132,7 @@ class TabContentBuilder(ttk.Frame):
     # Change focus to the just created tab
     self.plotTabControl.select(self.plotTabControl.index('end')-1)
 
+  @abstractmethod
   def _build_configuration_fields(self, config_area: ttk.LabelFrame):
     """
     Abstract method for building the plot configuration fields area, provided as
@@ -409,13 +421,21 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuPlot')
 
-  def set_times(self, macro_time: list, micro_time: list):
+  def set_times(self, **kwargs):
     """
     Method that allows to set the instance attributes for the simulation
     macro and micro step times.
     """
-    self.macro_time = macro_time
-    self.micro_time = micro_time
+    # Check if the correct arguments have been passed to the method
+    if not 'macro_time' in kwargs:
+      raise Exception("Error in passing arguments to this function. The macro step times\
+                      'macro_time' argument is missing.")
+    if not 'micro_time' in kwargs:
+      raise Exception("Error in passing arguments to this function. The micro step times\
+                      'mairo_time' argument is missing.")
+    # Store the times in the corresponding instance attributes
+    self.macro_time = kwargs['macro_time']
+    self.micro_time = kwargs['micro_time']
 
   def _activate_additional_settings(self, box_to_check: ttk.Combobox, container: ttk.Frame, row: int):
     """
@@ -435,14 +455,14 @@ class TuPlotTabContentBuilder(TabContentBuilder):
         # Rebuild the frame for the additional configuration fields and add one for
         # allowing the setting of the temperature distribution choice
         row_index = self._build_iant_field(
-          container, row, "Temp. distr.: ", self.gui_config.iant1[1], row_index, IANT.IANT_1)
+          container, row, "Temp. distr.: ", self.gui_config.iant1[1], row_index, IANT.IANT_1.description)
       elif any(str(i) in self.number_var.get() for i in self.gui_config.iant2[0]):
         # Plot numbers 102-108
         print(self.number_var.get())
         # Rebuild the frame for the additional configuration fields and add one for
         # allowing the setting of the radiation stress choice
         row_index = self._build_iant_field(
-          container, row, "Rad. Struct.: ", self.gui_config.iant2[1], row_index, IANT.IANT_2)
+          container, row, "Rad. Struct.: ", self.gui_config.iant2[1], row_index, IANT.IANT_2.description)
       else:
         # Destroy the additional fields
         print("DESTROY")
@@ -538,7 +558,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Build the frame
     self.additional_frame = self._build_frame(container, row)
     # Add a field for allowing the setting of the IANT1/2 choice
-    self.iant_entry = PlotSettingsField(self.additional_frame, 0, label, values)
+    self.iant_entry = LabelledCombobox(self.additional_frame, 0, label, values)
     # Store the value of the IANT enumeration
     self.iant = iant
     # Update the row index
@@ -552,17 +572,17 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     the specific implementation of the widgets for the frame provided as input.
     """
     # Build the "Group" setup made of a label and a combobox, disabled by default
-    self.group = PlotSettingsField(config_area, 0, "Group: ", tuple(self.gui_config.groupVSnumVsKn.keys()), tk.DISABLED)
+    self.group = LabelledCombobox(config_area, 0, "Group: ", tuple(self.gui_config.groupVSnumVsKn.keys()), tk.DISABLED)
     # Increase the combobox width a little bit to better show items
     self.group.cbx.configure(width=25)
 
     # Build the "Number" setup made of a label and a combobox, disabled until the "Group" field is undefined
-    number = PlotSettingsField(config_area, 1, "Number: ", list(), tk.DISABLED)
+    number = LabelledCombobox(config_area, 1, "Number: ", list(), tk.DISABLED)
     # Declare a variable holding the "Number" field choosen value
     self.number_var = number.var
 
     # Build the "Type" setup made of a label and a combobox, disabled until the "Group" field is undefined
-    type = PlotSettingsField(config_area, 2, "Type: ", list(), tk.DISABLED)
+    type = LabelledCombobox(config_area, 2, "Type: ", list(), tk.DISABLED)
     # Declare a variable holding the "Type" field choosen value
     self.type_var = type.var
 
@@ -609,9 +629,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
       time_to_show = self.micro_time
 
     # Handle the different curve types (IDGA value)
-    if (self.type_var.get() == IDGA['IDGA_1'].value):
+    if (self.type_var.get() == IDGA.IDGA_1.description):
       # Case of curves for different Kn-s --> IDGA 1
-      print("IDGA is: " + IDGA['IDGA_1'].value)
+      print("IDGA is: " + IDGA.IDGA_1.description)
       # Configure the fields
       self.plt_sett_cfg.configure_fields(
           "Slice: ", self.slice_settings,
@@ -620,9 +640,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
       # Set the fields type (1. Slice, 2. Time, 3. Kn)
       self.plt_sett_cfg.set_fields_type(FieldType['type3'], FieldType['type2'], FieldType['type1'])
 
-    elif (self.type_var.get() == IDGA['IDGA_2'].value):
+    elif (self.type_var.get() == IDGA.IDGA_2.description):
         # Case of curves for different times --> IDGA 2
-        print("IDGA is: " + IDGA['IDGA_2'].value)
+        print("IDGA is: " + IDGA.IDGA_2.description)
 
         # Configure the fields
         self.plt_sett_cfg.configure_fields(
@@ -632,9 +652,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
         # Set the fields type (1. Slice, 2. Kn, 3. Time)
         self.plt_sett_cfg.set_fields_type(FieldType['type3'], FieldType['type1'], FieldType['type2'])
 
-    elif (self.type_var.get() == IDGA['IDGA_3'].value):
+    elif (self.type_var.get() == IDGA.IDGA_3.description):
         # Case of curves for different slices --> IDGA 3
-        print("IDGA is: " + IDGA['IDGA_3'].value)
+        print("IDGA is: " + IDGA.IDGA_3.description)
 
         # Configure the fields
         self.plt_sett_cfg.configure_fields(
@@ -677,12 +697,17 @@ class TuStatTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuStat')
 
-  def set_times(self, sta_time: list):
+  def set_times(self, **kwargs):
     """
     Method that allows to set the instance attribute for the step times
     of the statistical simulation.
     """
-    self.sta_time = sta_time
+    # Check if the correct argument has been passed to the method
+    if not 'sta_times' in kwargs:
+      raise Exception("Error in passing arguments to this function. The statistical step times\
+                      'sta_time' argument is missing.")
+    # Store the times in the corresponding instance attributes
+    self.sta_time =  kwargs['sta_times']
 
   def _activate_fields(self, event=None):
     """
@@ -734,17 +759,17 @@ class TuStatTabContentBuilder(TabContentBuilder):
     the specific implementation of the widgets for the frame provided as input.
     """
     # Build the "Diagram Nr." setup made of a label and a combobox
-    self.diagram = PlotSettingsField(config_area, 0, "Diagram Nr.: ", self.gui_config.sta_numVSdescription.values())
+    self.diagram = LabelledCombobox(config_area, 0, "Diagram Nr.: ", self.gui_config.sta_numVSdescription.values())
     # Build the "Slice" setup made of a label and a combobox, disabled until the "Diagram Nr." field is undefined
-    self.slice = PlotSettingsField(config_area, 1, "Slice: ", cbx_list=list(), state=tk.DISABLED)
+    self.slice = LabelledCombobox(config_area, 1, "Slice: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Time" setup made of a label and a combobox, disabled until the "Diagram Nr." field is undefined
-    self.time = PlotSettingsField(config_area, 2, "Time: ", cbx_list=list(), state=tk.DISABLED)
+    self.time = LabelledCombobox(config_area, 2, "Time: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Number of intervals" setup made of a label and a combobox, disabled until
     # the "Diagram Nr." field is undefined
-    self.n_intervals = PlotSettingsField(config_area, 3, "Number of intervals: ", cbx_list=list(), state=tk.DISABLED)
+    self.n_intervals = LabelledCombobox(config_area, 3, "Number of intervals: ", cbx_list=list(), state=tk.DISABLED)
     # Build the "Type of distribution" setup made of a label and a combobox, disabled until
     # the "Diagram Nr." field is undefined
-    self.distribution = PlotSettingsField(config_area, 4, "Type of distribution: ", cbx_list=list(), state=tk.DISABLED)
+    self.distribution = LabelledCombobox(config_area, 4, "Type of distribution: ", cbx_list=list(), state=tk.DISABLED)
 
     # Bind the activation of all the configuration fields to the "Diagram Nr." field item selection
     self.diagram.cbx.bind('<<IsSet>>', func=lambda event: self._activate_fields())
@@ -765,7 +790,7 @@ if __name__ == "__main__":
   tabControl = ttk.Notebook(root)
   tabControl.pack(fill='both', expand=True)
   # Instantiate the GuiPlotFieldsConfigurator class providing the values for filling the fields
-  guiConfig = GuiPlotFieldsConfigurator()
+  guiConfig = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
 
   # Instatiate a TabBuilder object holding the tabs
   tab1 = TuPlotTabContentBuilder(

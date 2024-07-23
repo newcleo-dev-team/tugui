@@ -31,7 +31,7 @@ class GroupType(Enum):
 class PlotSettingsConfigurator():
   """
   Class that build the structure of the additional plot settings area as several rows
-  containing a label and a combobox each, provided as instances of the 'PlotSettingsField'
+  containing a label and a combobox each, provided as instances of the 'LabelledCombobox'
   class, with a listbox at the end, as instance of the 'PlotSettingsListBox' class.
   The plot group choice influences the structure of the built widgets.
   """
@@ -39,7 +39,7 @@ class PlotSettingsConfigurator():
     """
     Build an instance of the 'PlotSettingsConfigurator' class that provides the structure
     of the additional plot settings area in terms of three field with the first two being
-    instances of the 'PlotSettingsField' class, whereas the last one of the
+    instances of the 'LabelledCombobox' class, whereas the last one of the
     'PlotSettingsListBox' class. Depending on the plot group, the first field can be absent,
     that is for groups '2A' and '3'. It receives as parameters:
     . container: a frame object to which this instance is added
@@ -56,8 +56,8 @@ class PlotSettingsConfigurator():
     match group:
       case GroupType.group1:
         # Instantiate a label followed by a combobox for both field 1 and 2
-        self.field1 = PlotSettingsField(container, row_index, "", [])
-        self.field2 = PlotSettingsField(container, self.field1.row_next, "", [])
+        self.field1 = LabelledCombobox(container, row_index, "", [])
+        self.field2 = LabelledCombobox(container, self.field1.row_next, "", [])
 
         # Bind each field selection to the execution of a method that checks if all fields have been set
         self.field1.cbx.bind('<<ComboboxSelected>>',
@@ -66,7 +66,7 @@ class PlotSettingsConfigurator():
                              lambda event: self.handle_selection(container, self.field2.store_selected))
       case GroupType.group2:
         # Instantiate a label followed by a combobox for field 1
-        self.field1 = PlotSettingsField(container, row_index, "", [])
+        self.field1 = LabelledCombobox(container, row_index, "", [])
         # Instantiate a label followed by two label + combobox groups
         self.field2 = PlotSettingsField_2(container, self.field1.row_next, [])
 
@@ -87,7 +87,7 @@ class PlotSettingsConfigurator():
                                       lambda event: self.handle_selection(container, self.field2.check_time_consistency))
       case GroupType.group3:
         # Instantiate a label followed by a label + combobox group
-        self.field2 = PlotSettingsField(container, row_index, "Time (h s ms)", [])
+        self.field2 = LabelledCombobox(container, row_index, "Time (h s ms)", [])
         # Bind each field selection to the execution of a method that checks if all fields have been set
         self.field2.cbx.bind('<<ComboboxSelected>>',
                              lambda event: self.handle_selection(container, self.field2.store_selected))
@@ -189,7 +189,7 @@ class PlotSettingsConfigurator():
     self.field3_type = field3_type.value
 
 
-class PlotSettingsField():
+class LabelledCombobox():
   """
   Class that provides a field for setting one of the configuration options in the GUI in terms of:
   . a label: providing a description of the option
@@ -197,7 +197,7 @@ class PlotSettingsField():
   """
   def __init__(self, container: ttk.Frame, row_index: int, label_text: str, cbx_list: list, state: str='readonly'):
     """
-    Build an instance of the 'PlotSettingsField' class that provides the content of a
+    Build an instance of the 'LabelledCombobox' class that provides the content of a
     configuration option. It receives as parameters:
     . container: a frame object to which this instance is added
     . row_index: an integer indicating the row index of the container grid where the
@@ -271,9 +271,9 @@ class PlotSettingsField_2():
     self.label.grid(column=0, row=row_index, sticky='w')
 
     # Add the configuration field for the start time
-    self.start_time = PlotSettingsField(container, row_index+1, "Start: ", cbx_list)
+    self.start_time = LabelledCombobox(container, row_index+1, "Start: ", cbx_list)
     # Add the configuration field for the end time (same values except for the first)
-    self.end_time = PlotSettingsField(container, row_index+2, "End: ", cbx_list[1:])
+    self.end_time = LabelledCombobox(container, row_index+2, "End: ", cbx_list[1:])
     # Update the index indicating the row where to add additional widgets
     self.row_next = row_index + 3
     # Bind the selection of the time values to the check for their consistency
