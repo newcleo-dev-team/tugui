@@ -15,6 +15,7 @@ jobs:
       - run: pip install ttkthemes
       - run: pip install pandas
       - run: pip install matplotlib
+      - run: pip install typing-extensions
       - run: python3 -m unittest tests/test_gui_window_basic.py -v
 
   test_documentation:
