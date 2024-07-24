@@ -232,7 +232,7 @@ class SquareButton(ttk.Frame):
   """
   def __init__(self, parent: Union[tk.Misc, None],
                size: Union[int, None] = None, text: str = "",
-               command: function = None, style: str = None,
+               command = None, style: str = None,
                image: str = None) -> None:
     # Call the frame constructor by specifying its height and width
     ttk.Frame.__init__(self, parent, height=size, width=size, style="SquareButton.TFrame")
