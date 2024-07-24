@@ -18,9 +18,9 @@ class EntryVariable:
     configure the Entry object within the frame.
     """
     # Instantiate the string variable
-    self.var = tk.StringVar()
+    self.var: tk.StringVar = tk.StringVar()
     # Instantiate the entry field
-    self.entry = ttk.Entry(frame, width = width, textvariable=self.var)
+    self.entry: ttk.Entry = ttk.Entry(frame, width = width, textvariable=self.var)
     # Place the entry in the frame grid
     self.entry.grid(column = col, row = row, sticky = 'ew')
 
@@ -31,9 +31,9 @@ class EntryVariable:
     self.entry.configure(validate='focusout', validatecommand=valid_entry)
 
     # Entry file extension
-    self.entry_extension = end
+    self.entry_extension: str = end
 
-  def validate(self, event=None, newval: str = ""):
+  def validate(self, event: tk.Event = None, newval: str = "") -> bool:
     """
     Method that checks if the entry is valid. The "end" parameter indicates the
     extension to check against.
@@ -50,7 +50,7 @@ class EntryVariable:
         self.on_invalid()
         return False
 
-  def on_invalid(self):
+  def on_invalid(self) -> None:
     """
     Show the error message if the data is not valid.
     """
@@ -67,9 +67,9 @@ class StatusBar(ttk.Frame):
   Class describing a Frame where a label is shown. This represents a status bar
   that provides useful log to the user.
   """
-  def __init__(self, container, color: str = 'light gray'):
+  def __init__(self, container: tk.Misc, color: str = 'light gray') -> None:
     # Initialize the Style object
-    s = ttk.Style()
+    s: ttk.Style = ttk.Style()
     # Configure the style for the status bar frame
     s.configure('self.TFrame', background=color, border=1, borderwidth=1, relief=tk.GROOVE)
     # Configure the style for the status bar label
@@ -79,20 +79,20 @@ class StatusBar(ttk.Frame):
     super().__init__(container, style='self.TFrame')
 
     # Declare an empty label providing the status messages
-    self.label = ttk.Label(self, text="", style='self.TLabel')
+    self.label: ttk.Label = ttk.Label(self, text="", style='self.TLabel')
     # Align the label on the left
     self.label.pack(side=tk.LEFT, padx=3, pady=3)
 
     # Configure the status bar in order to fill all the space in the horizontal direction
     self.grid(sticky='ew')
 
-  def set_text(self, new_text):
+  def set_text(self, new_text: str) -> None:
     """
     Method that allow the modification of the status bar text.
     """
     self.label.configure(text=new_text)
 
-  def clear_label(self):
+  def clear_label(self) -> None:
     """
     Method that clears any text already present in the label status bar.
     """
@@ -107,7 +107,7 @@ class CustomNotebook(ttk.Notebook):
   """
   __initialized: bool = False
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args, **kwargs) -> None:
     # Initialize the custom style of the notebook, if not yet done
     if not self.__initialized:
       self.__initialize_custom_style()
@@ -117,7 +117,7 @@ class CustomNotebook(ttk.Notebook):
     kwargs["style"] = "CustomNotebook"
     # Call the superclass constructor
     ttk.Notebook.__init__(self, *args, **kwargs)
-    self._active: Union[bool, None] = None
+    self._active: Union[int, None] = None
     # Bind the mouse events to the execution of corresponding methods
     self.bind("<ButtonPress-1>", self.on_close_press, True)
     self.bind("<ButtonRelease-1>", self.on_close_release)
@@ -131,12 +131,10 @@ class CustomNotebook(ttk.Notebook):
     element = self.identify(event.x, event.y)
     # Handle the case when the event happens on the close button of a tab
     if "close" in element:
-      # Get the index of the tab where the event happened
-      index = self.index("@%d,%d" % (event.x, event.y))
+      # Get and store the index of the tab where the event happened
+      self._active = self.index("@%d,%d" % (event.x, event.y))
       # Set the state of the widget
       self.state(['pressed'])
-      # Store the index of the tab where the event happened
-      self._active = index
       return "break"
 
   def on_close_release(self, event: tk.Event) -> None:
@@ -232,18 +230,21 @@ class SquareButton(ttk.Frame):
   This class includes the possibility to add an image to the button, whose path is
   passed to the constructor.
   """
-  def __init__(self, parent, size=None, text="", command=None, style=None, image=None):
+  def __init__(self, parent: Union[tk.Misc, None],
+               size: Union[int, None] = None, text: str = "",
+               command: function = None, style: str = None,
+               image: str = None) -> None:
     # Call the frame constructor by specifying its height and width
     ttk.Frame.__init__(self, parent, height=size, width=size, style="SquareButton.TFrame")
     # Indicate that the frame must not adapt to its widgets
     self.pack_propagate(0)
     # Instantiate the button as a private attribute
-    self._btn = ttk.Button(self, text=text, command=command, style=style, padding=0)
+    self._btn: ttk.Button = ttk.Button(self, text=text, command=command, style=style, padding=0)
 
     if image:
       size = self._btn.winfo_pixels('18p')
       print("Size:", size)
-      self.image = Image.open(image)
+      self.image: Union[Image.Image, ImageTk.PhotoImage] = Image.open(image)
       # assure a RGBA image as foreground color is RGB
       self.image = self.image.convert("RGBA")
       self.image = ImageTk.PhotoImage(self.image.resize((24, 24)))
@@ -253,14 +254,14 @@ class SquareButton(ttk.Frame):
     # Place the button in the frame
     self._btn.pack(fill=tk.BOTH, expand=0, ipady=0, ipadx=0)
 
-  def set_text(self, new_text: str):
+  def set_text(self, new_text: str) -> None:
     """
     Method for setting the text of the button.
     """
     self._btn.configure(text=new_text)
 
 
-def provide_label_image(container, img_path: str) -> ttk.Label:
+def provide_label_image(container: tk.Misc, img_path: str) -> ttk.Label:
   """
   Function that provides a label filled with an image. It builds an instance
   of the 'ttk.Label' class by receiving the contaniner to put the label
