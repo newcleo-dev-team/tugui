@@ -7,7 +7,6 @@ import re
 import tkinter as tk
 
 from matplotlib import pyplot as plt
-from matplotlib.pylab import ArrayLike
 from matplotlib.axes import Axes
 from matplotlib.backends import _backend_tk
 from matplotlib.backends.backend_tkagg import (
@@ -151,8 +150,8 @@ class CustomToolbar(NavigationToolbar2Tk):
   """
   def __init__(self, canvas: tk.Canvas, frame: tk.Frame,
                pack_toolbar: bool = False, axes: Union[Axes, None] =None,
-               x: Union[List[ArrayLike], None] = None,
-               ys: Union[List[ArrayLike], None] = None) -> None:
+               x = None,
+               ys = None) -> None:
     super().__init__(canvas, window=frame, pack_toolbar=pack_toolbar)
 
     # Add the cursor button to the toolbar
@@ -389,7 +388,7 @@ class PlotCursor():
   The cursor can be dragged by the mouse and can assume positions given by the X-Y values
   of the active curves stored within the present instance.
   """
-  def __init__(self, ax: Axes, x: List[ArrayLike], y: List[ArrayLike]) -> None:
+  def __init__(self, ax: Axes, x, y) -> None:
     """
     Class constructor. It needs the plot Axes object, the X values and
     a list of Y-values for each curve.
@@ -404,8 +403,8 @@ class PlotCursor():
       self.ax: Axes = ax
       # Store the X-Y values into the corresponding instance variables by extracting
       # them from the corresponding curves.
-      self.xs: List[ArrayLike] = x
-      self.ys: List[ArrayLike] = y
+      self.xs = x
+      self.ys = y
 
       # Connect events on the plot area to the execution of the corresponding methods
       self._connect_events_to_methods()
@@ -863,7 +862,7 @@ class PlotCursor():
     else:
       self.ann.set(visible = True)
 
-  def _update_curves_info(self, x: List[ArrayLike]) -> None:
+  def _update_curves_info(self, x) -> None:
     """
     Method that updates the text shown by the annotation box. Given the current X-position
     of the cursor, provided as argument, it extract the Y-values for the plotted curves and
