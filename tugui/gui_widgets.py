@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
-from typing import Union
+from typing import Callable, Union
 
 
 class EntryVariable:
@@ -232,7 +232,7 @@ class SquareButton(ttk.Frame):
   """
   def __init__(self, parent: Union[tk.Misc, None],
                size: Union[int, None] = None, text: str = "",
-               command = None, style: str = None,
+               command: Callable = None, style: str = None,
                image: str = None) -> None:
     # Call the frame constructor by specifying its height and width
     ttk.Frame.__init__(self, parent, height=size, width=size, style="SquareButton.TFrame")
