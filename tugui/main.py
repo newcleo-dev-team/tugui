@@ -15,6 +15,7 @@ from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
 from support import IANT
 from shutil import copyfile
+from typing import Union
 
 ERROR_LEVEL: bool = 0
 
@@ -33,7 +34,7 @@ class TuPostProcessingGui(ThemedTk):
   . the plot area (right side) where the selected curves are shown
   . a status bar (bottom window) showing log messages.
   """
-  def __init__(self, window_title, width, height):
+  def __init__(self, window_title: str, width: int, height: int) -> None:
     """
     App windows's constructor
     """
@@ -58,7 +59,7 @@ class TuPostProcessingGui(ThemedTk):
 
     # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
     try:
-      self.guiconfig = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+      self.guiconfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
     except Exception as e:
       # Intercept any exception produced by running the configuration logic according to the selected error level
       if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
@@ -71,7 +72,7 @@ class TuPostProcessingGui(ThemedTk):
     self.create_menu()
 
     # Set the initial directory to the current working directory
-    self.initial_dir = os.getcwd()
+    self.initial_dir: str = os.getcwd()
 
     # Set the initial number of rows and columns and how much they are resized
     self.grid_rowconfigure((0,2), weight=0)
@@ -108,7 +109,7 @@ class TuPostProcessingGui(ThemedTk):
     # Instantiate a label for the .pli file entry
     ttk.Label(mainframe, text="Path to the .pli input file").grid(column=0, row=0, sticky='ew')
     # Instantiate the field holding the path to the .pli input file
-    self.pli_entry = EntryVariable(mainframe, 50, col=1, row=0, end="pli")
+    self.pli_entry: EntryVariable = EntryVariable(mainframe, 50, col=1, row=0, end="pli")
     # Put a button next the the entry for allowing the selection of the .pli file to open
     ttk.Button(mainframe, # width = 80,
                text="Choose file",
@@ -128,7 +129,7 @@ class TuPostProcessingGui(ThemedTk):
     self.build_tabs_area()
 
     # Add a status bar to the bottom of the window
-    self.status_bar = StatusBar(self)
+    self.status_bar: StatusBar = StatusBar(self)
     self.status_bar.grid(column=0, row=2, columnspan=2)
 
     # Add a padding for each widget in the top section frame
@@ -164,7 +165,7 @@ class TuPostProcessingGui(ThemedTk):
     # Bind the <<DatPltLoaded>> virtual event to the plot creation
     self.bind('<<DatPltLoaded>>', func=lambda event: self.display_plot())
 
-  def __initialize_gui_window(self, title, width, height):
+  def __initialize_gui_window(self, title: str, width: int, height: int) -> None:
     """
     Method that sets the GUI window title, as well as its dimensions, in terms
     of width and height. Given the screen size, the window is placed in the center
@@ -180,7 +181,7 @@ class TuPostProcessingGui(ThemedTk):
     # Set the window geometry
     self.geometry(f"{width}x{height}+{left}+{top}")
 
-  def display_plot(self):
+  def display_plot(self) -> None:
     """
     Method that enables the display-only mode for plots provided by reading
     the input .dat and .plt files.
@@ -222,7 +223,7 @@ class TuPostProcessingGui(ThemedTk):
       # Plot the i-th diagram
       self.plot_curves(plot_figure, self.loaded_dat_files[i], self.loaded_plt_files[i], "")
 
-  def display_inp_plots(self):
+  def display_inp_plots(self) -> None:
     """
     Method that enables the display-only mode for plots provided by reading
     an input .inp file.
@@ -298,7 +299,7 @@ class TuPostProcessingGui(ThemedTk):
       # Plot the i-th diagram
       self.plot_curves(plot_figure, inp_to_dat.dat_paths[i], inp_to_dat.plt_paths[i], inp_to_dat.out_paths[i])
 
-  def build_tabs_area(self):
+  def build_tabs_area(self) -> None:
     """
     Method that builds the tabs containing the plot configuration area and the plot display one
     for both the TuPlot and the TuStat cases.
@@ -324,7 +325,7 @@ class TuPostProcessingGui(ThemedTk):
     self.tustat_tab = TuStatTabContentBuilder(
         self.tabControl, tab_name="TU Stat", state=tk.DISABLED, guiConfig=self.guiconfig)
 
-  def retrieve_simulation_info(self):
+  def retrieve_simulation_info(self) -> None:
     """
     Method that extract all the needed information from the .pli input file. Given the
     paths to the .mac, .mic, .sta, .sti files therein present, the method provides the
@@ -409,7 +410,7 @@ class TuPostProcessingGui(ThemedTk):
       # pop-up box is produced showing the error message
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
 
-  def activate_all_tabs(self):
+  def activate_all_tabs(self) -> None:
     """
     Method that activates both the TuPlot and the TuStat tabs by calling the
     corresponding methods.
@@ -417,7 +418,7 @@ class TuPostProcessingGui(ThemedTk):
     self.activate_tuplot_area()
     self.activate_tustat_area()
 
-  def activate_tustat_area(self):
+  def activate_tustat_area(self) -> None:
     """
     Method that activates the TuStat tab by changing the state attribute of the
     corresponding tab object.
@@ -438,7 +439,7 @@ class TuPostProcessingGui(ThemedTk):
     # Pass the herein-defined method to call whenever the "Run" button of the TuStat tab is pressed
     self.tustat_tab.run_plot(self.run_tuStat)
 
-  def activate_tuplot_area(self):
+  def activate_tuplot_area(self) -> None:
     """
     Method that activates the TuPlot tab by changing the state attribute of the
     corresponding tab object.
@@ -462,7 +463,7 @@ class TuPostProcessingGui(ThemedTk):
     # Pass the herein-defined method to call whenever the "Run" button of the TuPlot object is pressed
     self.tuplot_tab.run_plot(self.run_tuPlot)
 
-  def run_tuPlot(self):
+  def run_tuPlot(self) -> None:
     """
     Method that runs the TuPlot executable by passing the required .inp file.
     This file is first built up based on the user's choices made in the plot
@@ -572,7 +573,7 @@ class TuPostProcessingGui(ThemedTk):
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       raise Exception(e)
 
-  def run_tuStat(self):
+  def run_tuStat(self) -> None:
     """
     Method that runs the TuStat executable by passing the required .inp file.
     This file is first built up based on the user's choices made in the plot
@@ -624,7 +625,8 @@ class TuPostProcessingGui(ThemedTk):
       # show a pop-up error message
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
 
-  def handle_plot_production(self, tuinp: TuInp, output_files_name: str, executable_path: str, active_plotFigure: PlotFigure):
+  def handle_plot_production(self, tuinp: TuInp, output_files_name: str,
+                             executable_path: str, active_plotFigure: PlotFigure) -> None:
     """
     Method that handles all the operations for displaying the diagrams on the plotting area of the main window.
     In particular, we have that:
@@ -664,7 +666,8 @@ class TuPostProcessingGui(ThemedTk):
     # onto the currently active tab figure --> only 1 .dat and .plt file is considered
     self.plot_curves(active_plotFigure, self.active_dat_file, self.active_plt_file, inp_to_dat.out_paths[0])
 
-  def plot_curves(self, plotFigure: PlotFigure, dat_file: str, plt_file: str, out_file: str):
+  def plot_curves(self, plotFigure: PlotFigure, dat_file: str, plt_file: str,
+                  out_file: str) -> None:
     """
     Method that instantiate the class handling the plot functionalities:\n
     . the output .dat and .plt files are read in order to extract:\n
@@ -684,13 +687,13 @@ class TuPostProcessingGui(ThemedTk):
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       raise Exception(e)
 
-  def open_pli_file(self, event=None):
+  def open_pli_file(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to open an input .pli file.
     """
     self.select_file_and_fill_entry(self.pli_entry.entry, "Input file", "pli")
 
-  def select_file(self, fileToSearch: str, format: str):
+  def select_file(self, fileToSearch: str, format: str) -> str:
     """
     Method for asking the user to select a file by opening a file selection window.
     A string representing the format of the target file is provided in order
@@ -709,7 +712,7 @@ class TuPostProcessingGui(ThemedTk):
       initialdir = self.initial_dir,
       filetypes = filetypes)
 
-  def select_file_and_fill_entry(self, entry: ttk.Entry, fileToSerch: str, format: str):
+  def select_file_and_fill_entry(self, entry: ttk.Entry, fileToSerch: str, format: str) -> None:
     """
     Method for asking the user to select a file by opening a file selection window.
     An Entry object is provided as input so that the path to the selected file is
@@ -748,7 +751,7 @@ class TuPostProcessingGui(ThemedTk):
     # content validation
     self.focus()
 
-  def select_output_folder(self, event=None):
+  def select_output_folder(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to select the output folder by opening a selection window.
     """
@@ -772,7 +775,7 @@ class TuPostProcessingGui(ThemedTk):
 
     print("Selected output folder:", self.output_dir)
 
-  def load_inp_file(self, event=None):
+  def load_inp_file(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to select a plot configuration .inp file to load by opening
     a file selection window.
@@ -797,7 +800,7 @@ class TuPostProcessingGui(ThemedTk):
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<InpLoaded>>')
 
-  def load_output_files(self, event=None):
+  def load_output_files(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to select the plot configuration files provided as a couple of
     .dat and .plt files, with the first containing the X-Y data of the curves and the second
@@ -844,7 +847,7 @@ class TuPostProcessingGui(ThemedTk):
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<DatPltLoaded>>')
 
-  def save_file(self, fileToSave: str, format: str):
+  def save_file(self, fileToSave: str, format: str) -> str:
     """
     """
     # Declare a tuple of tuples having the file type and its extension for filtering files in folders.
@@ -860,7 +863,7 @@ class TuPostProcessingGui(ThemedTk):
       initialdir = self.initial_dir,
       filetypes = filetypes)
 
-  def save_inp_file(self, event=None):
+  def save_inp_file(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to save the currently active plot configuration .inp file by opening
     a file save selection window.
@@ -882,7 +885,7 @@ class TuPostProcessingGui(ThemedTk):
     # Provide a message to the status bar
     self.status_bar.set_text("Saved .inp file: " + dest)
 
-  def save_output_files(self, event=None):
+  def save_output_files(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method for asking the user to save the currently active plot configuration .inp file by opening
     a file save selection window.
@@ -909,7 +912,7 @@ class TuPostProcessingGui(ThemedTk):
     # Provide a message to the status bar
     self.status_bar.set_text("Saved .inp file: " + filename)
 
-  def create_menu(self):
+  def create_menu(self) -> None:
     """
     Method that creates and adds a menu bar to the main window. It also builds the
     menu commands for each menu category.
@@ -952,14 +955,14 @@ class TuPostProcessingGui(ThemedTk):
     # Add the menu bar to the main window
     self.configure(menu=menubar)
 
-  def quit_app(self, event=None):
+  def quit_app(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that quit the application.
     """
     # Destroy the main window and all its widgets, thus closing the application
     self.destroy()
 
-  def reset_main_window(self, event=None):
+  def reset_main_window(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that resets the main window by clearing the content of the entry widget for
     setting the path to the input .pli file, as well as the message provided by the
@@ -975,7 +978,7 @@ class TuPostProcessingGui(ThemedTk):
     self.build_tabs_area()
 
 
-def new_postprocessing(event=None):
+def new_postprocessing(event: Union[tk.Event, None] = None) -> None:
   """
   Function that opens a new window for performing post-processing of results from a TU simulation.
   """
