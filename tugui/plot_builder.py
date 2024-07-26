@@ -14,6 +14,7 @@ from matplotlib.backends.backend_tkagg import (
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnnotationBbox, TextArea, VPacker
+from numpy.typing import ArrayLike
 from tkinter import ttk
 from tkinter.filedialog import asksaveasfilename
 from typing import Callable, Dict, List, Union
@@ -150,8 +151,8 @@ class CustomToolbar(NavigationToolbar2Tk):
   """
   def __init__(self, canvas: tk.Canvas, frame: tk.Frame,
                pack_toolbar: bool = False, axes: Union[Axes, None] =None,
-               x = None,
-               ys = None) -> None:
+               x: List[ArrayLike] = None,
+               ys: List[ArrayLike] = None) -> None:
     super().__init__(canvas, window=frame, pack_toolbar=pack_toolbar)
 
     # Add the cursor button to the toolbar
@@ -338,7 +339,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     # Update the initial directory to the path of the saved file folder
     self.initial_dir = os.path.dirname(filename)
 
-  def set_active_curves(self, active_curves: list[Line2D]) -> None:
+  def set_active_curves(self, active_curves: List[Line2D]) -> None:
     """
     Method that sets the instance attribute referring to the currently
     active curves, provided as a list of 'Line2D' objects.
@@ -388,7 +389,7 @@ class PlotCursor():
   The cursor can be dragged by the mouse and can assume positions given by the X-Y values
   of the active curves stored within the present instance.
   """
-  def __init__(self, ax: Axes, x, y) -> None:
+  def __init__(self, ax: Axes, x: List[ArrayLike], y: List[ArrayLike]) -> None:
     """
     Class constructor. It needs the plot Axes object, the X values and
     a list of Y-values for each curve.
@@ -403,8 +404,8 @@ class PlotCursor():
       self.ax: Axes = ax
       # Store the X-Y values into the corresponding instance variables by extracting
       # them from the corresponding curves.
-      self.xs = x
-      self.ys = y
+      self.xs: List[ArrayLike] = x
+      self.ys: List[ArrayLike] = y
 
       # Connect events on the plot area to the execution of the corresponding methods
       self._connect_events_to_methods()
@@ -862,7 +863,7 @@ class PlotCursor():
     else:
       self.ann.set(visible = True)
 
-  def _update_curves_info(self, x) -> None:
+  def _update_curves_info(self, x: List[ArrayLike]) -> None:
     """
     Method that updates the text shown by the annotation box. Given the current X-position
     of the cursor, provided as argument, it extract the Y-values for the plotted curves and
