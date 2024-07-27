@@ -5,6 +5,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 
 from abc import ABC, abstractmethod
+from typing import Callable, List, Union
 from gui_configuration import GuiPlotFieldsConfigurator
 from plot_settings import FieldType, GroupType, PlotSettingsConfigurator, LabelledCombobox
 from plot_builder import PlotFigure
@@ -22,7 +23,9 @@ class TabContentBuilder(ttk.Frame, ABC):
   left, while a text area on the right. The latter is where the report produced by the
   TU plot executables is shown.
   """
-  def __init__(self, container: ttk.Notebook, guiConfig: GuiPlotFieldsConfigurator, tab_name: str, state: str):
+  def __init__(self, container: ttk.Notebook,
+               guiConfig: GuiPlotFieldsConfigurator,
+               tab_name: str, state: str) -> None:
     """
     Build an instance of the 'TabContentBuilder' class that provides the content of a
     notebook tab as a frame. It receives as parameters:
@@ -36,12 +39,12 @@ class TabContentBuilder(ttk.Frame, ABC):
     super().__init__(container)
 
     # Store the GUI configuration
-    self.gui_config = guiConfig
+    self.gui_config: GuiPlotFieldsConfigurator = guiConfig
 
     # Build the tab content
     self._build_tab_content(container, tab_name, state)
 
-  def get_active_plotFigure(self):
+  def get_active_plotFigure(self) -> List[PlotFigure]:
     """
     Method that returns the 'PlotFigure' instance of the currently active tab of the
     notebook displaying the plots.
@@ -66,7 +69,7 @@ class TabContentBuilder(ttk.Frame, ABC):
       self.run_button.configure(state=tk.DISABLED)
       raise Exception("No plot figures are currently present. Please, create a new one first.")
 
-  def run_plot(self, func=None):
+  def run_plot(self, func: Union[Callable, None] = None) -> None:
     """
     Method for storing the input function as an instance attribute, if any
     is provided.
@@ -75,7 +78,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     if func != None:
       self.run_func = func
 
-  def set_slice_list(self, slices: list):
+  def set_slice_list(self, slices: List[str]) -> None:
     """
     Method for setting the list of strings used for populating the slice
     field in the plot configuration area.
@@ -83,7 +86,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     self.slice_settings = slices
 
   @abstractmethod
-  def set_times(self, **kwargs):
+  def set_times(self, **kwargs) -> None:
     """
     Abstract method that allows to set the instance attributes that corresponds
     to the simulation step times.
@@ -91,7 +94,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     their specific implementation.
     """
 
-  def _add_new_plot_figure(self, plot_name: str):
+  def _add_new_plot_figure(self, plot_name: str) -> None:
     """
     Method that adds a new 'PlotFigure' object to this instance notebook.
     Given the prefix input string, this method assigns a name to the
@@ -133,7 +136,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     self.plotTabControl.select(self.plotTabControl.index('end')-1)
 
   @abstractmethod
-  def _build_configuration_fields(self, config_area: ttk.LabelFrame):
+  def _build_configuration_fields(self, config_area: ttk.LabelFrame) -> None:
     """
     Abstract method for building the plot configuration fields area, provided as
     input. This method, being an interface, will be overridden by subclasses
@@ -141,7 +144,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     """
     return
 
-  def _build_plot_config_area(self, paned_window: ttk.PanedWindow):
+  def _build_plot_config_area(self, paned_window: ttk.PanedWindow) -> ttk.Frame:
     """
     Method for building the plot configuration area as a frame holding a 'LabelFrame'
     object within which the configuration fields and a button object for running the
@@ -172,7 +175,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     # Return the built frame
     return frame
 
-  def _build_plot_figure(self, container):
+  def _build_plot_figure(self, container: tk.Misc) -> ttk.Frame:
     """
     Method that builds the content of the area where the selected TU quantities are plotted.
     A Frame object, placed within the input container, holds the content of the plot area,
@@ -222,7 +225,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     # Return the just built frame object
     return frame
 
-  def _build_quick_access_buttons(self, panedwindow: ttk.PanedWindow):
+  def _build_quick_access_buttons(self, panedwindow: ttk.PanedWindow) -> None:
     """
     Method that builds a quick-access area with utility buttons to collapse the lateral
     panes of the window.
@@ -268,7 +271,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     self.bind("<<DeactivateReportButton>>", lambda event: hide_show_report_button.deactivate_label())
     self.bind("<<ActivateReportButton>>", lambda event: hide_show_report_button.activate_label())
 
-  def _build_tab_content(self, container: ttk.Notebook, tab_name: str, state=tk.NORMAL):
+  def _build_tab_content(self, container: ttk.Notebook, tab_name: str, state=tk.NORMAL) -> None:
     """
     Method that builds the content of a tab held by the input Notebook object. Its name and
     state (default value to NORMAL, meaning the tab is active) are provided as input as well.
@@ -307,7 +310,7 @@ class TabContentBuilder(ttk.Frame, ABC):
     # Add the just built frame to the notebook
     container.add(self, text=tab_name, state=state)
 
-  def expand_collapse_config_area(self, panedwindow: ttk.PanedWindow):
+  def expand_collapse_config_area(self, panedwindow: ttk.PanedWindow) -> None:
     """
     Method that, given the input 'PanedWindow' object, collapses or expands the plot
     configuration section. This object is associated to an instance attribute that
@@ -330,7 +333,7 @@ class TabContentBuilder(ttk.Frame, ABC):
       # Hide the pane object from the given PanedWindow
       panedwindow.remove(self.config_area)
 
-  def expand_collapse_report_area(self):
+  def expand_collapse_report_area(self) -> None:
     """
     Method that, given the input 'PanedWindow' object, collapses or expands the plot
     report section. This object is associated to an instance attribute that is saved
@@ -360,7 +363,8 @@ class TabContentBuilder(ttk.Frame, ABC):
       # Hide the pane object from the given PanedWindow
       active_pw.remove(active_pw.report_area)
 
-  def handle_tab_change(self, event, hide_show_report_button: OnOffClickableLabel):
+  def handle_tab_change(self, event: tk.Event,
+                        hide_show_report_button: OnOffClickableLabel) -> None:
     """
     Method that is called whenever a plot tab is changed. It retrieves the 'PanedWindow' object
     of the 'PlotFigure' for the currently active tab.
@@ -404,7 +408,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
   While keeping the same structure, this class implements the widgets contained in
   the configuration area, as they are specific of the 'TuPlot' case.
   """
-  def __init__(self, container: ttk.Notebook, guiConfig: GuiPlotFieldsConfigurator, tab_name: str, state: str):
+  def __init__(self, container: ttk.Notebook,
+               guiConfig: GuiPlotFieldsConfigurator,
+               tab_name: str, state: str) -> None:
     """
     Build an instance of the 'TuPlotTabContentBuilder' class that provides the content of a
     notebook tab. It receives as parameters:
@@ -421,7 +427,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuPlot')
 
-  def set_times(self, **kwargs):
+  def set_times(self, **kwargs) -> None:
     """
     Method that allows to set the instance attributes for the simulation
     macro and micro step times.
@@ -437,7 +443,8 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     self.macro_time = kwargs['macro_time']
     self.micro_time = kwargs['micro_time']
 
-  def _activate_additional_settings(self, box_to_check: ttk.Combobox, container: ttk.Frame, row: int):
+  def _activate_additional_settings(self, box_to_check: ttk.Combobox,
+                                    container: ttk.Frame, row: int) -> None:
     """
     Method that is called whenever the "Number" or the "Type" combobox values are selected.
     It checks if the other combobox is selected and, if so, it activates the frame that
@@ -497,7 +504,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
       # Change the run button state when elements are selected in every additional field
       self.additional_frame.bind('<<PlotSettingsSet>>', func=lambda event: self.run_button.configure(state=tk.ACTIVE))
 
-  def _activate_fields(self, event=None, number: ttk.Combobox=None, type: ttk.Combobox=None):
+  def _activate_fields(self, event: Union[tk.Event, None] = None,
+                       number: Union[ttk.Combobox, None] = None,
+                       type: Union[ttk.Combobox, None] = None) -> None:
     """
     Method that activates the "Number" and "Type" fields whenever the user chooses a value
     for the "Group" field in the plot settings area.
@@ -539,7 +548,8 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Hide the button for running the plot executable
     self.run_button.grid_remove()
 
-  def _build_iant_field(self, container, row, label: str, values: list, row_index: int, iant: IANT):
+  def _build_iant_field(self, container: tk.Misc, row, label: str,
+                        values: list, row_index: int, iant: IANT) -> int:
     """
     Method that builds a field for setting the IANT value in case the plot number is any
     in the range 102-108 (for radiation stress related cases) or the 113 one (for
@@ -564,7 +574,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Update the row index
     return row_index + 1
 
-  def _build_configuration_fields(self, config_area: ttk.LabelFrame):
+  def _build_configuration_fields(self, config_area: ttk.LabelFrame) -> None:
     """
     Method that builds the fields, in terms of the widgets, enabling the user to
     configure the quantities to plot for a 'TuPlot' case. This method overrides
@@ -593,7 +603,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     number.cbx.bind('<<ComboboxSelected>>', func=lambda event: self._activate_additional_settings(type.cbx, config_area, 3))
     type.cbx.bind('<<ComboboxSelected>>', func=lambda event: self._activate_additional_settings(number.cbx, config_area, 3))
 
-  def _build_frame(self, container, row):
+  def _build_frame(self, container: tk.Misc, row: int) -> ttk.Frame:
     """
     Method that builds and returns a frame within the given container object.
     It also places the frame within the container at the specified row index
@@ -610,7 +620,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     # Return the just built frame
     return frame
 
-  def _configure_additional_fields(self, group: GroupType):
+  def _configure_additional_fields(self, group: GroupType) -> None:
     """
     Method for configuring the values of the additional plot settings fields, provided by the
     'PlotSettingsConfigurator' instance, according to the choices made for the "Type" field.
@@ -680,7 +690,9 @@ class TuStatTabContentBuilder(TabContentBuilder):
   While keeping the same structure, this class implements the widgets contained in
   the configuration area, as they are specific of the 'TuStat' case.
   """
-  def __init__(self, container: ttk.Notebook, guiConfig: GuiPlotFieldsConfigurator, tab_name: str, state: str):
+  def __init__(self, container: ttk.Notebook,
+               guiConfig: GuiPlotFieldsConfigurator,
+               tab_name: str, state: str) -> None:
     """
     Build an instance of the 'TuStatTabContentBuilder' class that provides the content of a
     notebook tab. It receives as parameters:
@@ -697,7 +709,7 @@ class TuStatTabContentBuilder(TabContentBuilder):
     # Specify the text of the button for running the plot executable
     self.run_button.configure(text='Run TuStat')
 
-  def set_times(self, **kwargs):
+  def set_times(self, **kwargs) -> None:
     """
     Method that allows to set the instance attribute for the step times
     of the statistical simulation.
@@ -709,7 +721,7 @@ class TuStatTabContentBuilder(TabContentBuilder):
     # Store the times in the corresponding instance attributes
     self.sta_time =  kwargs['sta_times']
 
-  def _activate_fields(self, event=None):
+  def _activate_fields(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that activates the 'TuStat' tab plot configuration fields whenever the user
     chooses a value for the "Diagram Nr." field.
@@ -738,7 +750,7 @@ class TuStatTabContentBuilder(TabContentBuilder):
     # Show the button for running the plot executable
     self.run_button.grid(column=1, row=8, sticky='e')
 
-  def _are_all_fields_set(self, event=None):
+  def _are_all_fields_set(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method called whenever a combobox field is set for checking if all the other fields
     have been set. If so, the button for running the TuStat executable is enabled.
@@ -751,7 +763,7 @@ class TuStatTabContentBuilder(TabContentBuilder):
       # Disable the button
       self.run_button.configure(state=tk.DISABLED)
 
-  def _build_configuration_fields(self, config_area: ttk.LabelFrame):
+  def _build_configuration_fields(self, config_area: ttk.LabelFrame) -> None:
     """
     Method that builds the fields, in terms of the widgets, enabling the user to
     configure the quantities to plot for a 'TuStat' case. This method overrides
@@ -783,20 +795,20 @@ class TuStatTabContentBuilder(TabContentBuilder):
 
 if __name__ == "__main__":
   # Intantiate the root window
-  root = ThemedTk()
+  root: ThemedTk = ThemedTk()
   root.configure(theme='radiance')
 
   # Instantiate a notebook
-  tabControl = ttk.Notebook(root)
+  tabControl: ttk.Notebook = ttk.Notebook(root)
   tabControl.pack(fill='both', expand=True)
   # Instantiate the GuiPlotFieldsConfigurator class providing the values for filling the fields
-  guiConfig = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+  guiConfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
 
   # Instatiate a TabBuilder object holding the tabs
-  tab1 = TuPlotTabContentBuilder(
+  tab1: TuPlotTabContentBuilder = TuPlotTabContentBuilder(
      container=tabControl, tab_name="Tab 1", state='normal', guiConfig=guiConfig)
   tab1.set_slice_list(["Slice 1", "Slice 2", "Slice 3"])
-  tab2 = TuStatTabContentBuilder(
+  tab2: TuStatTabContentBuilder = TuStatTabContentBuilder(
     container=tabControl, tab_name="Tab 2", state='normal', guiConfig=guiConfig)
   tab2.set_slice_list(["Slice 1", "Slice 2"])
 
