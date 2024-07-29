@@ -17,7 +17,7 @@ from matplotlib.offsetbox import AnnotationBbox, TextArea, VPacker
 from numpy.typing import ArrayLike
 from tkinter import ttk
 from tkinter.filedialog import asksaveasfilename
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Union, Tuple
 
 
 class PlotFigure(ttk.Frame):
@@ -284,7 +284,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     curves_to_save.update({h: l for h, l in zip(handles, legends) for c in self.active_curves if c == h})
 
     # Get the list of X-data for each of the active curves
-    curves: list[Line2D] = list(curves_to_save.keys())
+    curves: List[Line2D] = list(curves_to_save.keys())
     # Define the header list with elements being the legend labels
     headers = list(curves_to_save.values())
     # Add the plot X-axis label in the first position of the header list
@@ -460,7 +460,7 @@ class PlotCursor():
     # Declare a list of empty strings with same dimension of the colors one
     texts = ['' for e in self.line_colors]
     # Declare a list of TextArea objects
-    self.text_areas: list[TextArea] = list()
+    self.text_areas: List[TextArea] = list()
     # Loop over all the elements of both text and colors lists
     for t,c in zip(texts, self.line_colors):
       # Add a TextArea object, each with a different color (for Y-values)
@@ -1096,7 +1096,7 @@ class PlotManager():
       # List containing the X-Y values for every curve
       curve = list()
       # Dictionary containing the curves values with key the legend and value a list of X-Y values
-      self.curves2plot: dict[(list | str), list] = dict()
+      self.curves2plot: Dict[Union[List[str], str], List[Tuple[float]]] = dict()
 
       # Handle the .dat content reading differently on the basis of the first line of the .dat file:
       # . if it starts with '/td', the curves X-Y data are provided separately as in the 'Radius'
@@ -1165,9 +1165,9 @@ class PlotManager():
         # information is present, which has already been retrieved from the already read .plt file.
         ##############################################################################################
         # Declare a list holding the X-data
-        x: list[str] = list()
+        x: List[str] = list()
         # Declare a list of lists holding the Y-data for each curve
-        ys: list[list[str]] = list()
+        ys: List[List[str]] = list()
 
         print("CURVE LEGEND 2: ", self.legend)
 

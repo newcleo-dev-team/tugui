@@ -231,7 +231,7 @@ class GuiPlotFieldsConfigurator():
       # Raise an exception
       raise PermissionError("Error: the \"" + filename + "\" does not have execution permission")
 
-  def __build_nVsKn(self, group_file: str, group_dict: dict, search_num: str) -> None:
+  def __build_nVsKn(self, group_file: str, group_dict: Dict[str, List[str]], search_num: str) -> None:
     """
     Function that, given the 'Group' file to read (its path), it fills up the input dictionary with:
     . keys, being the line indicating the plot 'Number'

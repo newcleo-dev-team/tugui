@@ -31,7 +31,7 @@ class TuInp:
   diagr_type: DiagramCharacteristics = None
 
   @staticmethod
-  def configure_tuplot_inp_fields(info: dict) -> Self:
+  def configure_tuplot_inp_fields(info: Dict[str, str]) -> Self:
     """
     Method that builds and configures the fields of the 'TuInp' dataclass
     for the 'TuPlot' case. This is done by getting the needed information
@@ -80,7 +80,7 @@ class TuInp:
     return tuinp
 
   @staticmethod
-  def configure_tustat_inp_fields(info: dict) -> Self:
+  def configure_tustat_inp_fields(info: Dict[str, str]) -> Self:
     """
     Method that builds and configures the fields of the 'TuInp' dataclass
     for the 'TuStat' case. This is done by getting the needed information
@@ -140,7 +140,7 @@ class InpHandler():
     """
     # Declare a list of dataclasses holding the configuration values for
     # each diagram declared in the loaded input file
-    self.diagrams_list: list[TuInp] = list()
+    self.diagrams_list: List[TuInp] = list()
     # Declare an index representing the plot index number
     plot_index = 0
 

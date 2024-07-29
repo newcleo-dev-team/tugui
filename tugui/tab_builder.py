@@ -549,7 +549,7 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     self.run_button.grid_remove()
 
   def _build_iant_field(self, container: tk.Misc, row, label: str,
-                        values: list, row_index: int, iant: IANT) -> int:
+                        values: List[str], row_index: int, iant: IANT) -> int:
     """
     Method that builds a field for setting the IANT value in case the plot number is any
     in the range 102-108 (for radiation stress related cases) or the 113 one (for
