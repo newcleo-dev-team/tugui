@@ -1,8 +1,10 @@
 import os
 import platform
 import shutil
-from typing import Dict, List
+from typing import Dict, List, Tuple
+from typing_extensions import Self
 import numpy as np
+from numpy.typing import NDArray
 import re
 
 from abc import ABC, abstractmethod
@@ -29,7 +31,7 @@ class TuInp:
   diagr_type: DiagramCharacteristics = None
 
   @staticmethod
-  def configure_tuplot_inp_fields(info: dict):
+  def configure_tuplot_inp_fields(info: Dict[str, str]) -> Self:
     """
     Method that builds and configures the fields of the 'TuInp' dataclass
     for the 'TuPlot' case. This is done by getting the needed information
@@ -78,7 +80,7 @@ class TuInp:
     return tuinp
 
   @staticmethod
-  def configure_tustat_inp_fields(info: dict):
+  def configure_tustat_inp_fields(info: Dict[str, str]) -> Self:
     """
     Method that builds and configures the fields of the 'TuInp' dataclass
     for the 'TuStat' case. This is done by getting the needed information
@@ -123,7 +125,7 @@ class InpHandler():
   Class for handling the functionalities devoted to reading and writing a plot
   configuration .inp file.
   """
-  def __init__(self, inp_path: str):
+  def __init__(self, inp_path: str) -> None:
     """
     Construct an instance of this class by receiving the path to the .inp file.
     """
@@ -131,14 +133,14 @@ class InpHandler():
     self.inp_path = inp_path
     self.inp_dir = os.path.dirname(self.inp_path)
 
-  def read_inp_file(self):
+  def read_inp_file(self) -> None:
     """
     Method that reads an input .inp file and interprets its content according to
     the specific 'TuPlot' or 'TuStat' subroutine it was created from.
     """
     # Declare a list of dataclasses holding the configuration values for
     # each diagram declared in the loaded input file
-    self.diagrams_list: list[TuInp] = list()
+    self.diagrams_list: List[TuInp] = list()
     # Declare an index representing the plot index number
     plot_index = 0
 
@@ -159,7 +161,7 @@ class InpHandler():
           # Extract and store all the information describing the plot configuration of a single diagram
           self._extract_diagram_info(plot_index, inp)
 
-  def save_inp_file(self, diagrams: list[TuInp]):
+  def save_inp_file(self, diagrams: List[TuInp]) -> None:
     """
     Method that saves 1 or more plot configuration diagrams on a single .inp file.
     The plots configuration are provided as a list of 'TuInp' dataclasses storing
@@ -176,7 +178,7 @@ class InpHandler():
         f.write(diagr.diagram_config)
         f.write(diagr.ikon + '\n')
 
-  def save_loaded_inp(self):
+  def save_loaded_inp(self) -> str:
     """
     Method that saves the loaded .inp file in the current working directory
     if its name is different from 'TuPlot.inp' or 'TuStat.inp', as the post-
@@ -223,7 +225,8 @@ class InpHandler():
     # Return the path to the saved .inp file
     return os.path.join(self.inp_dir, filename)
 
-  def _extract_diagram_info(self, plot_index: int, inp_file_handle: TextIOWrapper):
+  def _extract_diagram_info(self, plot_index: int,
+                            inp_file_handle: TextIOWrapper) -> None:
     """
     Method that extract from the given 'TextIOWrapper' instance, given by opening the
     .inp file for reading, all the information about the plot configuration of a single
@@ -276,7 +279,7 @@ class InpHandler():
       inp_config.diagram_config += line
 
 
-def check_file_existence(file_path: str, file_extension: str):
+def check_file_existence(file_path: str, file_extension: str) -> None:
   """
   Function that can be accessed globally for checking if the given
   file path exists and is a file. If not, the function raises an
@@ -302,7 +305,9 @@ class DatGenerator():
   out_paths: List[str] = field(default_factory=list)
 
   @staticmethod
-  def init_DatGenerator_and_run_exec(plotexec_path: str, inp_path: str, plots_num: int, cwd: str, output_files_name: str):
+  def init_DatGenerator_and_run_exec(plotexec_path: str, inp_path: str,
+                                     plots_num: int, cwd: str,
+                                     output_files_name: str) -> Self:
     """
     Static method that initialize the 'DatGenerator' dataclass by providing all the needed
     information received as input to this function.
@@ -368,7 +373,7 @@ class DatGenerator():
     return dat_gen
 
 
-def run_plot_files_generation(datGen: DatGenerator):
+def run_plot_files_generation(datGen: DatGenerator) -> Self:
   """
   Function that runs the plotting executable by feeding it with the .inp file.
   Since the run needs to be in the folder of the .inp input file, the current
@@ -445,7 +450,7 @@ class PliReader():
   axial_steps: str = ''
 
   @staticmethod
-  def init_PliReader(pli_path: str):
+  def init_PliReader(pli_path: str) -> Self:
     """
     Method that builds and configures the 'PliReader' dataclass by providing all
     the needed information that come by interpreting the content of the .pli file
@@ -519,7 +524,7 @@ class DaReader(ABC):
   by the TU simulation.
   It provides methods to be overridden by its subclasses.
   """
-  def __init__(self, da_path: str, extension: str):
+  def __init__(self, da_path: str, extension: str) -> None:
     """
     Build an instance of the 'DaReader' class. It receives as parameter the path to the
     direct-access file to read and checks its actual existence.
@@ -527,16 +532,16 @@ class DaReader(ABC):
     # Check the direct-access file existence
     check_file_existence(da_path, extension)
     # Store the direct-access file path
-    self.da_path = da_path
+    self.da_path: str = da_path
     # Initialize the time values read from the direct-access file
-    self.time_h = list()
-    self.time_s = list()
-    self.time_ms : list[int] = list()
+    self.time_h: List[int] = list()
+    self.time_s: List[int] = list()
+    self.time_ms : List[int] = list()
     # Call the ABC constructor
     super().__init__()
 
   @abstractmethod
-  def extract_time_hsms(self, record_length: str) -> tuple[list[int], list[int], list[int]]:
+  def extract_time_hsms(self, record_length: int) -> Tuple[List[int], List[int], List[int]]:
     """
     Method that extracts from the direct-access file the simulation time instants
     as arrays for hours, seconds and milliseconds respectively. These arrays are
@@ -544,7 +549,7 @@ class DaReader(ABC):
     """
 
   @abstractmethod
-  def read_tu_data(self, record_length):
+  def read_tu_data(self, record_length: int) -> NDArray[np.float32]:
     """
     Method that opens the direct-access file and re-elaborate its content, originally stored
     as a one-line array. Given the record length, the array is reshaped as a 2D array having:
@@ -561,7 +566,7 @@ class MicReader(DaReader):
   For every micro-step (TU internal step) several quantities are stored, that are
   section/slice dependent variables and special quantities.
   """
-  def __init__(self, mic_path: str):
+  def __init__(self, mic_path: str) -> None:
     """
     Build an instance of the 'MicReader' class that interprets the content of the .mic
     file produced by the TU simulation.
@@ -573,7 +578,7 @@ class MicReader(DaReader):
     # Call the superclass constructor
     super().__init__(mic_path, self.extension)
 
-  def extract_time_hsms(self, record_length):
+  def extract_time_hsms(self, record_length: int) -> Tuple[List[int], List[int], List[int]]:
     """
     Method that extracts from the direct-access file the simulation time instants
     as arrays for hours, seconds and milliseconds respectively. These arrays are
@@ -588,7 +593,7 @@ class MicReader(DaReader):
     # Return the tuple of times
     return (self.time_h, self.time_s, self.time_ms)
 
-  def read_tu_data(self, record_length):
+  def read_tu_data(self, record_length: int) -> NDArray[np.float32]:
     """
     Method that opens the direct-access file and re-elaborate its content, originally stored
     as a one-line array. Given the record length, the array is reshaped as a 2D array having:
@@ -616,7 +621,7 @@ class MacReader(MicReader):
   the radially dependent quantities at every simulation time for every (i, j)-th element of the
   domain.
   """
-  def __init__(self, mac_path: str, n_slices: int):
+  def __init__(self, mac_path: str, n_slices: int) -> None:
     """
     Build an instance of the 'MacReader' class that interprets the content of the .mac
     file produced by the TU simulation.
@@ -624,14 +629,14 @@ class MacReader(MicReader):
     existence of the file.
     """
     # Store the file extension
-    self.extension = 'mac'
+    self.extension: str = 'mac'
     # Call the superclass constructor
     super().__init__(mac_path)
 
     # Store the number of slices
-    self.n_slices = n_slices
+    self.n_slices: int = n_slices
 
-  def extract_xtime_hsms(self, record_length):
+  def extract_xtime_hsms(self, record_length: int) -> Tuple[List[int], List[int], List[int]]:
     """
     Method that extracts from the .mac file the simulation time instants as arrays
     for hours, seconds and milliseconds respectively. These values are provided
@@ -654,7 +659,7 @@ class StaReader(DaReader):
   Class that interprets the content of the .sta file produced by the TU simulation.
   For every time step (choosen by users) several quantities are stored.
   """
-  def __init__(self, sta_path: str, ibyte):
+  def __init__(self, sta_path: str, ibyte: int) -> None:
     """
     Build an instance of the 'MicReader' class that interprets the content of the .mic
     file produced by the TU simulation.
@@ -665,9 +670,10 @@ class StaReader(DaReader):
     super().__init__(sta_path, 'sta')
 
     # Store the ibyte value
-    self.ibyte = ibyte
+    self.ibyte: int = ibyte
 
-  def extract_time_hsms(self, record_length: int, axial_steps: int, sta_dataset_length: int):
+  def extract_time_hsms(self, record_length: int, axial_steps: int,
+                        sta_dataset_length: int) -> Tuple[List[int], List[int], List[int]]:
     """
     Method that overrides the superclass method for extracting the time steps from a generic
     direct-access file.
@@ -693,7 +699,8 @@ class StaReader(DaReader):
     # Return the tuple of times
     return (self.time_h, self.time_s, self.time_ms)
 
-  def read_tu_data(self, record_length: int, axial_steps: int, sta_dataset_length: int):
+  def read_tu_data(self, record_length: int, axial_steps: int,
+                   sta_dataset_length: int) -> NDArray[np.float32]:
     """
     Method that overrides the superclass method for extracting the content of a generic
     direct-access file.
@@ -732,22 +739,22 @@ if __name__ == "__main__":
   #   4-MacReader
   #   5-StaReader
   #   6-InpHandler (loading .inp)
-  test = 1
+  test: int = 1
 
   match test:
     case 1:
       print("Testing the interface to Tuplotgui executable")
 
       # Get the absolute path of the current file
-      abspath = os.path.abspath(__file__)
+      abspath: str = os.path.abspath(__file__)
       # Get the file directory path
-      dname = os.path.dirname(abspath)
+      dname: str = os.path.dirname(abspath)
 
       # Run the method that deals with instantiating the dataclass storing the needed
       # information for the plotting executable to be run. The corresponding executable
       # is run afterwards and the paths to the output .dat and .plt files, stored in the
       # returned object, are updated.
-      inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+      inp_to_dat: DatGenerator = DatGenerator.init_DatGenerator_and_run_exec(
         plotexec_path=os.path.join(dname, "bin/tuplotgui_nc"),
         inp_path="../tests/input/TuPlot.inp",
         plots_num=1,
@@ -756,10 +763,10 @@ if __name__ == "__main__":
     case 2:
       print("Testing the interface to .mic file")
       # Extract the information from the .pli file and instantiate the 'PliReader' class
-      plireader = PliReader.init_PliReader("../Input/rodcd.pli")
+      plireader: PliReader = PliReader.init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the MicReader class
-      micreader = MicReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mic_path)
+      micreader: MicReader = MicReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mic_path)
       # Extract the time values
       (h, s, ms) = micreader.extract_time_hsms(int(plireader.mic_recordLength))
       print(h, s, ms)
@@ -767,7 +774,7 @@ if __name__ == "__main__":
       # PliReader case
       print("Testing the interface to the .pli file")
       # Extract the information from the .pli file and instantiate the 'PliReader' class
-      plireader = PliReader.init_PliReader("../Input/rodcd.pli")
+      plireader: PliReader = PliReader.init_PliReader("../Input/rodcd.pli")
       print("Path to the .pli file: " + plireader.pli_path)
 
       print(plireader.opt_dict)
@@ -778,10 +785,10 @@ if __name__ == "__main__":
     case 4:
       print("Testing the interface to .mac file")
       # Extract the information from the .pli file and instantiate the 'PliReader' class
-      plireader = PliReader.init_PliReader("../Input/rodcd.pli")
+      plireader: PliReader = PliReader.init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the MacReader class
-      macreader = MacReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mac_path,
+      macreader: MacReader = MacReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.mac_path,
                             int(plireader.opt_dict['M3']))
       # Extract the time values
       (h, s, ms) = macreader.extract_xtime_hsms(int(plireader.mac_recordLength))
@@ -790,10 +797,10 @@ if __name__ == "__main__":
     case 5:
       print("Testing the interface to .sta file")
       # Extract the information from the .pli file and instantiate the 'PliReader' class
-      plireader = PliReader.init_PliReader("../Input/rodcd.pli")
+      plireader: PliReader = PliReader.init_PliReader("../Input/rodcd.pli")
 
       # Instantiate the StaReader class
-      stareader = StaReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.sta_path,
+      stareader: StaReader = StaReader(os.path.dirname(plireader.pli_path) + os.sep + plireader.sta_path,
                             int(plireader.opt_dict['IBYTE']))
       # stareader.read_tu_data(int(plireader.sta_recordLength), int(plireader.opt_dict['M3']), int(plireader.sta_dataset))
       # Extract the time values
@@ -806,7 +813,7 @@ if __name__ == "__main__":
     case 6:
       print("Testing the interface to .inp file")
       # Instantiate the 'InpHandler' class
-      inpreader = InpHandler("../Input/TuPlot_2diagrams.inp")
+      inpreader: InpHandler = InpHandler("../Input/TuPlot_2diagrams.inp")
       # Read the loaded .inp file and extract its content
       inpreader.read_inp_file()
       # Save the content of the read .inp file into a file whose name complies with

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from typing import Callable, List, Union
 
 
 class EntryVariable:
@@ -17,9 +18,9 @@ class EntryVariable:
     configure the Entry object within the frame.
     """
     # Instantiate the string variable
-    self.var = tk.StringVar()
+    self.var: tk.StringVar = tk.StringVar()
     # Instantiate the entry field
-    self.entry = ttk.Entry(frame, width = width, textvariable=self.var)
+    self.entry: ttk.Entry = ttk.Entry(frame, width = width, textvariable=self.var)
     # Place the entry in the frame grid
     self.entry.grid(column = col, row = row, sticky = 'ew')
 
@@ -30,9 +31,9 @@ class EntryVariable:
     self.entry.configure(validate='focusout', validatecommand=valid_entry)
 
     # Entry file extension
-    self.entry_extension = end
+    self.entry_extension: str = end
 
-  def validate(self, event=None, newval: str = ""):
+  def validate(self, event: Union[tk.Event, None] = None, newval: str = "") -> bool:
     """
     Method that checks if the entry is valid. The "end" parameter indicates the
     extension to check against.
@@ -49,7 +50,7 @@ class EntryVariable:
         self.on_invalid()
         return False
 
-  def on_invalid(self):
+  def on_invalid(self) -> None:
     """
     Show the error message if the data is not valid.
     """
@@ -66,9 +67,9 @@ class StatusBar(ttk.Frame):
   Class describing a Frame where a label is shown. This represents a status bar
   that provides useful log to the user.
   """
-  def __init__(self, container, color: str = 'light gray'):
+  def __init__(self, container: tk.Misc, color: str = 'light gray') -> None:
     # Initialize the Style object
-    s = ttk.Style()
+    s: ttk.Style = ttk.Style()
     # Configure the style for the status bar frame
     s.configure('self.TFrame', background=color, border=1, borderwidth=1, relief=tk.GROOVE)
     # Configure the style for the status bar label
@@ -78,20 +79,20 @@ class StatusBar(ttk.Frame):
     super().__init__(container, style='self.TFrame')
 
     # Declare an empty label providing the status messages
-    self.label = ttk.Label(self, text="", style='self.TLabel')
+    self.label: ttk.Label = ttk.Label(self, text="", style='self.TLabel')
     # Align the label on the left
     self.label.pack(side=tk.LEFT, padx=3, pady=3)
 
     # Configure the status bar in order to fill all the space in the horizontal direction
     self.grid(sticky='ew')
 
-  def set_text(self, new_text):
+  def set_text(self, new_text: str) -> None:
     """
     Method that allow the modification of the status bar text.
     """
     self.label.configure(text=new_text)
 
-  def clear_label(self):
+  def clear_label(self) -> None:
     """
     Method that clears any text already present in the label status bar.
     """
@@ -104,9 +105,9 @@ class CustomNotebook(ttk.Notebook):
   to build a notebook with tabs presenting a button for closing each one of
   them.
   """
-  __initialized = False
+  __initialized: bool = False
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args, **kwargs) -> None:
     # Initialize the custom style of the notebook, if not yet done
     if not self.__initialized:
       self.__initialize_custom_style()
@@ -116,12 +117,12 @@ class CustomNotebook(ttk.Notebook):
     kwargs["style"] = "CustomNotebook"
     # Call the superclass constructor
     ttk.Notebook.__init__(self, *args, **kwargs)
-    self._active = None
+    self._active: Union[int, None] = None
     # Bind the mouse events to the execution of corresponding methods
     self.bind("<ButtonPress-1>", self.on_close_press, True)
     self.bind("<ButtonRelease-1>", self.on_close_release)
 
-  def on_close_press(self, event):
+  def on_close_press(self, event: tk.Event) -> Union[str, None]:
     """
     Method that is called when the mouse button is pressed over
     the close button.
@@ -130,15 +131,13 @@ class CustomNotebook(ttk.Notebook):
     element = self.identify(event.x, event.y)
     # Handle the case when the event happens on the close button of a tab
     if "close" in element:
-      # Get the index of the tab where the event happened
-      index = self.index("@%d,%d" % (event.x, event.y))
+      # Get and store the index of the tab where the event happened
+      self._active = self.index("@%d,%d" % (event.x, event.y))
       # Set the state of the widget
       self.state(['pressed'])
-      # Store the index of the tab where the event happened
-      self._active = index
       return "break"
 
-  def on_close_release(self, event):
+  def on_close_release(self, event: tk.Event) -> None:
     """
     Method that is called when the mouse button is released after having
     pressed over the close button.
@@ -174,7 +173,7 @@ class CustomNotebook(ttk.Notebook):
     self.state(["!pressed"])
     self._active = None
 
-  def __initialize_custom_style(self):
+  def __initialize_custom_style(self) -> None:
     # Declare a new Style instance
     style = ttk.Style()
     # Store the images representing the different states of the close button
@@ -231,18 +230,22 @@ class SquareButton(ttk.Frame):
   This class includes the possibility to add an image to the button, whose path is
   passed to the constructor.
   """
-  def __init__(self, parent, size=None, text="", command=None, style=None, image=None):
+  def __init__(self, parent: Union[tk.Misc, None],
+               size: Union[int, None] = None, text: str = "",
+               command: Union[Callable, None] = None,
+               style: Union[str, None] = None,
+               image: Union[str, None] = None) -> None:
     # Call the frame constructor by specifying its height and width
     ttk.Frame.__init__(self, parent, height=size, width=size, style="SquareButton.TFrame")
     # Indicate that the frame must not adapt to its widgets
     self.pack_propagate(0)
     # Instantiate the button as a private attribute
-    self._btn = ttk.Button(self, text=text, command=command, style=style, padding=0)
+    self._btn: ttk.Button = ttk.Button(self, text=text, command=command, style=style, padding=0)
 
     if image:
       size = self._btn.winfo_pixels('18p')
       print("Size:", size)
-      self.image = Image.open(image)
+      self.image: Union[Image.Image, ImageTk.PhotoImage] = Image.open(image)
       # assure a RGBA image as foreground color is RGB
       self.image = self.image.convert("RGBA")
       self.image = ImageTk.PhotoImage(self.image.resize((24, 24)))
@@ -252,14 +255,14 @@ class SquareButton(ttk.Frame):
     # Place the button in the frame
     self._btn.pack(fill=tk.BOTH, expand=0, ipady=0, ipadx=0)
 
-  def set_text(self, new_text: str):
+  def set_text(self, new_text: str) -> None:
     """
     Method for setting the text of the button.
     """
     self._btn.configure(text=new_text)
 
 
-def provide_label_image(container, img_path: str) -> ttk.Label:
+def provide_label_image(container: tk.Misc, img_path: str) -> ttk.Label:
   """
   Function that provides a label filled with an image. It builds an instance
   of the 'ttk.Label' class by receiving the contaniner to put the label
@@ -295,26 +298,31 @@ class OnOffClickableLabel(ttk.Frame):
   A function object can be passed to the constructor too; this is called whenever a click event on the
   label happens.
   """
-  def __init__(self, parent, size=None, command=None, style=None, image: list=None, rotation: int=0):
+  def __init__(self, parent: Union[tk.Misc, None],
+               size: Union[int, None] = None,
+               command: Union[Callable, None] = None,
+               style: Union[str, None] = None,
+               image: Union[List[str], None] = None,
+               rotation: int = 0) -> None:
     # Call the frame constructor by specifying its height and width
     ttk.Frame.__init__(self, parent, height=size, width=size, style="ClickableLabelWithImage.TFrame")
     # Indicate that the frame must adapt to its widgets
     self.pack_propagate(1)
     # Instantiate the label as a private attribute
-    self._lbl = ttk.Label(self, style=style, padding=2, anchor=tk.CENTER)
+    self._lbl: ttk.Label = ttk.Label(self, style=style, padding=2, anchor=tk.CENTER)
     # Place the label in the frame
     self._lbl.pack(fill=tk.BOTH, expand=0, ipady=0, ipadx=0)
 
     # Set label default state
-    self.on_state = True
+    self.on_state: bool = True
     # Store the command to run when the label is clicked
-    self.command = command
+    self.command: Union[Callable, None] = command
 
     # Store the toggle images if two of them are provided
     if len(image) == 2:
       # Rotate the images, if a rotation value has been provided
-      self.on_image = Image.open(image[0]).rotate(rotation)
-      self.off_image = Image.open(image[1]).rotate(rotation)
+      self.on_image: Union[Image.Image, ImageTk.PhotoImage] = Image.open(image[0]).rotate(rotation)
+      self.off_image: Union[Image.Image, ImageTk.PhotoImage] = Image.open(image[1]).rotate(rotation)
       # Assure a RGBA image as foreground color is RGB
       self.on_image = self.on_image.convert("RGBA")
       self.off_image = self.off_image.convert("RGBA")
@@ -326,9 +334,10 @@ class OnOffClickableLabel(ttk.Frame):
       self._lbl.configure(image=self.on_image)
 
     # Bind mouse click event to image toggle and input function object call
-    self.click_event = self._lbl.bind('<Button-1>', lambda event: self.on_click(event, command))
+    self.click_event: str = self._lbl.bind('<Button-1>', lambda event: self.on_click(event, command))
 
-  def on_click(self, event=None, command=None):
+  def on_click(self, event: Union[tk.Event, None] = None,
+               command: Union[Callable, None] = None) -> None:
     """
     Method that is called whenever a mouse click event on the label happens.
     Given the current label 'on_state' attribute value, the method switches
@@ -351,7 +360,7 @@ class OnOffClickableLabel(ttk.Frame):
     if command:
       command()
 
-  def activate_label(self):
+  def activate_label(self) -> None:
     """
     Method that allows to activate the clickable label by binding the
     click event to the associated function and setting the label state
@@ -362,7 +371,7 @@ class OnOffClickableLabel(ttk.Frame):
     # Enable the binding to the label click
     self.click_event = self._lbl.bind('<Button-1>', lambda event: self.on_click(event, self.command))
 
-  def deactivate_label(self):
+  def deactivate_label(self) -> None:
     """
     Method that allows to de-activate the clickable label by unbinding the
     click event to the associated function and setting the label state as
@@ -382,15 +391,15 @@ class WidgetTooltip():
   enters the borders of the widget and remains active for a specified time
   interval or when the mouse leave the widget area.
   """
-  def __init__(self, widget, text='widget info'):
+  def __init__(self, widget: tk.Widget, text: str = 'widget info') -> None:
     # Specify the waiting time (in ms) for the tooltip to show
-    self.wait_time = 500
+    self.wait_time: int = 500
     # Specify the dimension (in px) of the tooltip area
-    self.wraplength = 180
+    self.wraplength: int = 180
     # Store the widget the tooltip has to be shown for
-    self.widget = widget
+    self.widget: tk.Widget = widget
     # Store the tooltip text
-    self.text = text
+    self.text: str = text
     # Bind the mouse enter event, for the given widget, to the method call showing the tooltip
     self.widget.bind("<Enter>", self.enter)
     # Bind the mouse leave event, for the given widget, to the method call removing the tooltip
@@ -398,18 +407,18 @@ class WidgetTooltip():
     # Bind the mouse click event, for the given widget, to the method call removing the tooltip
     self.widget.bind("<ButtonPress>", self.leave)
     # Initialize the tooltip ID
-    self.id = None
+    self.id: Union[str, None] = None
     # Initialize the tooltip window
-    self.tooltip_window = None
+    self.tooltip_window: Union[tk.Toplevel, None] = None
 
-  def enter(self, event=None):
+  def enter(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that is run whenever the mouse enters the widget area for
     showing its tooltip.
     """
     self.schedule()
 
-  def leave(self, event=None):
+  def leave(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that is run whenever the mouse leaves the widget area for
     hiding its tooltip.
@@ -417,7 +426,7 @@ class WidgetTooltip():
     self.unschedule()
     self.hidetip()
 
-  def schedule(self):
+  def schedule(self) -> None:
     """
     Method that clears any previous tooltip and shows the one for the
     widget after a specific waiting time, i.e. the corresponding method
@@ -427,7 +436,7 @@ class WidgetTooltip():
     # Run the method after a waiting time and store its ID
     self.id = self.widget.after(self.wait_time, self.showtip)
 
-  def unschedule(self):
+  def unschedule(self) -> None:
     """
     Method that stops the job that shows the tooltip. The ID of the job
     to stop is retrieved by the corresponding instance attribute.
@@ -438,14 +447,14 @@ class WidgetTooltip():
       # Cancel the job, given its ID, that shows the tooltip
       self.widget.after_cancel(id)
 
-  def showtip(self, event=None):
+  def showtip(self, event: Union[tk.Event, None] = None) -> None:
     """
     Method that shows the tooltip as a window with a label object inside.
     """
     # Initialize both X-Y coordinates to '0'
     x = y = 0
     # Get the size of the widget
-    x, y, cx, cy = self.widget.bbox("insert")
+    x, y, _, _ = self.widget.bbox("insert")
     # Calculate the X-Y coordinates of the tooltip window, so that it is shown
     # below and to the right of the widget
     x += self.widget.winfo_rootx() + 25
@@ -467,7 +476,7 @@ class WidgetTooltip():
                      wraplength = self.wraplength)
     label.pack(ipadx=1)
 
-  def hidetip(self):
+  def hidetip(self) -> None:
     """
     Method that hides the tooltip by destroying the Toplevel window that
     contains it.
@@ -479,22 +488,22 @@ class WidgetTooltip():
 
 # testing ...
 if __name__ == '__main__':
-  root = tk.Tk()
+  root: tk.Tk = tk.Tk()
 
   #----------------------------
   # Testing the tooltip feature
   #----------------------------
-  btn1 = tk.Button(root, text="button 1")
+  btn1: tk.Button = tk.Button(root, text = "button 1")
   btn1.pack(padx=10, pady=5)
-  button1_ttp = WidgetTooltip(btn1, \
+  button1_ttp: WidgetTooltip = WidgetTooltip(btn1, \
     'Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, '
     'consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum '
     'quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam '
     'est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.')
 
-  btn2 = tk.Button(root, text="button 2")
+  btn2: tk.Button = tk.Button(root, text="button 2")
   btn2.pack(padx=10, pady=5)
-  button2_ttp = WidgetTooltip(btn2, \
+  button2_ttp: WidgetTooltip = WidgetTooltip(btn2, \
     "First thing's first, I'm the realest. Drop this and let the whole world "
     "feel it. And I'm still in the Murda Bizness. I could hold you down, like "
     "I'm givin' lessons in  physics. You should want a bad Vic like this.")
@@ -502,7 +511,7 @@ if __name__ == '__main__':
   #------------------------------------
   # Testing the clickable label feature
   #------------------------------------
-  clickable_lbl = OnOffClickableLabel(
+  clickable_lbl: OnOffClickableLabel = OnOffClickableLabel(
     parent=root,
     command=lambda: print("Execute"),
     size=30,
@@ -514,7 +523,7 @@ if __name__ == '__main__':
   #--------------------------------------------------
   # Testing the notebook with tabs that can be closed
   #--------------------------------------------------
-  notebook = CustomNotebook(width=200, height=200)
+  notebook: CustomNotebook = CustomNotebook(width=200, height=200)
   notebook.pack(side="top", fill="both", expand=True)
 
   for color in ("red", "orange", "green", "blue", "violet"):

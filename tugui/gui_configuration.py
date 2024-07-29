@@ -6,6 +6,7 @@ import re
 
 from dataclasses import dataclass, field
 from typing import Dict, Tuple, List
+from typing_extensions import Self
 
 from plot_settings import GroupType
 from support import IDGA
@@ -22,7 +23,7 @@ class DiagramCharacteristics():
   idga: str = ''
 
   @staticmethod
-  def init_tuplot_DiagramCharacteristics(number: str, idga: str):
+  def init_tuplot_DiagramCharacteristics(number: str, idga: str) -> Self:
     """
     Method that, given the plot number and idga values, builds an instance
     of the 'DiagramCharacteristics' dataclass and evaluates the group value
@@ -50,9 +51,9 @@ class DiagramCharacteristics():
 @dataclass
 class GuiPlotFieldsConfigurator():
   """
-  Dataclass providing a record storing all the needed information for filling up
-  the plot configuration fields into the GUI, as well as for enabling the plotting
-  functionalities.
+  Dataclass providing a record storing all the needed information for filling
+  up the plot configuration fields into the GUI, as well as for enabling the
+  plotting functionalities.
   To do so, some support dictionaries are stored as well.
   """
   diagr_path: str = ''
@@ -71,7 +72,7 @@ class GuiPlotFieldsConfigurator():
   tustat_path: str = ''
 
   @staticmethod
-  def init_GuiPlotFieldsConfigurator_attrs():
+  def init_GuiPlotFieldsConfigurator_attrs() -> Self:
     """
     Method that builds and configure the attributes of an instance of the
     'GuiPlotFieldsConfigurator' class.
@@ -209,7 +210,7 @@ class GuiPlotFieldsConfigurator():
     # Return the configured 'GuiPlotFieldsConfigurator' dataclass
     return gui_config
 
-  def __check_config_file_existence(self, path2check: str, filename: str):
+  def __check_config_file_existence(self, path2check: str, filename: str) -> None:
     """
     Function that raises an exception if the given path does not correspond to an
     existing file.
@@ -218,7 +219,7 @@ class GuiPlotFieldsConfigurator():
       # Raise an exception
       raise FileNotFoundError("Error: missing \"" + filename + "\" configuration file")
 
-  def __check_exe_file_existence(self, path2check: str, filename: str):
+  def __check_exe_file_existence(self, path2check: str, filename: str) -> None:
     """
     Function that raises an exception if the given path does not correspond to an
     existing executable file with right permission.
@@ -230,7 +231,7 @@ class GuiPlotFieldsConfigurator():
       # Raise an exception
       raise PermissionError("Error: the \"" + filename + "\" does not have execution permission")
 
-  def __build_nVsKn(self, group_file: str, group_dict: dict, search_num: str):
+  def __build_nVsKn(self, group_file: str, group_dict: Dict[str, List[str]], search_num: str) -> None:
     """
     Function that, given the 'Group' file to read (its path), it fills up the input dictionary with:
     . keys, being the line indicating the plot 'Number'
@@ -262,7 +263,7 @@ class GuiPlotFieldsConfigurator():
 
 if __name__ == "__main__":
   # Instantiate and configure the dataclass storing the GUI configuration
-  gui_config = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+  gui_config: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
 
   # Print the built dictionaries
   print(gui_config.groupVSnumVsKn)
