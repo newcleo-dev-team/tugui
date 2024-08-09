@@ -57,6 +57,7 @@ To run the code, the following dependencies must be satisfied:
 - ``TtkThemes`` :math:`>= 3.2.2`
 - ``Pandas`` :math:`>= 2.2.2`
 - ``MatplotLib`` :math:`>= 3.9.0`
+- ``Typing-extensions`` :math:`>= 4.12.2`
 
 To build the documentation in both *html* and *LaTeX* formats, the following
 dependencies must be satisfied:
