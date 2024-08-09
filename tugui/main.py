@@ -23,33 +23,26 @@ class TuPostProcessingGui(ThemedTk):
   """
   Class that builds a GUI for enabling the user to plot the quantities produced by
   a TU simulation. Two plot types are available:
-  . the ones showing the TU quantities as function of time, radial and axial position
-  . the ones coming from a statistical simulation.
-  Depending on the .pli file produced by the TU simulation, both types or the TuPlot
-  ones only are available.
-  This class is structured by providing:
-  . a menu bar
-  . an entry for setting the path to the .pli file to process
-  . the plot configuration area (left side) allowing users to setup what to plot
-  . the plot area (right side) where the selected curves are shown
-  . a status bar (bottom window) showing log messages.
+  - TuPlot: showing the TU quantities as function of time, radial and axial positions;
+  - TuStat: coming from a statistical simulation.
+  Depending on the .pli file produced by the TU simulation, both TuPlot and TuStat or the TuPlot
+  type only are available.
+  The GUI layout resulting from this class is structured in the following way:
+  - a menu bar (top);
+  - an entry for setting the path to the .pli file to process (top, just below the menu bar);
+  - the plot configuration area (left) allowing users to setup what to plot;
+  - the plot area (right) where the selected curves are shown;
+  - a status bar (bottom) showing log messages.
   """
   def __init__(self, window_title: str, width: int, height: int) -> None:
-    """
-    App windows's constructor
-    """
     # Call the superclass constructor
     super().__init__()
 
     # Initialize the main GUI window
     self.__initialize_gui_window(window_title, width, height)
 
-    # Get the absolute path of the current file
-    abspath = os.path.abspath(__file__)
-    # Get the file directory path
-    dname = os.path.dirname(abspath)
-    # Change the working directory to the one where the current executed file is located
-    os.chdir(dname)
+    # Set the working directory to the tugui main module location
+    self.__set_working_dir()
 
     # Set the window icon
     icon = PhotoImage(file=os.path.join(os.getcwd(), "../resources/icons/tuoutgui.gif"))
@@ -180,6 +173,20 @@ class TuPostProcessingGui(ThemedTk):
     top = int(self.winfo_screenheight() / 2 - height / 2)
     # Set the window geometry
     self.geometry(f"{width}x{height}+{left}+{top}")
+
+
+  def __set_working_dir(self) -> None:
+    """
+    Method that sets the working directory to the one where the tugui main
+    module is located.
+    """
+    # Get the absolute path of the tugui main module
+    abspath = os.path.abspath(__file__)
+    # Get the path of the folder where the tugui main module is placed
+    dname = os.path.dirname(abspath)
+    # Set the working dir to the one just retrieved
+    os.chdir(dname)
+
 
   def display_plot(self) -> None:
     """
