@@ -13,11 +13,9 @@ from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import DatGenerator, InpHandler, MicReader, PliReader, StaReader, TuInp, MacReader
 from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
-from support import IANT
+from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS
 from shutil import copyfile
 from typing import Union
-
-ERROR_LEVEL: bool = 0
 
 class TuPostProcessingGui(ThemedTk):
   """
@@ -35,6 +33,12 @@ class TuPostProcessingGui(ThemedTk):
   - a status bar (bottom) showing log messages.
   """
   def __init__(self, window_title: str, width: int, height: int) -> None:
+    # Check whether the OS platform is supported
+    if OS_PLATFORM not in SUPPORTED_OS_PLATFORMS:
+      error_message = f"The {OS_PLATFORM} OS is not yet supported!"
+      messagebox.showerror("Error", error_message)
+      raise RuntimeError(error_message)
+
     # Call the superclass constructor
     super().__init__()
 
@@ -44,11 +48,14 @@ class TuPostProcessingGui(ThemedTk):
     # Set the working directory to the tugui main module location
     self.__set_working_dir()
 
-    # Set the window icon
-    icon = PhotoImage(file=os.path.join(os.getcwd(), "../resources/icons/tuoutgui.gif"))
-    self.iconphoto(False, icon)
-    # self.tk.call('wm', 'iconphoto', self._w, icon)
-    # self.iconphoto(True, PhotoImage(file=os.path.join(os.getcwd(), "resources/tuoutgui.ico")))
+    # Set the titlebar icon
+    if OS_PLATFORM == "Linux":
+      self.iconphoto(False, PhotoImage(file = os.path.join(
+        os.getcwd(),"../resources/icons/tuoutgui.gif")))
+    else:
+      # FIXME: to add the file "tuoutgui.ico" in the right location
+      self.iconphoto(True, PhotoImage(file = os.path.join(
+        os.getcwd(), "../resources/icons/tuoutgui.ico")))
 
     # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
     try:

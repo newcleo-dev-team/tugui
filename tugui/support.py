@@ -1,5 +1,15 @@
+import platform
 from enum import Enum
-from typing import Tuple
+from typing import List, Tuple
+
+# Flag defining the level of error management
+ERROR_LEVEL: bool = 0
+
+# List of supported OS
+SUPPORTED_OS_PLATFORMS: List[str] = ["Linux", "Windows"]
+
+# Variable storing the OS platform tugui is running on
+OS_PLATFORM: str = platform.system()
 
 class IDGA(Enum):
   """

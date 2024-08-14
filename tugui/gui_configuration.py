@@ -1,7 +1,6 @@
 from ast import List
 from enum import Enum
 import os
-import platform
 import re
 
 from dataclasses import dataclass, field
@@ -9,7 +8,7 @@ from typing import Dict, Tuple, List
 from typing_extensions import Self
 
 from plot_settings import GroupType
-from support import IDGA
+from support import IDGA, OS_PLATFORM
 
 
 @dataclass
@@ -192,13 +191,13 @@ class GuiPlotFieldsConfigurator():
       # ---------------------------------------------------------------------------
       # Check the executables existence in the "bin" folder on the basis of the
       # current OS
-      if platform.system() == "Linux":
+      if OS_PLATFORM == "Linux":
         print("LINUX HERE!")
         gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
         gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
         gui_config.__check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
         gui_config.__check_exe_file_existence(gui_config.tustat_path, "tustatgui")
-      elif platform.system() == "Windows":
+      else:
         print("WINDOWS HERE!")
         gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
         gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
