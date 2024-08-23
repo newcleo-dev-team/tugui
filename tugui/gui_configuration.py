@@ -1,114 +1,131 @@
+from ast import List
 from enum import Enum
 import os
 import platform
 import re
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict, Tuple, List
+from typing_extensions import Self
 
-class IDGA(Enum):
-  """
-  Enumeration storing the different types of plots (field "Type").
-  """
-  IDGA_1 = "1 - Different Curve Numbers"
-  IDGA_2 = "2 - Different Times"
-  IDGA_3 = "3 - Different Slices"
+from plot_settings import GroupType
+from support import IDGA
 
-class IANT(Enum):
-  """
-  Enumeration storing the different types of IANT field.
-  """
-  IANT_1 = "IANT 1"
-  IANT_2 = "IANT 2"
-  IANT_3 = "IANT 3"
 
 @dataclass
-class Diagram():
+class DiagramCharacteristics():
   """
-  Dataclass providing a record storing the basic features of a diagram.
+  Dataclass providing a record storing the characteristics of either a
+  TuPlot or a TuStat diagram.
   """
-  number: str = '000'
+  group: GroupType = None
+  number: str = ''
+  idga: str = ''
 
-@dataclass
-class TuPlotDiagram(Diagram):
-  """
-  Dataclass providing a record storing the features of a TuPlot diagram.
-  """
-  group: str = 'Radius'
-  idga: str = '1'
-
-  def define_group_from_num(self):
+  @staticmethod
+  def init_tuplot_DiagramCharacteristics(number: str, idga: str) -> Self:
     """
-    Method that evaluates the group value based on the diagram number and
-    set the corresponding class attribute.
+    Method that, given the plot number and idga values, builds an instance
+    of the 'DiagramCharacteristics' dataclass and evaluates the group value
+    based on the diagram number. It then sets the corresponding attribute
+    of the built dataclass, which is returned.
+
+    N.B. This method should be called for a 'TuPlot' case diagram only.
     """
-    if int(self.number) >= 101 and int(self.number) <= 140:
-      self.group = 'Radius'
-    elif int(self.number) >= 201 and int(self.number) <= 251:
-      self.group = 'Time'
-    elif int(self.number) >= 252 and int(self.number) <= 270:
-      self.group = 'Time Integral'
-    elif int(self.number) >= 301 and int(self.number) <= 340:
-      self.group = 'Axial'
+    # Instantiate an object of the 'DiagramCharacteristics' class by passing
+    # the values for the 'number' and the 'idga' attributes
+    diagr_char = DiagramCharacteristics(number=number, idga=idga)
+    # Set the 'group' value according to the given 'number' attribute
+    if int(diagr_char.number) >= 101 and int(diagr_char.number) <= 140:
+      diagr_char.group = GroupType.group1
+    elif int(diagr_char.number) >= 201 and int(diagr_char.number) <= 251:
+      diagr_char.group = GroupType.group2
+    elif int(diagr_char.number) >= 252 and int(diagr_char.number) <= 270:
+      diagr_char.group = GroupType.group2A
+    elif int(diagr_char.number) >= 301 and int(diagr_char.number) <= 340:
+      diagr_char.group = GroupType.group3
+
+    # Return the built 'DiagramCharacteristics' instance
+    return diagr_char
 
 @dataclass
-class TuStatDiagram(Diagram):
-  """
-  Dataclass providing a record storing the features of a TuPlot diagram.
-  """
-  group: str = ''
-
-
 class GuiPlotFieldsConfigurator():
   """
-  Class that reads the configuration files and extract the values in order to build
-  the option fields into the GUI. These configuration files are:
-  . Diagrams - file storing the plot numbers for each plot "Group"
-  . Group 1/2/2a/3 - file storing the available Kns for each plot "Number"
-  . Statdiag - file storing the plot numbers related to a statistical simulation.
-  A dictionary is built storing the plot "Group" VS a dictionary of the corresponding
-  "Number" VS their Kns.
-  As for the statistical diagrams, a dictionary of number VS their descriptive string is
-  built as well.
-  These configuration files need to be present in the "config" folder of the application.
-  Their presence is checked before extracting the plots information.
+  Dataclass providing a record storing all the needed information for filling
+  up the plot configuration fields into the GUI, as well as for enabling the
+  plotting functionalities.
+  To do so, some support dictionaries are stored as well.
   """
-  def __init__(self):
+  diagr_path: str = ''
+  g1_path: str = ''
+  g2_path: str = ''
+  g2a_path: str = ''
+  g3_path: str = ''
+  stat_path: str = ''
+  groupVSnumVsKn: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
+  groupVStype: Dict[List, List[str]] = field(default_factory=dict)
+  iant1: Tuple = tuple()
+  iant2: Tuple = tuple()
+  idgaVSi: Dict[str, int] = field(default_factory=dict)
+  sta_numVSdescription: Dict[int, str] = field(default_factory=dict)
+  tuplot_path: str = ''
+  tustat_path: str = ''
+
+  @staticmethod
+  def init_GuiPlotFieldsConfigurator_attrs() -> Self:
+    """
+    Method that builds and configure the attributes of an instance of the
+    'GuiPlotFieldsConfigurator' class.
+    Configuration files and plotting executables are checked for existence,
+    and an exception is thrown if any of these files cannot be found.
+    This method returns the built dataclass.
+    """
+    # Declare an instance of the 'GuiPlotFieldsConfigurator' dataclass
+    gui_config = GuiPlotFieldsConfigurator()
+    ####################################
+    # Configure the dataclass attributes
+    ####################################
+    # ---------------------------------------
+    # Build and check the configuration files
+    # ---------------------------------------
+    # Build the configuration folder path
+    config =  os.path.join(os.getcwd(), "../resources/config")
     # Build the paths to the configuration files
-    self.diagr_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Diagrams")
-    self.g1_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group1")
-    self.g2_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2")
-    self.g2a_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group2a")
-    self.g3_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Group3")
-    self.stat_path = os.path.join(os.getcwd(), "../resources/config" + os.sep + "Statdiag")
+    gui_config.diagr_path = os.path.join(config, "Diagrams")
+    gui_config.g1_path = os.path.join(config, "Group1")
+    gui_config.g2_path = os.path.join(config, "Group2")
+    gui_config.g2a_path = os.path.join(config, "Group2a")
+    gui_config.g3_path = os.path.join(config, "Group3")
+    gui_config.stat_path = os.path.join(config, "Statdiag")
 
     # Check the configuration files existence into the application "config" folder
-    self.check_config_file_existence(self.diagr_path, "Diagrams")
-    self.check_config_file_existence(self.g1_path, "Group1")
-    self.check_config_file_existence(self.g2_path, "Group2")
-    self.check_config_file_existence(self.g2a_path, "Group2a")
-    self.check_config_file_existence(self.g3_path, "Group3")
-    self.check_config_file_existence(self.g3_path, "Statdiag")
+    gui_config.__check_config_file_existence(gui_config.diagr_path, "Diagrams")
+    gui_config.__check_config_file_existence(gui_config.g1_path, "Group1")
+    gui_config.__check_config_file_existence(gui_config.g2_path, "Group2")
+    gui_config.__check_config_file_existence(gui_config.g2a_path, "Group2a")
+    gui_config.__check_config_file_existence(gui_config.g3_path, "Group3")
+    gui_config.__check_config_file_existence(gui_config.g3_path, "Statdiag")
 
     print("###\nConfiguration files are present in the \"resources/config\" folder\n###")
 
-    ######################################################
+    # ----------------------------------------------------
     # Extract the information from the configuration files
-    ######################################################
-    # Open the different "Group" files and fill the dictionary "Number"-"Kn"
+    # ----------------------------------------------------
+    # Open the different 'Group' files and fill the dictionary 'Number'-'Kn'
     numberVsKn = dict()
-    self.build_nVsKn(self.g1_path, numberVsKn, "^1\d\d")
-    self.build_nVsKn(self.g2_path, numberVsKn, "^2\d\d")
-    self.build_nVsKn(self.g2a_path, numberVsKn, "^2\d\d")
-    self.build_nVsKn(self.g3_path, numberVsKn, "^3\d\d")
+    gui_config.__build_nVsKn(gui_config.g1_path, numberVsKn, "^1\d\d")
+    gui_config.__build_nVsKn(gui_config.g2_path, numberVsKn, "^2\d\d")
+    gui_config.__build_nVsKn(gui_config.g2a_path, numberVsKn, "^2\d\d")
+    gui_config.__build_nVsKn(gui_config.g3_path, numberVsKn, "^3\d\d")
 
     # Instantiate the dictionary holding the plots "Group" Vs the dictionary of corresponding "Number"-s VS "Kn"-s
-    self.groupVSnumVsKn = dict()
+    gui_config.groupVSnumVsKn = dict()
     # Initialize a string holding the "Group" name
     group_name = ""
 
     # Open the "Diagram" file and extract each of the plot "Number"-s for each "Group"
     # Open the given "Group" file by specifying the ANSI encoding they are built with
-    with open(self.diagr_path, 'r', encoding="cp1252") as dg:
+    with open(gui_config.diagr_path, 'r', encoding="cp1252") as dg:
       # Process the file line by line
       for line in dg:
         # Get the line specifying the plot "Group"
@@ -116,7 +133,7 @@ class GuiPlotFieldsConfigurator():
           # Check if the saved "Group" name differs from the current line
           if(group_name != "" and group_name != line.split(" : ")[1]):
             # Assemble the entry of the dictionary of "Group" VS dictionary of "Number" VS "Kn"-s
-            self.groupVSnumVsKn[group_name] = numVskn
+            gui_config.groupVSnumVsKn[group_name] = numVskn
 
           # Declare a dictionary holding the plot "Number" VS the corresponding "Kn"-s of the current "Group"
           numVskn = dict()
@@ -132,125 +149,122 @@ class GuiPlotFieldsConfigurator():
             numVskn[line.split('\n')[0]] = numberVsKn[num]
 
       # Add the last entry of the dictionary of "Group" VS dictionary of "Number" VS "Kn"-s
-      self.groupVSnumVsKn[group_name] = numVskn
+      gui_config.groupVSnumVsKn[group_name] = numVskn
 
       # Build a dictionary of plot "Group" VS the available "Type" values
-      self.groupVStype = {
-        list(self.groupVSnumVsKn.keys())[0]: ["1 - Different Curve Numbers", "2 - Different Times", "3 - Different Slices"],
-        list(self.groupVSnumVsKn.keys())[1]: ["1 - Different Curve Numbers", "3 - Different Slices"],
-        list(self.groupVSnumVsKn.keys())[2]: ["1 - Different Curve Numbers"],
-        list(self.groupVSnumVsKn.keys())[3]: ["1 - Different Curve Numbers", "2 - Different Times"]
+      gui_config.groupVStype = {
+        list(gui_config.groupVSnumVsKn.keys())[0]: ["1 - Different Curve Numbers", "2 - Different Times", "3 - Different Slices"],
+        list(gui_config.groupVSnumVsKn.keys())[1]: ["1 - Different Curve Numbers", "3 - Different Slices"],
+        list(gui_config.groupVSnumVsKn.keys())[2]: ["1 - Different Curve Numbers"],
+        list(gui_config.groupVSnumVsKn.keys())[3]: ["1 - Different Curve Numbers", "2 - Different Times"]
       }
 
-    # Build a tuple storing the available options for specific plot "Number"-s
-    self.iant1 = ([113], ["Temperature-distribution will be drawn over the fuel, the cladding and the structure"])
-    self.iant2 = ([102, 103, 104, 105, 106, 107, 108],
-                  ["The radial stresses and strains are only drawn for the cladding",
-                   "The radial stresses and strains are only drawn for the fuel"])
+      # Build a tuple storing the available options for specific plot "Number"-s
+      gui_config.iant1 = ([113], ["Temperature-distribution will be drawn over the fuel, the cladding and the structure"])
+      gui_config.iant2 = ([102, 103, 104, 105, 106, 107, 108],
+                    ["The radial stresses and strains are only drawn for the cladding",
+                    "The radial stresses and strains are only drawn for the fuel"])
 
-    # Build a map between the IDGA enumeration and their index
-    self.idgaVSi = {
-      IDGA(IDGA['IDGA_1']).value: 1,
-      IDGA(IDGA['IDGA_2']).value: 2,
-      IDGA(IDGA['IDGA_3']).value: 3,
-    }
+      # Build a map between the IDGA enumeration and their index
+      gui_config.idgaVSi = {
+        IDGA.IDGA_1.description: IDGA.IDGA_1.index,
+        IDGA.IDGA_2.description: IDGA.IDGA_2.index,
+        IDGA.IDGA_3.description: IDGA.IDGA_3.index
+      }
 
-    print(self.idgaVSi)
+      print(gui_config.idgaVSi)
 
+      # Build the dictionary of plot number VS their descriptive string for the statistical case
+      gui_config.sta_numVSdescription = dict()
+      with open(gui_config.stat_path, 'r', encoding="cp1252") as st:
+        # Process the file line by line
+        for line in st:
+          # Get the line specifying the plot number avoiding those lines indicating as
+          # "Dummy-Diagram"
+          if re.search("^\d+\s+(?!.*Dummy-Diagram).*", line.split('\n')[0]):
+            # Extract the plot number as an integer
+            num = int(line.split(' ')[0])
+            # Add the number VS descriptive line into the statistical plot dictionary
+            gui_config.sta_numVSdescription[num] = line.strip()
 
-    # Build an enumeration holding the available values of the IANT1 option, only available
-    # if the selected "Number" is 113
-    # self.iant1 = Enum('IANT1', ['Y', 'N'])
-    # p = self.iant1.N.name
-    # print("##\n", p)
+      # ---------------------------------------------------------------------------
+      # Check the presence of the TuPlot and TuStat executables in the "bin" folder
+      # ---------------------------------------------------------------------------
+      # Check the executables existence in the "bin" folder on the basis of the
+      # current OS
+      if platform.system() == "Linux":
+        print("LINUX HERE!")
+        gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
+        gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
+        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
+        gui_config.__check_exe_file_existence(gui_config.tustat_path, "tustatgui")
+      elif platform.system() == "Windows":
+        print("WINDOWS HERE!")
+        gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
+        gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
+        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "TuPlotGUI.exe")
+        gui_config.__check_exe_file_existence(gui_config.tustat_path, "TuStatGUI.exe")
 
-    # Build the dictionary of plot number VS their descriptive string for the statistical case
-    self.sta_numVSdescription = dict()
-    with open(self.stat_path, 'r', encoding="cp1252") as st:
-      # Process the file line by line
-      for line in st:
-        # Get the line specifying the plot number avoiding those lines indicating as
-        # "Dummy-Diagram"
-        if re.search("^\d+\s+(?!.*Dummy-Diagram).*", line.split('\n')[0]):
-          # Extract the plot number as an integer
-          num = int(line.split(' ')[0])
-          # Add the number VS descriptive line into the statistical plot dictionary
-          self.sta_numVSdescription[num] = line.strip()
+      print("###\nExecutables files are present in the \"../resources/exec\" folder\n###")
 
-    #############################################################################
-    # Check the presence of the TuPlot and TuStat executables in the "bin" folder
-    #############################################################################
-    # Check the executables existence in the "bin" folder on the basis of the
-    # current OS
-    if platform.system() == "Linux":
-      print("LINUX HERE!")
-      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
-      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
-      self.check_exe_file_existence(self.tuplot_path, "tuplotgui")
-      self.check_exe_file_existence(self.tustat_path, "tustatgui")
-    elif platform.system() == "Windows":
-      print("WINDOWS HERE!")
-      self.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
-      self.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
-      self.check_exe_file_existence(self.tuplot_path, "TuPlotGUI.exe")
-      self.check_exe_file_existence(self.tustat_path, "TuStatGUI.exe")
+    # Return the configured 'GuiPlotFieldsConfigurator' dataclass
+    return gui_config
 
-    print("###\nExecutables files are present in the \"../resources/exec\" folder\n###")
-
-  def build_nVsKn(self, group_file: str, group_dict: dict, search_num: str):
+  def __check_config_file_existence(self, path2check: str, filename: str) -> None:
     """
-    Method that, given the "Group" file to read (its path), it fills the input dictionary with:
-    . keys, being the line indicating the plot "Number"
-    . values, being a list of lines indicating the available Kn-s for the corresponding plot "Number"
-    """
-    # Open the given "Group" file by specifying the ANSI encoding they are built with
-    with open(group_file, 'r', encoding="cp1252") as g1:
-      # Process the file line by line
-      for line in g1:
-        # Get the line specifying the plot "Number"
-        num = re.search(search_num, line.split('\n')[0])
-        if num:
-          # Declare a list holding the Kn-s of the current found "Number"
-          kns = list()
-          # Get the lines specifying the Kn-s corresponding to the current found "Number"
-          while True:
-            # Read the following line
-            line = g1.readline()
-            # Check for the presence of an empy line indicating the end of the Kn-s for the
-            # current "Number"
-            if (line.isspace() or line == "end\n"):
-              # Add the "Number"-Kn entry of the dictionary
-              group_dict[num.group(0)] = kns
-              break
-            else:
-              # Add the Kn line to a list belonging to the current found "Number"
-              kns.append(line.strip())
-
-
-  def check_config_file_existence(self, path2check: str, filename: str):
-    """
-    Method that raises an exception if the given path does not correspond to an
+    Function that raises an exception if the given path does not correspond to an
     existing file.
     """
     if (not os.path.isfile(path2check)):
       # Raise an exception
       raise FileNotFoundError("Error: missing \"" + filename + "\" configuration file")
 
-  def check_exe_file_existence(self, path2check: str, filename: str):
+  def __check_exe_file_existence(self, path2check: str, filename: str) -> None:
     """
-    Method that raises an exception if the given path does not correspond to an
+    Function that raises an exception if the given path does not correspond to an
     existing executable file with right permission.
     """
-    self.check_config_file_existence(path2check, filename)
+    # Check the executable file existence
+    self.__check_config_file_existence(path2check, filename)
     # Check that the file has execution permission
     if (not os.access(path2check, os.X_OK)):
       # Raise an exception
       raise PermissionError("Error: the \"" + filename + "\" does not have execution permission")
 
+  def __build_nVsKn(self, group_file: str, group_dict: Dict[str, List[str]], search_num: str) -> None:
+    """
+    Function that, given the 'Group' file to read (its path), it fills up the input dictionary with:
+    . keys, being the line indicating the plot 'Number'
+    . values, being a list of lines indicating the available Kn-s for the corresponding plot 'Number'
+    """
+    # Open the given 'Group' file by specifying the ANSI encoding they are built with
+    with open(group_file, 'r', encoding="cp1252") as g1:
+      # Process the file line by line
+      for line in g1:
+        # Get the line specifying the plot 'Number'
+        num = re.search(search_num, line.split('\n')[0])
+        if num:
+          # Declare a list holding the Kn-s of the current found 'Number'
+          kns = list()
+          # Get the lines specifying the Kn-s corresponding to the current found 'Number'
+          while True:
+            # Read the following line
+            line = g1.readline()
+            # Check for the presence of an empy line indicating the end of the Kn-s for the
+            # current 'Number'
+            if (line.isspace() or line == "end\n"):
+              # Add the 'Number'-Kn entry of the dictionary
+              group_dict[num.group(0)] = kns
+              break
+            else:
+              # Add the Kn line to a list belonging to the current found 'Number'
+              kns.append(line.strip())
+
 
 if __name__ == "__main__":
-  # Instantiate the class
-  gui_config = GuiPlotFieldsConfigurator()
+  # Instantiate and configure the dataclass storing the GUI configuration
+  gui_config: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+
   # Print the built dictionaries
   print(gui_config.groupVSnumVsKn)
   print(gui_config.sta_numVSdescription)

@@ -14,8 +14,10 @@ from matplotlib.backends.backend_tkagg import (
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnnotationBbox, TextArea, VPacker
+from numpy.typing import ArrayLike
 from tkinter import ttk
 from tkinter.filedialog import asksaveasfilename
+from typing import Callable, Dict, List, Union, Tuple
 
 
 class PlotFigure(ttk.Frame):
@@ -29,7 +31,7 @@ class PlotFigure(ttk.Frame):
       CustomToolbar instance;
     . report: a Frame object providing a Text object for the report to display.
   """
-  def __init__(self, container):
+  def __init__(self, container: tk.Misc) -> None:
     super().__init__(container)
 
     # Build a paned window
@@ -43,7 +45,7 @@ class PlotFigure(ttk.Frame):
     plot_frame.grid_rowconfigure(1, weight=0)
     plot_frame.grid_columnconfigure(0, weight=3)
     # Build a frame holding the plot report text
-    self.report_frame = ttk.Frame(container)
+    self.report_frame: ttk.Frame = ttk.Frame(container)
     self.report_frame.grid(column=0, row=0, sticky='nsew')
     # Build the content of the report frame
     self._build_report_area(self.report_frame)
@@ -54,7 +56,7 @@ class PlotFigure(ttk.Frame):
     panedwindow.add(self.report_frame, weight=1)
 
     # Instantiate the figure that will contain the plot; it is treated as an instance attribute
-    self.fig = Figure(figsize = (10, 5), dpi = 100)
+    self.fig: Figure = Figure(figsize = (10, 5), dpi = 100)
     self.fig.add_subplot(111)
     # Add a Tkinter canvas within the plot frame and that holds the matplotlib Figure object
     canvas = FigureCanvasTkAgg(self.fig, master = plot_frame)
@@ -63,7 +65,7 @@ class PlotFigure(ttk.Frame):
     canvas.get_tk_widget().grid(column=0, row=0, sticky='nsew')
 
     # Instantiate the toolbar
-    self.toolbar = CustomToolbar(canvas, plot_frame, False)
+    self.toolbar: CustomToolbar = CustomToolbar(canvas, plot_frame, False)
     # Reset the axes
     self.toolbar.update()
     # Place the toolbar into the Frame grid
@@ -77,7 +79,7 @@ class PlotFigure(ttk.Frame):
     # Bind the deselection of the toolbar buttons to the "DeselectButtons" event
     self.bind('<<DeselectButtons>>', func=lambda event: self.toolbar.reset_toolbar_buttons())
 
-  def _build_report_area(self, report_frame: ttk.Frame):
+  def _build_report_area(self, report_frame: ttk.Frame) -> None:
     """
     Method that builds the report area (as a Text widget) where the content of the
     .out file is displayed.
@@ -109,7 +111,7 @@ class PlotFigure(ttk.Frame):
     self.text_widget.bind("<Control-Key-c>", self._copy_report_selection)
     self.text_widget.bind("<Control-Key-C>", self._copy_report_selection) # In case caps lock is on
 
-  def _select_all_report(self, event):
+  def _select_all_report(self, event: tk.Event) -> str:
     """
     Method that selects all the content of the text widget showing the plot report.
     """
@@ -122,7 +124,7 @@ class PlotFigure(ttk.Frame):
     # Stops other bindings on this event from being invoked
     return 'break'
 
-  def _copy_report_selection(self, event):
+  def _copy_report_selection(self, event: tk.Event) -> None:
     """
     Method that copies the current report selection to the clipboard.
     """
@@ -147,7 +149,10 @@ class CustomToolbar(NavigationToolbar2Tk):
     . save as CSV: functionality for saving the X-Y data of the currently active curves
       to a file in the CSV format.
   """
-  def __init__(self, canvas, frame, pack_toolbar=False, axes=None, x=None, ys=None):
+  def __init__(self, canvas: tk.Canvas, frame: tk.Frame,
+               pack_toolbar: bool = False, axes: Union[Axes, None] =None,
+               x: List[ArrayLike] = None,
+               ys: List[ArrayLike] = None) -> None:
     super().__init__(canvas, window=frame, pack_toolbar=pack_toolbar)
 
     # Add the cursor button to the toolbar
@@ -178,12 +183,12 @@ class CustomToolbar(NavigationToolbar2Tk):
       self.get_toolbar_button('savecsv').configure(state='disabled')
 
     # Set the initial directory
-    self.initial_dir = os.getcwd()
+    self.initial_dir: str = os.getcwd()
 
     # Instantiate the PlotCursor class
-    self.cursor = PlotCursor(axes, x, ys)
+    self.cursor: PlotCursor = PlotCursor(axes, x, ys)
 
-  def get_toolbar_button(self, button_name: str) -> tk.Button | tk.Checkbutton:
+  def get_toolbar_button(self, button_name: str) -> Union[tk.Button, tk.Checkbutton]:
     """
     Method that, given a string representing the toolbar button name, it returns
     the corresponding button, either as an instance of the 'tk.Button' or the
@@ -191,7 +196,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     """
     return self._buttons[button_name]
 
-  def need_cursor_activation(self):
+  def need_cursor_activation(self) -> None:
     """
     Method that is called when the cursor button is pressed. Depending on the PlotCursor
     object 'button_state' attribute, the corresponding method of the PlotCursor instance
@@ -216,7 +221,7 @@ class CustomToolbar(NavigationToolbar2Tk):
       # Call the cursor object method for handling the cursor activation
       self.cursor.activate_cursor()
 
-  def need_legend_activation(self):
+  def need_legend_activation(self) -> None:
     """
     Method that is called when the legend button is pressed. Depending on the
     legend current visibility, the opposite state is assigned.
@@ -241,7 +246,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     # Re-draw the figure
     self.axes.figure.canvas.draw_idle()
 
-  def reset_toolbar_buttons(self):
+  def reset_toolbar_buttons(self) -> None:
     """
     Method that resets the additional buttons of the toolbar. In particular, both the
     cursor and the legend buttons are toggled off, while the PlotCursor related instance
@@ -254,7 +259,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     self.cursor.state = False
     self.cursor.set_button_state(False)
 
-  def save_csv(self):
+  def save_csv(self) -> None:
     """
     Method that enables the functionality for saving the X-Y data of the currently
     active curves on a file in CSV format. In case the plot presents curves with
@@ -279,7 +284,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     curves_to_save.update({h: l for h, l in zip(handles, legends) for c in self.active_curves if c == h})
 
     # Get the list of X-data for each of the active curves
-    curves: list[Line2D] = list(curves_to_save.keys())
+    curves: List[Line2D] = list(curves_to_save.keys())
     # Define the header list with elements being the legend labels
     headers = list(curves_to_save.values())
     # Add the plot X-axis label in the first position of the header list
@@ -334,7 +339,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     # Update the initial directory to the path of the saved file folder
     self.initial_dir = os.path.dirname(filename)
 
-  def set_active_curves(self, active_curves: list[Line2D]):
+  def set_active_curves(self, active_curves: List[Line2D]) -> None:
     """
     Method that sets the instance attribute referring to the currently
     active curves, provided as a list of 'Line2D' objects.
@@ -343,7 +348,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     # Activate the 'SaveCSV' toolbar button as there are curves available
     self._buttons['savecsv'].configure(state='active')
 
-  def set_axes(self, axes: Axes):
+  def set_axes(self, axes: Axes) -> None:
     """
     Method that sets the instance attribute referring to the current
     plot Axes object.
@@ -353,7 +358,8 @@ class CustomToolbar(NavigationToolbar2Tk):
     self._buttons['legend'].configure(state='active')
     self._buttons['cursor'].configure(state='active')
 
-  def _add_new_button(self, name: str, text: str, img_relpath: str, toggle: bool, command, tooltip: str):
+  def _add_new_button(self, name: str, text: str, img_relpath: str,
+                      toggle: bool, command: Callable, tooltip: str) -> None:
     """
     Method that allows to add a new button for the plot toolbar by providing its name, a descriptive
     text, the path to its image, relative to this module, if it has to be treated as an on/off button,
@@ -383,7 +389,7 @@ class PlotCursor():
   The cursor can be dragged by the mouse and can assume positions given by the X-Y values
   of the active curves stored within the present instance.
   """
-  def __init__(self, ax: Axes, x, y: list):
+  def __init__(self, ax: Axes, x: List[ArrayLike], y: List[ArrayLike]) -> None:
     """
     Class constructor. It needs the plot Axes object, the X values and
     a list of Y-values for each curve.
@@ -395,29 +401,29 @@ class PlotCursor():
     # curves are plotted yet.
     if ax != None:
       # Store the current plot Axes object
-      self.ax = ax
+      self.ax: Axes = ax
       # Store the X-Y values into the corresponding instance variables by extracting
       # them from the corresponding curves.
-      self.xs = x
-      self.ys = y
+      self.xs: List[ArrayLike] = x
+      self.ys: List[ArrayLike] = y
 
       # Connect events on the plot area to the execution of the corresponding methods
       self._connect_events_to_methods()
 
     # Initialize a list holding the curves markers and labels
-    self.marker: list[Line2D] = list()
+    self.marker: List[Line2D] = list()
 
     # Initialize flags for defining the cursor events
-    self.moved = None
-    self.pressed = False
-    self.start = False
+    self.moved: Union[bool, None] = None
+    self.pressed: bool = False
+    self.start: bool = False
     # Initialize to False the flag providing the cursor activation
-    self.state = False
-    self.button_state = False
+    self.state: bool = False
+    self.button_state: bool = False
     # Initialize a variable identifying the index for the curves X-Y lists
-    self.indx = 0
+    self.indx: int = 0
 
-  def activate_cursor(self):
+  def activate_cursor(self) -> None:
     """
     Method that deals with the cursor activation. When called, it builds the cursor
     vertical line, the annotation box showing the curves Y-values at the cursor
@@ -454,7 +460,7 @@ class PlotCursor():
     # Declare a list of empty strings with same dimension of the colors one
     texts = ['' for e in self.line_colors]
     # Declare a list of TextArea objects
-    self.text_areas: list[TextArea] = list()
+    self.text_areas: List[TextArea] = list()
     # Loop over all the elements of both text and colors lists
     for t,c in zip(texts, self.line_colors):
       # Add a TextArea object, each with a different color (for Y-values)
@@ -559,7 +565,7 @@ class PlotCursor():
     # Re-draw the figure
     self.figcanvas.draw_idle()
 
-  def deactivate_cursor(self):
+  def deactivate_cursor(self) -> None:
     """
     Method that deals with the cursor deactivation. When called, it removes the
     cursor vertical line, deleting the corresponding instance attribute, the
@@ -587,7 +593,7 @@ class PlotCursor():
     # Re-draw the figure
     self.figcanvas.draw_idle()
 
-  def set_attributes(self, ax: Axes, lines: list[Line2D]):
+  def set_attributes(self, ax: Axes, lines: List[Line2D]) -> None:
     """
     Method for setting the Axes object of the plot, the X-Y values lists, and the list
     of colors used by each plot.
@@ -621,7 +627,7 @@ class PlotCursor():
     # Connect events on the plot area to the execution of the corresponding methods
     self._connect_events_to_methods()
 
-  def _evaluate_display_mode(self):
+  def _evaluate_display_mode(self) -> str:
     """
     Method that evaluates the cursor display mode according to the X-coordinates of the
     input curves: if they all have the same X-values, the cursor shows an annotation box
@@ -647,14 +653,14 @@ class PlotCursor():
     # If here, return the 'YYX' mode (same X-values for all curves)
     return 'YYX'
 
-  def set_button_state(self, button_state: bool):
+  def set_button_state(self, button_state: bool) -> None:
     """
     Method that allows to set the instance variable storing the corresponding
     button state in the plot toolbar.
     """
     self.button_state = button_state
 
-  def show_activeonly_curves_info(self, active_curves: list[Line2D]):
+  def show_activeonly_curves_info(self, active_curves: List[Line2D]) -> None:
     """
     Method that, given a list of Line2D objects, set the instance attribute
     storing the currently active curves, i.e. those shown in the plot and
@@ -689,7 +695,7 @@ class PlotCursor():
     # the cursor given the new X-Y values.
     self.activate_cursor()
 
-  def _connect_events_to_methods(self):
+  def _connect_events_to_methods(self) -> None:
     """
     Method that handles the binding of the instance methods ot specific events happening
     within the plot area. In particular, we have:
@@ -715,7 +721,7 @@ class PlotCursor():
     self.ax.callbacks.connect('xlim_changed', self._handle_xylims_change)
     self.ax.callbacks.connect('ylim_changed', self._handle_xylims_change)
 
-  def _handle_mouse_move(self, event):
+  def _handle_mouse_move(self, event: tk.Event) -> None:
     """
     Method that is called whenever the mouse move event happens. It allows to move the
     cursor, the annotation box showing the X-Y values, and the corresponding markers
@@ -755,7 +761,7 @@ class PlotCursor():
     # Re-draw the figure
     self.ax.figure.canvas.draw_idle()
 
-  def _handle_mouse_press(self, event):
+  def _handle_mouse_press(self, event: tk.Event) -> None:
     """
     Method that is called whenever the mouse button press event
     happens to set the point corresponding to the X-coordinate of
@@ -772,7 +778,7 @@ class PlotCursor():
     # Having pressed the mouse button, set the corresponding flag to True
     self.pressed = True
 
-  def _handle_mouse_release(self, event):
+  def _handle_mouse_release(self, event: tk.Event) -> None:
     """
     Method that is called whenever the mouse button release event
     happens to set the instance flags.
@@ -789,7 +795,7 @@ class PlotCursor():
       self.start = False
       self.obj = self.moved
 
-  def _handle_resize(self, event):
+  def _handle_resize(self, event: tk.Event) -> None:
     """
     Method that is called whenever an event related to a resize of the plot
     figure happens. Given the new figure size, it calls the method for
@@ -799,7 +805,7 @@ class PlotCursor():
     if hasattr(self, 'ann'):
       self._update_box_coordinates()
 
-  def _handle_xylims_change(self, event_ax):
+  def _handle_xylims_change(self, event_ax: Axes) -> None:
     """
     Method that is called whenever an event related to a change in the X-axis
     range happens. Given the new limits, it calls the method for updating the
@@ -820,7 +826,7 @@ class PlotCursor():
       if self.xs[self.indx] < self.ax.get_xlim()[0]:
         self.indx += 1
 
-  def _update_box_coordinates(self):
+  def _update_box_coordinates(self) -> None:
     """
     Method that updates the position of the annotation box showing the X-Y values of the curves
     at the cursor position, if any has been defined.
@@ -857,7 +863,7 @@ class PlotCursor():
     else:
       self.ann.set(visible = True)
 
-  def _update_curves_info(self, x):
+  def _update_curves_info(self, x: List[ArrayLike]) -> None:
     """
     Method that updates the text shown by the annotation box. Given the current X-position
     of the cursor, provided as argument, it extract the Y-values for the plotted curves and
@@ -924,12 +930,12 @@ class PlotManager():
   Class that handles the plot creation by extracting the data provided by the output files
   produced by the TuPlot and TuStat executables.
   """
-  def __init__(self, dat_file: str, plt_file: str, out_file: str=""):
+  def __init__(self, dat_file: str, plt_file: str, out_file: str="") -> None:
     # Set the instance attributes
-    self.dat_file = dat_file
-    self.plt_file = plt_file
+    self.dat_file: str = dat_file
+    self.plt_file: str = plt_file
     if out_file != "":
-      self.out_file = out_file
+      self.out_file: str = out_file
 
     # Extract the plot information from the .plt file
     self._read_plt_file()
@@ -939,7 +945,7 @@ class PlotManager():
     if hasattr(self, 'out_file'):
       self._read_out_file()
 
-  def plot(self, plotFigure: PlotFigure, plot_index: int = 111):
+  def plot(self, plotFigure: PlotFigure, plot_index: int = 111) -> None:
     """
     Method that, given the input PlotFigure object, configures the plots and shows
     the curves. The plot legend is configured so that each curve visibility can be
@@ -948,7 +954,7 @@ class PlotManager():
     # Get the Figure from PlotFigure instance
     fig = plotFigure.fig
     # Store a reference to the toolbar for the given PlotFigure object
-    self.toolbar = plotFigure.toolbar
+    self.toolbar: CustomToolbar = plotFigure.toolbar
     # Reset the cursor state of the toolbar
     self.toolbar.cursor.deactivate_cursor()
 
@@ -966,7 +972,7 @@ class PlotManager():
     axes.set_ylabel(self.y_axis_name)
 
     # Declare an array holding the X-Y data for each curve to plot
-    lines: list[Line2D] = list()
+    lines: List[Line2D] = list()
 
     # Loop over all the curves stored in the dictionary extracted by reading the .dat file
     # and plot each of them
@@ -1029,7 +1035,8 @@ class PlotManager():
       # Disable the editability of the report text area
       plotFigure.text_widget.configure(state=tk.DISABLED)
 
-  def _handle_legend_pick(self, event, fig: Figure, map_legend_to_ax: dict[Axes.legend, Line2D]):
+  def _handle_legend_pick(self, event: tk.Event, fig: Figure,
+                          map_legend_to_ax: Dict[Axes.legend, Line2D]) -> None:
     """
     Method that, given the pick event, changes the visibility of the curve selected
     from the plot legend.
@@ -1063,7 +1070,7 @@ class PlotManager():
     # Pass the active curves to the toolbar object
     self.toolbar.set_active_curves(active_curves)
 
-  def _read_dat_file(self):
+  def _read_dat_file(self) -> None:
     """
     Method for extracting the X-Y data for the curves to be plotted. A different reading method
     is used that is given by the presence of the '/td' string at the beginning of the file. This
@@ -1089,7 +1096,7 @@ class PlotManager():
       # List containing the X-Y values for every curve
       curve = list()
       # Dictionary containing the curves values with key the legend and value a list of X-Y values
-      self.curves2plot: dict[(list | str), list] = dict()
+      self.curves2plot: Dict[Union[List[str], str], List[Tuple[float]]] = dict()
 
       # Handle the .dat content reading differently on the basis of the first line of the .dat file:
       # . if it starts with '/td', the curves X-Y data are provided separately as in the 'Radius'
@@ -1158,9 +1165,9 @@ class PlotManager():
         # information is present, which has already been retrieved from the already read .plt file.
         ##############################################################################################
         # Declare a list holding the X-data
-        x: list[str] = list()
+        x: List[str] = list()
         # Declare a list of lists holding the Y-data for each curve
-        ys: list[list[str]] = list()
+        ys: List[List[str]] = list()
 
         print("CURVE LEGEND 2: ", self.legend)
 
@@ -1202,7 +1209,7 @@ class PlotManager():
             self.curves2plot[l].append((float(x[i].replace("D", "E")), float(ys[i][j].replace("D", "E"))))
             j += 1
 
-  def _read_out_file(self):
+  def _read_out_file(self) -> None:
     """
     Method for extracting the content of the report .out file and saving it
     into a string instance attribute.
@@ -1212,7 +1219,7 @@ class PlotManager():
       # Save all the file content into a string
       self.report = file.read()
 
-  def _read_plt_file(self):
+  def _read_plt_file(self) -> None:
     """
     Method for extracting the data for setting up the plot display information,
     i.e. the axes names, the plot title, the plot legend, if present.
@@ -1260,7 +1267,7 @@ class PlotManager():
         if not self.legend[i]:
           self.legend[i] = self.y_axis_name
 
-  def _render_mathtext(self, text: str):
+  def _render_mathtext(self, text: str) -> str:
     """
     Method that, given the input string, allows its rendering as a mathematical expression.
     The string can contain some special characters that need to be interpreted as a
@@ -1293,7 +1300,7 @@ class PlotManager():
     # Return the string with any performed modification
     return text
 
-  def _interpret_matplotlib_symbol(self, letter: str):
+  def _interpret_matplotlib_symbol(self, letter: str) -> str:
     """
     Method that, given the input letter, returns a new one that corresponds
     to how matplotlib interprets the corresponding symbol.
@@ -1346,7 +1353,7 @@ class PlotManager():
       # Default case
       case _: return letter
 
-  def _search_and_replace(self, text: str, search_char: str):
+  def _search_and_replace(self, text: str, search_char: str) -> str:
     """
     Method that, given the input string 'text', searches for any match of substrings that start
     with the input character.
@@ -1372,12 +1379,12 @@ Testing the module functionalities.
 """
 if __name__ == "__main__":
   # Instantiate the root window
-  root = tk.Tk()
+  root: tk.Tk = tk.Tk()
   # Instantiate the PlotManager class
-  plt_manager = PlotManager(dat_file="../Input/TuPlot01.dat",
+  plt_manager: PlotManager = PlotManager(dat_file="../Input/TuPlot01.dat",
                             plt_file="../Input/TuPlot01.plt")
   # Instantiate a PlotFigure object
-  plt_figure = PlotFigure(root)
+  plt_figure: PlotFigure = PlotFigure(root)
   plt_figure.pack(fill='both', expand=True)
   # Remove the report area
   plt_figure.report_frame.destroy()
