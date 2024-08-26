@@ -20,10 +20,15 @@ a post-processing GUI.
 **TuGUI** allows the user to configure the plot area and select the quantities
 to be plotted from those available in the *TRANSURANUS* results file.
 
-*tugui* is developed by the **Codes & Methods** group of
+**TuGUI** is developed by the **Codes & Methods** group of
 `newcleo <https://www.newcleo.com/>`_ in partnership with the
 `JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_
 and it is released under the **GNU Lesser General Public License 3**.
+
+**DISCLAIMER:** **TuGUI** project does not contain any confidential or
+proprietary content of *TRANSURANUS*. The user must acquire the license for use
+of the **Transuranus Software Package** separately. It does not come with
+**TuGUI**, but it is essential for making **TuGUI** work properly.
 
 Project Structure
 -----------------
@@ -45,8 +50,6 @@ The project is organized according to the following folder structure:
 - ``resources``: contains files that support the configuration and operation of the GUI;
 - ``tests``: contains input files needed for test purposes;
 - ``tugui``: contains all modules, classes and methods implemented in *tugui*.
-
-*The structure of the repo is currently being defined.*
 
 Dependencies
 ------------
@@ -93,7 +96,7 @@ depending on the case) that extract the *X*-*Y* data for the curves to be
 plotted. In particular:
 
 - JRC-EC distributes the Windows-OS version of these executables in the
-  ``PostProcessors/TuOutGUI/Exe-Files`` of the *TRANSURANUS* code release;
+  ``PostProcessors/TuOutGUI/Exe-Files`` of the *Transuranus Software Package*;
   please note that such executables may limit some functionalities of
   **TuGUI**, since *batch mode* is not activated;
 
@@ -103,19 +106,12 @@ plotted. In particular:
   executables using the ``gfortran`` compiler (*10.+* version). Windows users
   can do the same by using appropriate FORTRAN compiler.
 
-Please note: when compiling both *TuPlot* and *TuStat*, the *batch mode* must
-be enabled in the code on both Windows and Linux systems to make **TuGUI**
-work properly, that is:
 
-- ``TuPlot``:
-   - open ``PostProcessors/TuPlot/TuPlot.f95`` file;
-   - comment line 98 ``iMode = 1``;
-   - uncomment line 102 ``iMode = 3``.
-
-- ``TuStat``:
-   - open ``PostProcessors/TuStat/tustat.f95`` file;
-   - comment line 92 ``iMode = 1``;
-   - uncomment line 98 ``iMode = 3``.
+**Please note**: when compiling both *TuPlot* and *TuStat*, the *batch mode*
+must be enabled in the code on both Windows and Linux systems to make **TuGUI**
+work properly. Please, refer to chapters **15.4** and **16.4.5**,
+respectively, of **TRANSURANUS HANDBOOK** that is distributed within the
+*Transuranus Software Package*.
 
 Once applied these modifications, the user must compile both the executables,
 call them ``tuplotgui`` and ``tustatgui`` respectively, 
