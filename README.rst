@@ -26,9 +26,10 @@ to be plotted from those available in the *TRANSURANUS* results file.
 and it is released under the **GNU Lesser General Public License 3**.
 
 **DISCLAIMER:** **TuGUI** project does not contain any confidential or
-proprietary content of *TRANSURANUS*. The user must acquire the license for use
-of the **Transuranus Software Package** separately. It does not come with
-**TuGUI**, but it is essential for making **TuGUI** work properly.
+proprietary content of *TRANSURANUS*. The user must purchase the license for use
+of the **Transuranus Software Package** separately. This software package
+does not come with **TuGUI**, but it is essential for making **TuGUI** work
+properly.
 
 Project Structure
 -----------------
