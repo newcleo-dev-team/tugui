@@ -191,18 +191,15 @@ class GuiPlotFieldsConfigurator():
       # ---------------------------------------------------------------------------
       # Check the executables existence in the "bin" folder on the basis of the
       # current OS
-      if OS_PLATFORM == "Linux":
-        print("LINUX HERE!")
-        gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tuplotgui")
-        gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "tustatgui")
-        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "tuplotgui")
-        gui_config.__check_exe_file_existence(gui_config.tustat_path, "tustatgui")
-      else:
-        print("WINDOWS HERE!")
-        gui_config.tuplot_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuPlotGUI.exe")
-        gui_config.tustat_path = os.path.join(os.getcwd(), "../resources/exec" + os.sep + "TuStatGUI.exe")
-        gui_config.__check_exe_file_existence(gui_config.tuplot_path, "TuPlotGUI.exe")
-        gui_config.__check_exe_file_existence(gui_config.tustat_path, "TuStatGUI.exe")
+      tuplot_filename = "tuplotgui"
+      tustat_filename = "tustatgui"
+      if OS_PLATFORM == "Windows":
+        tuplot_filename += ".exe"
+        tustat_filename += ".exe"
+      gui_config.tuplot_path = os.path.join(os.getcwd(), f"../resources/exec/{tuplot_filename}")
+      gui_config.tustat_path = os.path.join(os.getcwd(), f"../resources/exec/{tustat_filename}")
+      gui_config.__check_exe_file_existence(gui_config.tuplot_path, tuplot_filename)
+      gui_config.__check_exe_file_existence(gui_config.tustat_path, tustat_filename)
 
       print("###\nExecutables files are present in the \"../resources/exec\" folder\n###")
 
