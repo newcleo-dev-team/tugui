@@ -150,7 +150,7 @@ own development.
 Acknowledgement
 ---------------
 
-*new*cleo is thankful to the *TRANSURANUS* development team of
+*new*\cleo is thankful to the *TRANSURANUS* development team of
 `JRC-EC Karlsruhe <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_
 for distributing their software to *new*cleo and for supporting the
 development of **TUGUI**.
