@@ -346,7 +346,7 @@ class CustomToolbar(NavigationToolbar2Tk):
     """
     self.active_curves = active_curves
     # Activate the 'SaveCSV' toolbar button as there are curves available
-    self._buttons['savecsv'].configure(state='active')
+    self.get_toolbar_button('savecsv').configure(state='normal')
 
   def set_axes(self, axes: Axes) -> None:
     """
@@ -355,8 +355,8 @@ class CustomToolbar(NavigationToolbar2Tk):
     """
     self.axes = axes
     # Activate the 'Legend' and 'Cursor' toolbar buttons as the Axes object has been defined
-    self._buttons['legend'].configure(state='active')
-    self._buttons['cursor'].configure(state='active')
+    self.get_toolbar_button('legend').configure(state='normal')
+    self.get_toolbar_button('cursor').configure(state='normal')
 
   def _add_new_button(self, name: str, text: str, img_relpath: str,
                       toggle: bool, command: Callable, tooltip: str) -> None:
