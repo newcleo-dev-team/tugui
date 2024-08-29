@@ -21,7 +21,7 @@ a post-processing GUI.
 to be plotted from those available in the *TRANSURANUS* results file.
 
 **TUGUI** is developed by the **Codes & Methods** group of
-`newcleo <https://www.newcleo.com/>`_ and it is released under the
+`*new*\cleo <https://www.newcleo.com/>`_ and it is released under the
 **GNU Lesser General Public License 3**.
 
 **DISCLAIMER:** **TUGUI** project must not contain any confidential or
