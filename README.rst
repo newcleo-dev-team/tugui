@@ -7,7 +7,7 @@ TUGUI
 
 :Author: Davide Manzione, Elena Travaglia
 :Contributor: Daniele Tomatis, Gabriele Ottino
-:Date: 11/06/2024
+:Date: 30/08/2024
 
 Introduction
 ------------
@@ -22,11 +22,12 @@ to be plotted from those available in the *TRANSURANUS* results file.
 
 **TUGUI** is developed by the **Codes & Methods** group of
 `*new*\cleo <https://www.newcleo.com/>`_ and it is released under the
-**GNU Lesser General Public License 3**.
+**BSD 3-Clause License**.
 
 **DISCLAIMER:** **TUGUI** project must not contain any confidential or
 proprietary content of *TRANSURANUS*. The user must address a license request
-for the **Transuranus Software Package** to `JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_.
+for the **Transuranus Software Package (Version v1m1j24)** to
+`JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_.
 **Transuranus Software Package** is not distributed with **TUGUI**.
 
 Project Structure
@@ -56,7 +57,7 @@ Dependencies
 To run the code, the following dependencies must be satisfied:
 
 - ``Python`` :math:`>= 3.11+`
-- ``TtkThemes`` :math:`>= 3.2.2`
+- ``sv-ttk`` :math:`>= 2.6.0`
 - ``Pandas`` :math:`>= 2.2.2`
 - ``MatplotLib`` :math:`>= 3.9.0`
 - ``Typing-extensions`` :math:`>= 4.12.2`
