@@ -21,7 +21,7 @@ a post-processing GUI.
 to be plotted from those available in the *TRANSURANUS* results file.
 
 **TUGUI** is developed by the **Codes & Methods** group of
-`*new*\cleo <https://www.newcleo.com/>`_ and it is released under the
+|newcleo|_ and it is released under the
 **BSD 3-Clause License**.
 
 **DISCLAIMER:** **TUGUI** project must not contain any confidential or
@@ -29,6 +29,9 @@ proprietary content of *TRANSURANUS*. The user must address a license request
 for the **Transuranus Software Package (Version v1m1j24)** to
 `JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_.
 **Transuranus Software Package** is not distributed with **TUGUI**.
+
+.. |newcleo| replace:: *new*\cleo
+.. _newcleo: https://www.newcleo.com/
 
 Project Structure
 -----------------
