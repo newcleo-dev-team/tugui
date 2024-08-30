@@ -991,7 +991,7 @@ def new_postprocessing(event: Union[tk.Event, None] = None) -> None:
   Function that opens a new window for performing post-processing of results from a TU simulation.
   """
   # Instantiate the TuPostProcessingGui class by passing the window title and its dimensions
-  window = TuPostProcessingGui("TU Graphical User Interface", 1377, 679)
+  window = TuPostProcessingGui("TransUranus Graphical User Interface", 1377, 679)
   # Start the window loop event
   window.mainloop()
 
