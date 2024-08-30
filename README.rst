@@ -1,4 +1,4 @@
-TuGUI
+TUGUI
 =====
 
 .. image:: resources/icons/newcleologo_hd.png
@@ -7,23 +7,28 @@ TuGUI
 
 :Author: Davide Manzione, Elena Travaglia
 :Contributor: Daniele Tomatis, Gabriele Ottino
-:Date: 11/06/2024
+:Date: 30/08/2024
 
 Introduction
 ------------
 
-**TuGUI** is a Python-based application intended for providing the
+**TUGUI** is a Python-based application intended for providing the
 *Transuranus Fuel Performance code*
 (`TRANSURANUS <https://data.jrc.ec.europa.eu/collection/transuranus>`_) with
 a post-processing GUI.
 
-**TuGUI** allows the user to configure the plot area and select the quantities
+**TUGUI** allows the user to configure the plot area and select the quantities
 to be plotted from those available in the *TRANSURANUS* results file.
 
-*tugui* is developed by the **Codes & Methods** group of
-`newcleo <https://www.newcleo.com/>`_ in partnership with the
-`JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_
-and it is released under the **GNU Lesser General Public License 3**.
+**TUGUI** is developed by the **Codes & Methods** group of
+`*new*\cleo <https://www.newcleo.com/>`_ and it is released under the
+**BSD 3-Clause License**.
+
+**DISCLAIMER:** **TUGUI** project must not contain any confidential or
+proprietary content of *TRANSURANUS*. The user must address a license request
+for the **Transuranus Software Package (Version v1m1j24)** to
+`JRC-EC <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_.
+**Transuranus Software Package** is not distributed with **TUGUI**.
 
 Project Structure
 -----------------
@@ -44,9 +49,7 @@ The project is organized according to the following folder structure:
 - ``docs``: contains files for the generation of the documentation by Sphinx;
 - ``resources``: contains files that support the configuration and operation of the GUI;
 - ``tests``: contains input files needed for test purposes;
-- ``tugui``: contains all modules, classes and methods implemented in *tugui*.
-
-*The structure of the repo is currently being defined.*
+- ``tugui``: contains all modules, classes and methods implemented in **TUGUI**.
 
 Dependencies
 ------------
@@ -54,7 +57,7 @@ Dependencies
 To run the code, the following dependencies must be satisfied:
 
 - ``Python`` :math:`>= 3.11+`
-- ``TtkThemes`` :math:`>= 3.2.2`
+- ``sv-ttk`` :math:`>= 2.6.0`
 - ``Pandas`` :math:`>= 2.2.2`
 - ``MatplotLib`` :math:`>= 3.9.0`
 - ``Typing-extensions`` :math:`>= 4.12.2`
@@ -70,7 +73,7 @@ dependencies must be satisfied:
 How to Install
 --------------
 
-To install the *tugui* application, please be sure that all the dependencies
+To install the **TUGUI** application, please check that all the dependencies
 are met, and then clone the repository at
 https://github.com/newcleo-dev-team/tugui using the following command:
 
@@ -81,46 +84,40 @@ https://github.com/newcleo-dev-team/tugui using the following command:
 How to Use
 ----------
 
-To open the GUI, the following command needs to be run from the command prompt:
+To open the GUI, run the following command from the command prompt:
 
   .. code-block:: bash
 
     python tugui/main.py
 
-To generate the plots from the results of a *TRANSURANUS* simulation, **TuGUI**
+To generate the plots from the results of a *TRANSURANUS* simulation, **TUGUI**
 relies on the execution of one of the executables (``TuPlot`` or ``TuStat``,
 depending on the case) that extract the *X*-*Y* data for the curves to be
 plotted. In particular:
 
 - JRC-EC distributes the Windows-OS version of these executables in the
-  ``PostProcessors/TuOutGUI/Exe-Files`` of the *TRANSURANUS* code release;
+  ``PostProcessors/TuOutGUI/Exe-Files`` of the *Transuranus Software Package*;
   please note that such executables may limit some functionalities of
-  **TuGUI**, since *batch mode* is not activated;
+  **TUGUI**, since *batch mode* is disabled;
 
 - the FORTRAN source code of the above executables is provided as well
   in the ``PostProcessors/TuPlot`` and ``PostProcessors/TuStat`` folders,
   correspondingly. Linux users can compile the Linux-OS version of the same
   executables using the ``gfortran`` compiler (*10.+* version). Windows users
-  can do the same by using appropriate FORTRAN compiler.
+  can do the same by using appropriate FORTRAN compiler. We recommend
+  *Silverfrost FTN95* as FORTRAN compiler on Windows Operative Systems.
 
-Please note: when compiling both *TuPlot* and *TuStat*, the *batch mode* must
-be enabled in the code on both Windows and Linux systems to make **TuGUI**
-work properly, that is:
 
-- ``TuPlot``:
-   - open ``PostProcessors/TuPlot/TuPlot.f95`` file;
-   - comment line 98 ``iMode = 1``;
-   - uncomment line 102 ``iMode = 3``.
+**Please note**: when compiling both *TuPlot* and *TuStat*, the *batch mode*
+must be enabled in the code on both Windows and Linux systems to make **TUGUI**
+work properly. Please, refer to chapters **15.4** and **16.4.5**,
+respectively, of **TRANSURANUS HANDBOOK** that is distributed within the
+*Transuranus Software Package*.
 
-- ``TuStat``:
-   - open ``PostProcessors/TuStat/tustat.f95`` file;
-   - comment line 92 ``iMode = 1``;
-   - uncomment line 98 ``iMode = 3``.
-
-Once applied these modifications, the user must compile both the executables,
+Once applied these modifications, the user must compile both executables,
 call them ``tuplotgui`` and ``tustatgui`` respectively, 
 and put them into the folder ``tugui/resources/exec`` (to be created) of the
-**TuGUI** project.
+**TUGUI** project.
 
 Documentation
 -------------
@@ -145,3 +142,16 @@ How to Contribute
 For anyone wishing to contribute to the development of the project, report
 issues or problems with the software, or request support, please refer to this
 `web page <https://github.com/newcleo-dev-team/tugui/blob/master/CONTRIBUTIONS.rst>`_.
+
+Developers issuing pull requests for consideration and acceptance of their
+work into the main development branch of **TUGUI** must first verify that no
+original content of the *Transuranus Software Package* is contained in their
+own development.
+
+Acknowledgement
+---------------
+
+*new*\cleo is thankful to the *TRANSURANUS* development team of
+`JRC-EC Karlsruhe <https://commission.europa.eu/about-european-commission/departments-and-executive-agencies/joint-research-centre_en>`_
+for distributing their software to *new*\cleo and for supporting the
+development of **TUGUI**.

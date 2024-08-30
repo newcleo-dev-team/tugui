@@ -1,8 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk
-
-from ttkthemes import ThemedTk
+from sv_ttk import set_theme
 
 from abc import ABC, abstractmethod
 from typing import Callable, List, Union
@@ -794,9 +793,10 @@ class TuStatTabContentBuilder(TabContentBuilder):
 
 
 if __name__ == "__main__":
-  # Intantiate the root window
-  root: ThemedTk = ThemedTk()
-  root.configure(theme='radiance')
+  # Instantiate the root window
+  root: tk.Tk = tk.Tk()
+  # Set the theme to use
+  set_theme("light")
 
   # Instantiate a notebook
   tabControl: ttk.Notebook = ttk.Notebook(root)
