@@ -1,6 +1,6 @@
 import platform
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 # Flag defining the level of error management
 ERROR_LEVEL: bool = 0
@@ -10,6 +10,14 @@ SUPPORTED_OS_PLATFORMS: List[str] = ["Linux", "Windows"]
 
 # Variable storing the OS platform tugui is running on
 OS_PLATFORM: str = platform.system()
+
+# Variable storing the relative path of the icon file
+ICON_PATH: Union[str, None] = None
+if OS_PLATFORM == "Linux":
+  ICON_PATH = "../resources/icons/tuoutgui.gif"
+elif OS_PLATFORM == "Windows":
+  # FIXME: to add the file "tuoutgui.ico" in the right location
+  ICON_PATH = "../resources/icons/tuoutgui.ico"
 
 class IDGA(Enum):
   """

@@ -1,6 +1,8 @@
 import tkinter as tk
 import os
 import re
+import sys
+import traceback
 
 from tkinter import PhotoImage, ttk
 from tkinter import filedialog
@@ -13,7 +15,7 @@ from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import DatGenerator, InpHandler, MicReader, PliReader, StaReader, TuInp, MacReader
 from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
-from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS
+from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS, ICON_PATH
 from shutil import copyfile
 from typing import Union
 
@@ -34,10 +36,7 @@ class TuPostProcessingGui(ThemedTk):
   """
   def __init__(self, window_title: str, width: int, height: int) -> None:
     # Check whether the OS platform is supported
-    if OS_PLATFORM not in SUPPORTED_OS_PLATFORMS:
-      error_message = f"The {OS_PLATFORM} OS is not yet supported!"
-      messagebox.showerror("Error", error_message)
-      raise RuntimeError(error_message)
+    self.__check_OS_platform()
 
     # Call the superclass constructor
     super().__init__()
@@ -49,13 +48,7 @@ class TuPostProcessingGui(ThemedTk):
     self.__set_working_dir()
 
     # Set the titlebar icon
-    if OS_PLATFORM == "Linux":
-      self.iconphoto(False, PhotoImage(file = os.path.join(
-        os.getcwd(),"../resources/icons/tuoutgui.gif")))
-    else:
-      # FIXME: to add the file "tuoutgui.ico" in the right location
-      self.iconphoto(True, PhotoImage(file = os.path.join(
-        os.getcwd(), "../resources/icons/tuoutgui.ico")))
+    self.__set_icon()
 
     # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
     try:
@@ -165,6 +158,16 @@ class TuPostProcessingGui(ThemedTk):
     # Bind the <<DatPltLoaded>> virtual event to the plot creation
     self.bind('<<DatPltLoaded>>', func=lambda event: self.display_plot())
 
+  def __check_OS_platform(self) -> None:
+    """
+    Method that checks whether the OS platform is supported:
+    for the time being, only Windows and Linux OSs are supported.
+    """    
+    if OS_PLATFORM not in SUPPORTED_OS_PLATFORMS:
+      error_message = f"The {OS_PLATFORM} OS is not yet supported!"
+      messagebox.showerror("Error", error_message)
+      raise RuntimeError(error_message)
+
   def __initialize_gui_window(self, title: str, width: int, height: int) -> None:
     """
     Method that sets the GUI window title, as well as its dimensions, in terms
@@ -181,6 +184,15 @@ class TuPostProcessingGui(ThemedTk):
     # Set the window geometry
     self.geometry(f"{width}x{height}+{left}+{top}")
 
+  def __set_icon(self) -> None:
+    """
+    Set the titlebar icon
+    """
+    try:
+      self.iconphoto(False,
+                     PhotoImage(file = os.path.join(os.getcwd(), ICON_PATH)))
+    except Exception:
+      raise
 
   def __set_working_dir(self) -> None:
     """
@@ -1012,6 +1024,6 @@ if __name__ == "__main__":
   try:
     new_postprocessing()
   except Exception as e:
-    print(e)
+    traceback.print_exception(type(e), e, e.__traceback__, file=sys.stderr)
     # If any exception is caught, exit
     exit()
