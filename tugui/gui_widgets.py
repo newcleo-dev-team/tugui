@@ -67,13 +67,13 @@ class StatusBar(ttk.Frame):
   Class describing a Frame where a label is shown. This represents a status bar
   that provides useful log to the user.
   """
-  def __init__(self, container: tk.Misc, color: str = 'light gray') -> None:
+  def __init__(self, container: tk.Misc) -> None:
     # Initialize the Style object
     s: ttk.Style = ttk.Style()
     # Configure the style for the status bar frame
-    s.configure('self.TFrame', background=color, border=1, borderwidth=1, relief=tk.GROOVE)
+    s.configure('self.TFrame', border=1, borderwidth=1, relief=tk.GROOVE)
     # Configure the style for the status bar label
-    s.configure('self.TLabel', background=color)
+    s.configure('self.TLabel')
 
     # Call the superclass initializer passing the built style
     super().__init__(container, style='self.TFrame')

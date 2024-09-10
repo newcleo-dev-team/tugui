@@ -7,7 +7,6 @@ import traceback
 from tkinter import PhotoImage, ttk
 from tkinter import filedialog
 from tkinter import messagebox
-from ttkthemes import ThemedTk
 
 from plot_builder import PlotManager, PlotFigure
 from plot_settings import GroupType
@@ -18,8 +17,12 @@ from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_
 from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS, ICON_PATH
 from shutil import copyfile
 from typing import Union
+from sv_ttk import set_theme
 
-class TuPostProcessingGui(ThemedTk):
+
+ERROR_LEVEL: bool = 0
+
+class TuPostProcessingGui(tk.Tk):
   """
   Class that builds a GUI for enabling the user to plot the quantities produced by
   a TU simulation. Two plot types are available:
@@ -76,7 +79,7 @@ class TuPostProcessingGui(ThemedTk):
     # TODO: check how to set a dark-mode
     s = ttk.Style()
 
-    self.configure(background='#F6F4F2')
+    # self.configure(background='#F6F4F2')
     # s.configure('TFrame', background='black')
     # s.configure('TLabel', background='black', foreground='white')
     # s.configure('TButton', background='black', foreground='black', highlightbackground='black', highlightcolor='black')
@@ -177,7 +180,8 @@ class TuPostProcessingGui(ThemedTk):
     # Set the window title
     self.title(title)
     # Set the theme to use
-    self.configure(theme='radiance')
+    set_theme("light")
+
     # Set the top-left coordinate of the window so that the app is placed in the screen center
     left = int(self.winfo_screenwidth() / 2 - width / 2)
     top = int(self.winfo_screenheight() / 2 - height / 2)
@@ -1015,7 +1019,7 @@ def new_postprocessing(event: Union[tk.Event, None] = None) -> None:
   Function that opens a new window for performing post-processing of results from a TU simulation.
   """
   # Instantiate the TuPostProcessingGui class by passing the window title and its dimensions
-  window = TuPostProcessingGui("TU Post-Processing Interface", 1377, 679)
+  window = TuPostProcessingGui("TransUranus Graphical User Interface", 1377, 679)
   # Start the window loop event
   window.mainloop()
 
