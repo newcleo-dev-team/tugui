@@ -71,7 +71,7 @@ class GuiPlotFieldsConfigurator():
   tustat_path: str = ''
 
   @staticmethod
-  def init_GuiPlotFieldsConfigurator_attrs() -> Self:
+  def init_GuiPlotFieldsConfigurator() -> Self:
     """
     Method that builds and configure the attributes of an instance of the
     'GuiPlotFieldsConfigurator' class.
@@ -259,7 +259,7 @@ class GuiPlotFieldsConfigurator():
 
 if __name__ == "__main__":
   # Instantiate and configure the dataclass storing the GUI configuration
-  gui_config: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+  gui_config: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator()
 
   # Print the built dictionaries
   print(gui_config.groupVSnumVsKn)

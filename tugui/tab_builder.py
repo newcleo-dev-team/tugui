@@ -802,7 +802,7 @@ if __name__ == "__main__":
   tabControl: ttk.Notebook = ttk.Notebook(root)
   tabControl.pack(fill='both', expand=True)
   # Instantiate the GuiPlotFieldsConfigurator class providing the values for filling the fields
-  guiConfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
+  guiConfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator()
 
   # Instatiate a TabBuilder object holding the tabs
   tab1: TuPlotTabContentBuilder = TuPlotTabContentBuilder(

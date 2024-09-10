@@ -53,16 +53,8 @@ class TuPostProcessingGui(tk.Tk):
     # Set the titlebar icon
     self.__set_icon()
 
-    # Instantiate and configure the 'GuiPlotFieldsConfigurator' class in a try-except
-    try:
-      self.guiconfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator_attrs()
-    except Exception as e:
-      # Intercept any exception produced by running the configuration logic according to the selected error level
-      if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
-      # Quit the application as this case represents a fatal error
-      self.quit_app()
-      # Propagate the caught exception
-      raise e
+    # Load configuration settings
+    self.__load_configuration_settings()
 
     # Build the menu bar
     self.create_menu()
@@ -187,6 +179,22 @@ class TuPostProcessingGui(tk.Tk):
     top = int(self.winfo_screenheight() / 2 - height / 2)
     # Set the window geometry
     self.geometry(f"{width}x{height}+{left}+{top}")
+
+  def __load_configuration_settings(self):
+    """
+    Check whether the configuration files and TU post-processing executables
+    exist. If any of such files is not found, an exception is thrown.
+    In addition, the content of the configuration files is loaded.
+    """
+    try:
+      self.guiconfig: GuiPlotFieldsConfigurator = GuiPlotFieldsConfigurator.init_GuiPlotFieldsConfigurator()
+    except Exception as e:
+      # Intercept any exception produced by running the configuration logic according to the selected error level
+      if ERROR_LEVEL: messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      # Quit the application as this case represents a fatal error
+      self.quit_app()
+      # Propagate the caught exception
+      raise e
 
   def __set_icon(self) -> None:
     """
