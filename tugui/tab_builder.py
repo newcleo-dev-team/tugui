@@ -407,6 +407,9 @@ class TuPlotTabContentBuilder(TabContentBuilder):
   While keeping the same structure, this class implements the widgets contained in
   the configuration area, as they are specific of the 'TuPlot' case.
   """
+  iant_entry: LabelledCombobox = None
+  additional_frame: ttk.Frame = None
+
   def __init__(self, container: ttk.Notebook,
                guiConfig: GuiPlotFieldsConfigurator,
                tab_name: str, state: str) -> None:
@@ -474,13 +477,13 @@ class TuPlotTabContentBuilder(TabContentBuilder):
         print("DESTROY")
 
         # Clear out the stress or the temperature-related field, if present
-        if hasattr(self, 'iant_entry'):
+        if self.iant_entry:
           self.iant_entry.destroy_fields()
-          delattr(self, 'iant_entry')
+          self.iant_entry = None
           delattr(self, 'iant')
-        if hasattr(self, 'additional_frame'):
+        if self.additional_frame:
           self.additional_frame.destroy()
-          delattr(self, 'additional_frame')
+          self.additional_frame = None
         # Re-build the frame
         self.additional_frame = self._build_frame(container, row)
         # Disable the button for running the plot executable as the additional fields need to be set yet
@@ -527,22 +530,18 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     type['values'] = tuple(self.gui_config.groupVStype[self.group.var.get()])
 
     # Destroy any additional field previously created by a different choice of the main fields
-    if hasattr(self, 'iant_entry'):
-      # Destroy the field for setting the IANT value (plots 102-108 and 113)
+    if self.iant_entry:
       self.iant_entry.destroy_fields()
-      # Delete the corresponding attributes
-      delattr(self, 'iant_entry')
+      self.iant_entry = None
       delattr(self, 'iant')
     if hasattr(self, 'plt_sett_cfg'):
       # Destroy the additional configuration fields
       self.plt_sett_cfg.destroy_fields()
       # Delete the corresponding attribute
       delattr(self, 'plt_sett_cfg')
-    if hasattr(self, 'additional_frame'):
-      # Destroy the frame holding the additional configuration fields
+    if self.additional_frame:
       self.additional_frame.destroy()
-      # Delete the corresponding attribute
-      delattr(self, 'additional_frame')
+      self.additional_frame = None
 
     # Hide the button for running the plot executable
     self.run_button.grid_remove()
@@ -556,13 +555,13 @@ class TuPlotTabContentBuilder(TabContentBuilder):
     This field is placed in the first row of a frame that holds the additional setup
     fields.
     """
-    if hasattr(self, 'iant_entry'):
+    if self.iant_entry:
       self.iant_entry.destroy_fields()
-      delattr(self, 'iant_entry')
+      self.iant_entry = None
       delattr(self, 'iant')
-    if hasattr(self, 'additional_frame'):
+    if self.additional_frame:
       self.additional_frame.destroy()
-      delattr(self, 'additional_frame')
+      self.additional_frame = None
 
     # Build the frame
     self.additional_frame = self._build_frame(container, row)

@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 import re
+import support
 import sys
 import traceback
 
@@ -37,6 +38,9 @@ class TuPostProcessingGui(tk.Tk):
   - the plot area (right) where the selected curves are shown;
   - a status bar (bottom) showing log messages.
   """
+  # Notebook acting as the container of the plot tabs
+  __plotTabController: CustomNotebook = None
+
   def __init__(self, window_title: str, width: int, height: int) -> None:
     # Check whether the OS platform is supported
     self.__check_OS_platform()
@@ -57,7 +61,7 @@ class TuPostProcessingGui(tk.Tk):
     self.__load_configuration_settings()
 
     # Build the menu bar
-    self.create_menu()
+    self.__create_menu()
 
     # Set the initial directory to the current working directory
     self.initial_dir: str = os.getcwd()
@@ -114,7 +118,7 @@ class TuPostProcessingGui(tk.Tk):
     ###############################################################################
     # Build the plot configuration area for the two types of plot (TUPlot e TUStat)
     ###############################################################################
-    self.build_tabs_area()
+    self.__build_tabs_area()
 
     # Add a status bar to the bottom of the window
     self.status_bar: StatusBar = StatusBar(self)
@@ -128,7 +132,7 @@ class TuPostProcessingGui(tk.Tk):
     # Declare events binding to call to instance methods
     ####################################################
     # Bind Ctrl+N to the request of resetting the post-processing window
-    self.bind("<Control-n>", func=self.reset_main_window)
+    self.bind("<Control-n>", func=self.__reset_main_window)
     # Bind Ctrl+O to the request of opening a new .pli input file
     self.bind("<Control-o>", func=self.open_pli_file)
     # Bind Ctrl+W to the request of selecting the output folder
@@ -146,7 +150,7 @@ class TuPostProcessingGui(tk.Tk):
 
     # Bind the <<Reload>> virtual event to the clearing of all the settings and plots
     # thus rebuilding the plot settings fields options.
-    self.bind('<<Reload>>', func=lambda event: self.build_tabs_area())
+    self.bind('<<Reload>>', func=lambda event: self.__build_tabs_area())
 
     # Bind the <<InpLoaded>> virtual event to the plot creation
     self.bind('<<InpLoaded>>', func=lambda event: self.display_inp_plots())
@@ -236,7 +240,7 @@ class TuPostProcessingGui(tk.Tk):
     # Clear any previously displayed plot
     if hasattr(self, 'plotTabControl'):
       print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
-      self.plotTabControl.destroy()
+      self.__plotTabController.destroy()
       delattr(self, 'plotTabControl')
 
     # Clear the input .pli entry
@@ -246,18 +250,18 @@ class TuPostProcessingGui(tk.Tk):
     s = ttk.Style()
     s.configure("CustomNotebook", tabmargins=[0, 5, 0, 0])
     # Instantiate the CustomNotebook object and place it into the grid
-    self.plotTabControl = CustomNotebook(self, style='CustomNotebook')
+    self.__plotTabController = CustomNotebook(self, style='CustomNotebook')
     # The tab can span 2 columns so to overlap with the following button
-    self.plotTabControl.grid(column=0, row=1, columnspan=2, sticky='nsew')
+    self.__plotTabController.grid(column=0, row=1, columnspan=2, sticky='nsew')
 
     # Build a diagram for each plot of the loaded .dat and .plt files
     for i in range(0, len(self.loaded_dat_files)):
       # Build the plot frame where the plots are shown
-      plot_figure = PlotFigure(self.plotTabControl)
+      plot_figure = PlotFigure(self.__plotTabController)
       # Destroy the report area as no input report is provided
       plot_figure.report_frame.destroy()
       # Add the just built plot frame to the notebook
-      self.plotTabControl.add(plot_figure, text=f"Plot {i+1}")
+      self.__plotTabController.add(plot_figure, text=f"Plot {i+1}")
       # Plot the i-th diagram
       self.plot_curves(plot_figure, self.loaded_dat_files[i], self.loaded_plt_files[i], "")
 
@@ -278,7 +282,7 @@ class TuPostProcessingGui(tk.Tk):
     # Clear any previously displayed plot provided by loading an .inp file
     if hasattr(self, 'plotTabControl'):
       print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
-      self.plotTabControl.destroy()
+      self.__plotTabController.destroy()
       delattr(self, 'plotTabControl')
 
     # Clear the input .pli entry
@@ -292,9 +296,9 @@ class TuPostProcessingGui(tk.Tk):
     s = ttk.Style()
     s.configure("CustomNotebook", tabmargins=[0, 5, 0, 0])
     # Instantiate the CustomNotebook object and place it into the grid
-    self.plotTabControl = CustomNotebook(self, style='CustomNotebook')
+    self.__plotTabController = CustomNotebook(self, style='CustomNotebook')
     # The tab can span 2 columns so to overlap with the following button
-    self.plotTabControl.grid(column=0, row=1, columnspan=2, sticky='nsew')
+    self.__plotTabController.grid(column=0, row=1, columnspan=2, sticky='nsew')
 
     # Instantiate the class that read and extract the content of the .inp file
     # in order to know how many diagrams need to be produced
@@ -331,24 +335,21 @@ class TuPostProcessingGui(tk.Tk):
     # For each diagram configuration create a new PlotFigure object and plot the curves
     for i in range(0, len(inpreader.diagrams_list)):
       # Build the plot frame where the plots are shown
-      plot_figure = PlotFigure(self.plotTabControl)
+      plot_figure = PlotFigure(self.__plotTabController)
       # Add the just built plot frame to the notebook
-      self.plotTabControl.add(plot_figure, text=f"Plot {i+1}")
+      self.__plotTabController.add(plot_figure, text=f"Plot {i+1}")
       # Plot the i-th diagram
       self.plot_curves(plot_figure, inp_to_dat.dat_paths[i], inp_to_dat.plt_paths[i], inp_to_dat.out_paths[i])
 
-  def build_tabs_area(self) -> None:
+  def __build_tabs_area(self) -> None:
     """
-    Method that builds the tabs containing the plot configuration area and the plot display one
-    for both the TuPlot and the TuStat cases.
+    Build the tabs containing the plot configuration area and the plot display one
+    for both TuPlot and TuStat cases.
     Both tabs are built with an initial "Disabled" state, meaning that their content cannot be
     accessed by default.
     """
-    # Destroy the notebook holding the plot figure, if any is present
-    if hasattr(self, 'plotTabControl'):
-      self.plotTabControl.destroy()
-      # Delete the attribute
-      delattr(self, 'plotTabControl')
+    # Reset the notebook holding the plot figure, if any
+    support.destroy_widget(self.__plotTabController)
 
     # Change the style of the Notebook object for positioning the tabs on the bottom-left corner
     # tab_style = ttk.Style()
@@ -956,23 +957,22 @@ class TuPostProcessingGui(tk.Tk):
     # Provide a message to the status bar
     self.status_bar.set_text("Saved .inp file: " + filename)
 
-  def create_menu(self) -> None:
+  def __create_menu(self) -> None:
     """
-    Method that creates and adds a menu bar to the main window. It also builds the
-    menu commands for each menu category.
+    Create and add a menu bar to the main window, together with the sub-items
+    for each of the menu bar category.
     TODO - create a new class that enables the presence of a tooltip for each menu item.
     """
+    # Create the entire menu bar object
     menubar = tk.Menu(self)
-    # Create the "File" menu
+    # Create the "File" item as sub-items of the menu bar
     filemenu = tk.Menu(menubar, tearoff=0)
-    # Create the "Load" submenu
+    # Create the "Load" and "Save" sub-menus as sub-items of the "File" item
     loadmenu = tk.Menu(filemenu, tearoff=0)
-    # Create the "Save" submenu
     savemenu = tk.Menu(filemenu, tearoff=0)
 
     # Add the "File" menu commands
-    # FIXME "New" command is disabled until a better knowledge on new windows
-    filemenu.add_command(label="New", accelerator="Ctrl+N", command=self.reset_main_window)
+    filemenu.add_command(label="New", accelerator="Ctrl+N", command=self.__reset_main_window)
     filemenu.add_command(label="Open", accelerator="Ctrl+O", command=self.open_pli_file)
 
     # Append the "Load" submenu to the "File" menu
@@ -1006,20 +1006,21 @@ class TuPostProcessingGui(tk.Tk):
     # Destroy the main window and all its widgets, thus closing the application
     self.destroy()
 
-  def reset_main_window(self, event: Union[tk.Event, None] = None) -> None:
+  def __reset_main_window(self, event: Union[tk.Event, None] = None) -> None:
     """
-    Method that resets the main window by clearing the content of the entry widget for
+    Reset the main window by clearing the content of the entry widget for
     setting the path to the input .pli file, as well as the message provided by the
     status bar. It also re-builds all the 'TuPlot' and 'TuStat' tabs thus allowing users
     a fresh restart.
     """
+    # FIXME: message to print into the log area
     print("Resetting the main window...")
     # Delete the content of the .pli entry
     self.pli_entry.entry.delete(0, tk.END)
     # Clear the content of the status bar
     self.status_bar.set_text("")
     # Re-build the plot tabs
-    self.build_tabs_area()
+    self.__build_tabs_area()
 
 
 def new_postprocessing(event: Union[tk.Event, None] = None) -> None:

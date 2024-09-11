@@ -2,6 +2,8 @@ import platform
 from enum import Enum
 from typing import List, Tuple, Union
 
+from tkinter import Widget
+
 # Flag defining the level of error management
 ERROR_LEVEL: bool = 0
 
@@ -18,6 +20,15 @@ if OS_PLATFORM == "Linux":
 elif OS_PLATFORM == "Windows":
   # FIXME: to add the file "tuoutgui.ico" in the right location
   ICON_PATH = "../resources/icons/tuoutgui.ico"
+
+def destroy_widget(widget: Widget) -> None:
+  """
+  Destroy the widget from the tcl/tk interpreter and
+  clear out any Python object reference
+  """
+  if widget:
+    widget.destroy()
+    widget = None
 
 class IDGA(Enum):
   """
