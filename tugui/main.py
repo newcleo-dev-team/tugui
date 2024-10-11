@@ -38,6 +38,9 @@ class TuPostProcessingGui(tk.Tk):
   - the plot area (right) where the selected curves are shown;
   - a status bar (bottom) showing log messages.
   """
+  # Notebook acting as the container of both TuPlot and TuStat tabs
+  __tabController: CustomNotebook = None
+
   # Notebook acting as the container of the plot tabs
   __plotTabController: CustomNotebook = None
 
@@ -230,18 +233,18 @@ class TuPostProcessingGui(tk.Tk):
     In case the plot configuration mode was enabled, the method changes the
     GUI layout to display only the plots and the related report.
     """
+    # Clear any previously displayed plot in the plot area
+    if self.__plotTabController:
+      # FIXME: to print into log file
+      print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
+      support.destroy_widget(self.__plotTabController)
+
     # Destroy the objects holding the TuPlot and TuStat sections and delete
     # the corresponding instance attributes, if they are present.
-    if hasattr(self, 'tabControl'):
+    if self.__tabController:
+      # FIXME: to print into log file
       print("\n######### DESTROY CONFIG TABS ###########\n")
-      self.tabControl.destroy()
-      delattr(self, 'tabControl')
-
-    # Clear any previously displayed plot
-    if hasattr(self, 'plotTabControl'):
-      print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
-      self.__plotTabController.destroy()
-      delattr(self, 'plotTabControl')
+      support.destroy_widget(self.__tabController)
 
     # Clear the input .pli entry
     self.pli_entry.entry.delete(0, tk.END)
@@ -272,18 +275,18 @@ class TuPostProcessingGui(tk.Tk):
     In case the plot configuration mode was enabled, the method changes the
     GUI layout to display only the plots and the related report.
     """
+    # Clear any previously displayed plot provided by loading an .inp file
+    if self.__plotTabController:
+      # FIXME: to print into log file
+      print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
+      support.destroy_widget(self.__plotTabController)
+
     # Destroy the objects holding the TuPlot and TuStat sections and delete
     # the corresponding instance attributes, if they are present.
-    if hasattr(self, 'tabControl'):
+    if self.__tabController:
+      # FIXME: to print into log file
       print("\n######### DESTROY CONFIG TABS ###########\n")
-      self.tabControl.destroy()
-      delattr(self, 'tabControl')
-
-    # Clear any previously displayed plot provided by loading an .inp file
-    if hasattr(self, 'plotTabControl'):
-      print("\n######### DESTROY PREVIOUS PLOTS ###########\n")
-      self.__plotTabController.destroy()
-      delattr(self, 'plotTabControl')
+      support.destroy_widget(self.__tabController)
 
     # Clear the input .pli entry
     self.pli_entry.entry.delete(0, tk.END)
@@ -351,9 +354,6 @@ class TuPostProcessingGui(tk.Tk):
     # Reset the notebook holding the plot figure, if any
     support.destroy_widget(self.__plotTabController)
 
-    # Change the style of the Notebook object for positioning the tabs on the bottom-left corner
-    # tab_style = ttk.Style()
-    # tab_style.configure('TNotebook', tabposition='nw')
     # Instatiate a Notebook object holding all the tabs
     self.tabControl = ttk.Notebook(self)
     # Position the notebook into the main window grid
@@ -967,35 +967,39 @@ class TuPostProcessingGui(tk.Tk):
     menubar = tk.Menu(self)
     # Create the "File" item as sub-items of the menu bar
     filemenu = tk.Menu(menubar, tearoff=0)
-    # Create the "Load" and "Save" sub-menus as sub-items of the "File" item
-    loadmenu = tk.Menu(filemenu, tearoff=0)
-    savemenu = tk.Menu(filemenu, tearoff=0)
 
-    # Add the "File" menu commands
+    # Add the first "File" menu commands
     filemenu.add_command(label="New", accelerator="Ctrl+N", command=self.__reset_main_window)
     filemenu.add_command(label="Open", accelerator="Ctrl+O", command=self.open_pli_file)
 
+    # Create the "Load" sub-menus as sub-items of the "File" item
+    loadmenu = tk.Menu(filemenu, tearoff=0)
     # Append the "Load" submenu to the "File" menu
     filemenu.add_cascade(menu=loadmenu, label="Load")
-    # Append the "Save" submenu to the "File" menu
-    # FIXME uncomment the 'Save' menu when functionalities will be ready
-    # filemenu.add_cascade(menu=savemenu, label="Save")
-
-    filemenu.add_command(label="Set output folder", accelerator="Ctrl+W", command=self.select_output_folder)
-    # Add a separator
-    filemenu.add_separator()
-    filemenu.add_command(label="Quit", accelerator="Ctrl+Q", command=self.quit)
-
     # Add the "Load" submenu commands
     loadmenu.add_command(label=".inp file", command=self.load_inp_file)
     loadmenu.add_command(label=".dat/.plt files", command=self.load_output_files)
+
+    # Create the "Load" and "Save" sub-menus as sub-items of the "File" item
+    savemenu = tk.Menu(filemenu, tearoff=0)
+    # Append the "Save" submenu to the "File" menu
+    # FIXME uncomment the 'Save' menu when functionalities will be ready
+    # filemenu.add_cascade(menu=savemenu, label="Save")
     # Add the "Save" submenu commands
     # FIXME uncomment the 'Save' submenus when functionalities will be ready
     # savemenu.add_command(label=".inp file", command=self.save_inp_file)
     # savemenu.add_command(label=".dat/.plt files", command=self.save_output_files)
 
+    # Add another "File" menu command
+    filemenu.add_command(label="Set output folder", accelerator="Ctrl+W", command=self.select_output_folder)
+    # Add a separator
+    filemenu.add_separator()
+    # Add the last "File" menu command
+    filemenu.add_command(label="Quit", accelerator="Ctrl+Q", command=self.quit)
+
     # Append the "File" menu to the menubar
     menubar.add_cascade(menu=filemenu, label="File")
+
     # Add the menu bar to the main window
     self.configure(menu=menubar)
 
@@ -1011,7 +1015,7 @@ class TuPostProcessingGui(tk.Tk):
     Reset the main window by clearing the content of the entry widget for
     setting the path to the input .pli file, as well as the message provided by the
     status bar. It also re-builds all the 'TuPlot' and 'TuStat' tabs thus allowing users
-    a fresh restart.
+    to restart.
     """
     # FIXME: message to print into the log area
     print("Resetting the main window...")
