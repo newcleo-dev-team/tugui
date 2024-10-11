@@ -355,14 +355,14 @@ class TuPostProcessingGui(tk.Tk):
     support.destroy_widget(self.__plotTabController)
 
     # Instatiate a Notebook object holding all the tabs
-    self.tabControl = ttk.Notebook(self)
+    self.__tabController = ttk.Notebook(self)
     # Position the notebook into the main window grid
-    self.tabControl.grid(column=0, row=1, sticky="nsew", columnspan=2)
+    self.__tabController.grid(column=0, row=1, sticky="nsew", columnspan=2)
     # Build the content of each tab frame by instantiating the class TabContentBuilder
     self.tuplot_tab = TuPlotTabContentBuilder(
-        self.tabControl, tab_name="TU Plot", state=tk.DISABLED, guiConfig=self.guiconfig)
+        self.__tabController, tab_name="TU Plot", state=tk.DISABLED, guiConfig=self.guiconfig)
     self.tustat_tab = TuStatTabContentBuilder(
-        self.tabControl, tab_name="TU Stat", state=tk.DISABLED, guiConfig=self.guiconfig)
+        self.__tabController, tab_name="TU Stat", state=tk.DISABLED, guiConfig=self.guiconfig)
 
   def retrieve_simulation_info(self) -> None:
     """
@@ -380,7 +380,7 @@ class TuPostProcessingGui(tk.Tk):
     if self.pli_entry.var.get() == "": return
     # In case of plot display-only mode, generate the event for rebuilding the configuration
     # and the plot areas
-    if hasattr(self, 'plotTabControl'):
+    if self.__plotTabController:
       self.event_generate('<<Reload>>')
     # In case a previous .pli file has already been opened, check if the path of the entry
     # has changed.
@@ -466,7 +466,7 @@ class TuPostProcessingGui(tk.Tk):
     to be run when the button in the tab area is pressed.
     """
     print("Activating the TuStat tab...")
-    self.tabControl.tab(self.tustat_tab, state=tk.NORMAL)
+    self.__tabController.tab(self.tustat_tab, state=tk.NORMAL)
     # Activate the "Diagram Nr." field of the active tab
     print("Setting Diagram Nr. field state for TuStat...")
     self.tustat_tab.diagram.cbx.configure(state='readonly')
@@ -487,13 +487,13 @@ class TuPostProcessingGui(tk.Tk):
     the function to be run when the button in the tab area is pressed.
     """
     print("Activating the TuPlot tab...")
-    self.tabControl.tab(self.tuplot_tab, state=tk.NORMAL)
+    self.__tabController.tab(self.tuplot_tab, state=tk.NORMAL)
 
     # Activate the group field of the active tabs
     print("Setting Group field state for TuPlot...")
     self.tuplot_tab.group.cbx.configure(state='readonly')
     # Select the TuPlot tab in order to show its content
-    self.tabControl.select(self.tuplot_tab)
+    self.__tabController.select(self.tuplot_tab)
 
     # Set the list of slice names for the TuPlot tab
     self.tuplot_tab.set_slice_list(self.slice_settings)
