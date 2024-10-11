@@ -12,10 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt-get install python3-tk
-      - run: pip install sv-ttk
-      - run: pip install pandas
-      - run: pip install matplotlib
-      - run: pip install typing-extensions
+      - run: sudo apt install pipx
+      - run: pipx install sv-ttk
+      - run: pipx install pandas
+      - run: pipx install matplotlib
+      - run: pipx install typing-extensions
       - run: python3 -m unittest tests/test_gui_window_basic.py -v
 
   test_documentation:
