@@ -789,7 +789,10 @@ class TuPostProcessingGui(tk.Tk):
       self.__output_dir = self.__initial_dir
 
     # Provide a message to the status bar and to the log file
-    self.status_bar.set_text("Selected .pli file: " + filename)
+    output_message = "Selected .pli file: " + filename
+    self.status_bar.set_text(output_message)
+    # FIXME: to print into log file
+    print(output_message)
 
     # Delete any already present path in the given entry
     entry.delete(0, tk.END)
