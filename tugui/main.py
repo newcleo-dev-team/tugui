@@ -39,10 +39,16 @@ class TuPostProcessingGui(tk.Tk):
   - a status bar (bottom) showing log messages.
   """
   # Notebook acting as the container of both TuPlot and TuStat tabs
-  __tabController: CustomNotebook = None
+  __tabController: Union[CustomNotebook, None] = None
 
   # Notebook acting as the container of the plot tabs
-  __plotTabController: CustomNotebook = None
+  __plotTabController: Union[CustomNotebook, None] = None
+
+  # Directory to show when opening a file selection window
+  __initial_dir: str = os.getcwd()
+
+  # Directory where storing output files
+  __output_dir: str = ""
 
   def __init__(self, window_title: str, width: int, height: int) -> None:
     # Check whether the OS platform is supported
@@ -65,9 +71,6 @@ class TuPostProcessingGui(tk.Tk):
 
     # Build the menu bar
     self.__create_menu()
-
-    # Set the initial directory to the current working directory
-    self.initial_dir: str = os.getcwd()
 
     # Set the initial number of rows and columns and how much they are resized
     self.grid_rowconfigure((0,2), weight=0)
@@ -108,7 +111,7 @@ class TuPostProcessingGui(tk.Tk):
     # Put a button next the the entry for allowing the selection of the .pli file to open
     ttk.Button(mainframe, # width = 80,
                text="Choose file",
-               command=lambda: self.select_file_and_fill_entry(
+               command=lambda: self.__select_file_from_button(
                  self.pli_entry.entry, "Input .pli file", "pli")).grid(column=2, row=0, sticky='ew')
 
     # Instantiate a Frame object holding the logos
@@ -137,7 +140,7 @@ class TuPostProcessingGui(tk.Tk):
     # Bind Ctrl+N to the request of resetting the post-processing window
     self.bind("<Control-n>", func=self.__reset_main_window)
     # Bind Ctrl+O to the request of opening a new .pli input file
-    self.bind("<Control-o>", func=self.open_pli_file)
+    self.bind("<Control-o>", func=self.__open_pli_file)
     # Bind Ctrl+W to the request of selecting the output folder
     self.bind("<Control-w>", func=self.select_output_folder)
     # Bind Ctrl+Q to the request of quitting the application
@@ -225,7 +228,6 @@ class TuPostProcessingGui(tk.Tk):
     # Set the working dir to the one just retrieved
     os.chdir(dname)
 
-
   def display_plot(self) -> None:
     """
     Method that enables the display-only mode for plots provided by reading
@@ -292,8 +294,8 @@ class TuPostProcessingGui(tk.Tk):
     self.pli_entry.entry.delete(0, tk.END)
 
     # If the output directory has not been specified, use the .inp file folder
-    if not hasattr(self, 'output_dir'):
-      self.output_dir = os.path.dirname(self.loaded_inp_file)
+    if not self.__output_dir:
+      self.__output_dir = os.path.dirname(self.loaded_inp_file)
 
     # Declare a style for the CustomNotebook object so to add a bit of margin on the top
     s = ttk.Style()
@@ -332,7 +334,7 @@ class TuPostProcessingGui(tk.Tk):
       plotexec_path=executable_path,
       inp_path=self.loaded_inp_file,
       plots_num=len(inpreader.diagrams_list),
-      cwd=self.output_dir,
+      cwd=self.__output_dir,
       output_files_name=output_files_name)
 
     # For each diagram configuration create a new PlotFigure object and plot the curves
@@ -353,15 +355,17 @@ class TuPostProcessingGui(tk.Tk):
     """
     # Reset the notebook holding the plot figure, if any
     support.destroy_widget(self.__plotTabController)
+    # Reset the notebook holding both TuPlot and TuStat tabs, if any
+    support.destroy_widget(self.__tabController)
 
-    # Instatiate a Notebook object holding all the tabs
+    # Instantiate a Notebook object holding all the tabs
     self.__tabController = ttk.Notebook(self)
     # Position the notebook into the main window grid
     self.__tabController.grid(column=0, row=1, sticky="nsew", columnspan=2)
-    # Build the content of each tab frame by instantiating the class TabContentBuilder
-    self.tuplot_tab = TuPlotTabContentBuilder(
+    # Build the content of each tab frame according to its type
+    self.__tuplot_tab = TuPlotTabContentBuilder(
         self.__tabController, tab_name="TU Plot", state=tk.DISABLED, guiConfig=self.guiconfig)
-    self.tustat_tab = TuStatTabContentBuilder(
+    self.__tustat_tab = TuStatTabContentBuilder(
         self.__tabController, tab_name="TU Stat", state=tk.DISABLED, guiConfig=self.guiconfig)
 
   def retrieve_simulation_info(self) -> None:
@@ -466,17 +470,17 @@ class TuPostProcessingGui(tk.Tk):
     to be run when the button in the tab area is pressed.
     """
     print("Activating the TuStat tab...")
-    self.__tabController.tab(self.tustat_tab, state=tk.NORMAL)
+    self.__tabController.tab(self.__tustat_tab, state=tk.NORMAL)
     # Activate the "Diagram Nr." field of the active tab
     print("Setting Diagram Nr. field state for TuStat...")
-    self.tustat_tab.diagram.cbx.configure(state='readonly')
+    self.__tustat_tab.diagram.cbx.configure(state='readonly')
 
     # Set the list of slice names for the TuStat tab
-    self.tustat_tab.set_slice_list(self.slice_settings)
+    self.__tustat_tab.set_slice_list(self.slice_settings)
     # Set the list providing the times of the statistical simulation
-    self.tustat_tab.set_times(sta_times=self.sta_times)
+    self.__tustat_tab.set_times(sta_times=self.sta_times)
     # Pass the herein-defined method to call whenever the "Run" button of the TuStat tab is pressed
-    self.tustat_tab.run_plot(self.run_tuStat)
+    self.__tustat_tab.run_plot(self.run_tuStat)
 
   def activate_tuplot_area(self) -> None:
     """
@@ -487,20 +491,20 @@ class TuPostProcessingGui(tk.Tk):
     the function to be run when the button in the tab area is pressed.
     """
     print("Activating the TuPlot tab...")
-    self.__tabController.tab(self.tuplot_tab, state=tk.NORMAL)
+    self.__tabController.tab(self.__tuplot_tab, state=tk.NORMAL)
 
     # Activate the group field of the active tabs
     print("Setting Group field state for TuPlot...")
-    self.tuplot_tab.group.cbx.configure(state='readonly')
+    self.__tuplot_tab.group.cbx.configure(state='readonly')
     # Select the TuPlot tab in order to show its content
-    self.__tabController.select(self.tuplot_tab)
+    self.__tabController.select(self.__tuplot_tab)
 
     # Set the list of slice names for the TuPlot tab
-    self.tuplot_tab.set_slice_list(self.slice_settings)
+    self.__tuplot_tab.set_slice_list(self.slice_settings)
     # Set the lists providing the macro and micro time
-    self.tuplot_tab.set_times(macro_time=self.macro_time, micro_time=self.micro_time)
+    self.__tuplot_tab.set_times(macro_time=self.macro_time, micro_time=self.micro_time)
     # Pass the herein-defined method to call whenever the "Run" button of the TuPlot object is pressed
-    self.tuplot_tab.run_plot(self.run_tuPlot)
+    self.__tuplot_tab.run_plot(self.run_tuPlot)
 
   def run_tuPlot(self) -> None:
     """
@@ -515,7 +519,7 @@ class TuPostProcessingGui(tk.Tk):
 
     try:
       # Get the index corresponding to the IDGA option selected by users
-      idga_indx = self.guiconfig.idgaVSi[self.tuplot_tab.type_var.get()]
+      idga_indx = self.guiconfig.idgaVSi[self.__tuplot_tab.type_var.get()]
 
       # Instantiate the class dealing with the .inp file generation based on the made choices
       # inp_generator = TuPlotInpGenerator(self.plireader.pli_path)
@@ -523,9 +527,9 @@ class TuPostProcessingGui(tk.Tk):
       # default values for each entry.
       inp_info = {
         "PLI": os.path.basename(self.plireader.pli_path).split(os.sep)[-1],
-        "IDNF": self.tuplot_tab.number_var.get().split(' ')[0],
+        "IDNF": self.__tuplot_tab.number_var.get().split(' ')[0],
         "IDGA": str(idga_indx),
-        "NKN": str(len(self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values)),
+        "NKN": str(len(self.__tuplot_tab.plt_sett_cfg.field3.lb_selected_values)),
         "IANT1": "N",
         "IANT2": "F",
         "IANT3": "N",
@@ -537,70 +541,70 @@ class TuPostProcessingGui(tk.Tk):
       }
 
       # Overwrite the default entry for the temperature distribution if plot 113
-      if hasattr(self.tuplot_tab, 'iant'):
-        if self.tuplot_tab.iant == IANT.IANT_1.description:
+      if hasattr(self.__tuplot_tab, 'iant'):
+        if self.__tuplot_tab.iant == IANT.IANT_1.description:
           # TODO check why the manual says this field shoud be 'Y', but actually the executable fails
           inp_info["IANT1"] = "N"
-        elif self.tuplot_tab.iant == IANT.IANT_2.description:
+        elif self.__tuplot_tab.iant == IANT.IANT_2.description:
           # Overwrite the default entry for the radial stresses, if plot 102-108
-          if hasattr(self.tuplot_tab, 'iant_entry'):
-            if self.tuplot_tab.iant_entry.cbx.current() == 0:
+          if hasattr(self.__tuplot_tab, 'iant_entry'):
+            if self.__tuplot_tab.iant_entry.cbx.current() == 0:
               inp_info["IANT2"] = "C"
 
       # If the plot type (IDGA) is 1, put the list of selected Kn-s in the dictionary
       if idga_indx == 1:
         # Get the list of strings identifying the chosen Kn-s
-        kn_list = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
+        kn_list = self.__tuplot_tab.plt_sett_cfg.field3.lb_selected_values
         # Extract the Kn numbers only if the list is not empty
         if len(kn_list) > 0:
           # Get the list of Kn numbers
           inp_info["KN"] = " ".join([re.findall(r'\d+', item)[0] for item in kn_list])
       else:
         # Get the value of selected Kn from the corresponding field
-        if hasattr(self.tuplot_tab.plt_sett_cfg, 'field1') and self.tuplot_tab.plt_sett_cfg.field1_type == "Kn":
-          print("TYPE FIELD1", self.tuplot_tab.plt_sett_cfg.field1_type)
-          inp_info["KN"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field1.cbx_selected_value)[0]
-        elif self.tuplot_tab.plt_sett_cfg.field2_type == "Kn":
-          inp_info["KN"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
+        if hasattr(self.__tuplot_tab.plt_sett_cfg, 'field1') and self.__tuplot_tab.plt_sett_cfg.field1_type == "Kn":
+          print("TYPE FIELD1", self.__tuplot_tab.plt_sett_cfg.field1_type)
+          inp_info["KN"] = re.findall(r'\d+', self.__tuplot_tab.plt_sett_cfg.field1.cbx_selected_value)[0]
+        elif self.__tuplot_tab.plt_sett_cfg.field2_type == "Kn":
+          inp_info["KN"] = re.findall(r'\d+', self.__tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
 
       # Overwrite the default entry for the NLSUCH item
       if idga_indx == 3:
         # Get the number of selected slices
-        slice_list = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
+        slice_list = self.__tuplot_tab.plt_sett_cfg.field3.lb_selected_values
         # Extract the slice numbers only if the list is not empty
         if len(slice_list) > 0:
           # Get the list of Kn numbers
           inp_info["NLSUCH"] = " ".join([re.findall(r'\d+', item)[0] for item in slice_list])
       else:
         # Get the value of selected slice from the corresponding field
-        if hasattr(self.tuplot_tab.plt_sett_cfg, 'field1') and self.tuplot_tab.plt_sett_cfg.field1_type == "Slice":
-          inp_info["NLSUCH"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field1.cbx_selected_value)[0]
-        elif self.tuplot_tab.plt_sett_cfg.field2_type == "Slice":
-          inp_info["NLSUCH"] = re.findall(r'\d+', self.tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
+        if hasattr(self.__tuplot_tab.plt_sett_cfg, 'field1') and self.__tuplot_tab.plt_sett_cfg.field1_type == "Slice":
+          inp_info["NLSUCH"] = re.findall(r'\d+', self.__tuplot_tab.plt_sett_cfg.field1.cbx_selected_value)[0]
+        elif self.__tuplot_tab.plt_sett_cfg.field2_type == "Slice":
+          inp_info["NLSUCH"] = re.findall(r'\d+', self.__tuplot_tab.plt_sett_cfg.field2.cbx_selected_value)[0]
 
       # Overwrite the default TIME (IASTUN/IASEC/FAMILY) entries on the basis of the selected time(s)
       if idga_indx == 1 or idga_indx == 3:
         # Curves at a specific time instant, i.e. one time for plot type 1 (different Kn-s) and 3 (different slices)
-        if self.tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.tuplot_tab.plt_sett_cfg.group == GroupType.group3:
+        if self.__tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.__tuplot_tab.plt_sett_cfg.group == GroupType.group3:
           # Only one time for group 1 (Radius) and 3 (Axial)
           # Get the time from field2
-          inp_info["TIME"] = self.tuplot_tab.plt_sett_cfg.field2.cbx_selected_value
-        elif self.tuplot_tab.plt_sett_cfg.group == GroupType.group2 or self.tuplot_tab.plt_sett_cfg.group == GroupType.group2A:
+          inp_info["TIME"] = self.__tuplot_tab.plt_sett_cfg.field2.cbx_selected_value
+        elif self.__tuplot_tab.plt_sett_cfg.group == GroupType.group2 or self.__tuplot_tab.plt_sett_cfg.group == GroupType.group2A:
           # Start and end times for group 2 (Time) and 2A (TimeIntegral)
           # Get the start/end times from field2
-          inp_info["TIME"] = "\n".join([self.tuplot_tab.plt_sett_cfg.field2.time1, self.tuplot_tab.plt_sett_cfg.field2.time2])
+          inp_info["TIME"] = "\n".join([self.__tuplot_tab.plt_sett_cfg.field2.time1, self.__tuplot_tab.plt_sett_cfg.field2.time2])
       elif idga_indx == 2:
         # Curves for different time instants, list of times for plot type 1 (different Kn-s) and 3 (different slices)
-        if self.tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.tuplot_tab.plt_sett_cfg.group == GroupType.group3:
+        if self.__tuplot_tab.plt_sett_cfg.group == GroupType.group1 or self.__tuplot_tab.plt_sett_cfg.group == GroupType.group3:
           # Get the list of selected time instants from field3
-          times = self.tuplot_tab.plt_sett_cfg.field3.lb_selected_values
+          times = self.__tuplot_tab.plt_sett_cfg.field3.lb_selected_values
           inp_info["TIME"] = "\n".join(i for i in times)
 
       # Build and configure the 'TuInp' dataclass for storing the plot configuration
       tuplot_inp = TuInp.configure_tuplot_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
-      active_plotFigure = self.tuplot_tab.get_active_plotFigure()
+      active_plotFigure = self.__tuplot_tab.get_active_plotFigure()
 
       # Save the plot configuration .inp file and run the plotting executable to produce
       # the output files needed to plot the current diagram
@@ -631,10 +635,10 @@ class TuPostProcessingGui(tk.Tk):
       # default values for each entry.
       inp_info = {
         "PLI": os.path.basename(self.plireader.pli_path).split(os.sep)[-1],
-        "DIAGNR": self.tustat_tab.diagram.cbx_selected_value.split(' ')[0],
-        "NAXIAL": self.tustat_tab.slice.cbx_selected_value.split(' ')[0],
-        "TIME": self.tustat_tab.time.cbx_selected_value,
-        "INTERV": self.tustat_tab.n_intervals.cbx_selected_value,
+        "DIAGNR": self.__tustat_tab.diagram.cbx_selected_value.split(' ')[0],
+        "NAXIAL": self.__tustat_tab.slice.cbx_selected_value.split(' ')[0],
+        "TIME": self.__tustat_tab.time.cbx_selected_value,
+        "INTERV": self.__tustat_tab.n_intervals.cbx_selected_value,
         "DISTR": "f",
         "CONTIN": "E"
       }
@@ -642,7 +646,7 @@ class TuPostProcessingGui(tk.Tk):
       # Overwrite the default entry for the type of distribution (DISTR) item, where:
       # . f - fractional frequency
       # . d - probabilistic density
-      if self.tustat_tab.distribution.cbx.current() == 0:
+      if self.__tustat_tab.distribution.cbx.current() == 0:
         # Index 0 corresponds to "Fractional frequency"
         inp_info["DISTR"] = "f"
       else:
@@ -653,7 +657,7 @@ class TuPostProcessingGui(tk.Tk):
       tustat_inp = TuInp.configure_tustat_inp_fields(inp_info)
 
       # Get the 'PlotFigure' instance from the currently active tab of the plots notebook
-      active_plotFigure = self.tustat_tab.get_active_plotFigure()
+      active_plotFigure = self.__tustat_tab.get_active_plotFigure()
 
       # Save the plot configuration .inp file and run the plotting executable to produce
       # the output files needed to plot the current diagram
@@ -691,7 +695,7 @@ class TuPostProcessingGui(tk.Tk):
       plotexec_path=executable_path,
       inp_path=inp_path,
       plots_num=1,
-      cwd=self.output_dir,
+      cwd=self.__output_dir,
       output_files_name=output_files_name)
 
     # Store the currently .dat and .plt output files (first element in the
@@ -726,57 +730,65 @@ class TuPostProcessingGui(tk.Tk):
       messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
       raise Exception(e)
 
-  def open_pli_file(self, event: Union[tk.Event, None] = None) -> None:
+  def __open_pli_file(self, event: Union[tk.Event, None] = None) -> None:
     """
-    Method for asking the user to open an input .pli file.
+    Method for asking the user to select an input .pli file to open.
     """
-    self.select_file_and_fill_entry(self.pli_entry.entry, "Input file", "pli")
+    self.__select_file_and_fill_entry(self.pli_entry.entry, "Input file", "pli")
 
-  def select_file(self, fileToSearch: str, format: str) -> str:
+  def __select_file(self, fileToSearch: str, format: str) -> str:
     """
     Method for asking the user to select a file by opening a file selection window.
     A string representing the format of the target file is provided in order
     to enable filtering of files in folders with the correct extension.
     """
-    # Declare a tuple of tuples having the file type and its extension for filtering files in folders.
+    # Declare a tuple of tuples associating the file type label to its extension for filtering purposes.
     # The last one allows to show all files in folders.
     filetypes = (
       (fileToSearch, '*.' + format),
       ('All files', '*.*')
     )
-    # Open a select file window by calling the corresponding Tkinter method returning the path of the
-    # selected file.
+    # Open a file selection window by calling the corresponding Tkinter method
+    # and return the path to the selected file.
     return filedialog.askopenfilename(
       title = 'Choose the file',
-      initialdir = self.initial_dir,
+      initialdir = self.__initial_dir,
       filetypes = filetypes)
 
-  def select_file_and_fill_entry(self, entry: ttk.Entry, fileToSerch: str, format: str) -> None:
+  def __select_file_from_button(self, entry: ttk.Entry, fileToSearch: str, format: str) -> None:
+    """
+    Method for asking the user to select a file upon pressing a button and
+    for changing the focus.
+    """
+    # Remove focus from the run button by assigning it to the root window
+    self.focus_set()
+
+    # Call the method opening the file selection window
+    self.__select_file_and_fill_entry(entry, fileToSearch, format)
+
+  def __select_file_and_fill_entry(self, entry: ttk.Entry, fileToSearch: str, format: str) -> None:
     """
     Method for asking the user to select a file by opening a file selection window.
     An Entry object is provided as input so that the path to the selected file is
     passed to it and showed in the GUI.
     A string representing the format of the target file is provided as well in order
-    to enable filtering of files in folders with the correct extension.
+    to enable filtering of files in folders with the corresponding extension.
     """
-    # Remove focus from the run button by assigning it to the root window
-    self.focus_set()
-
-    # Open a select file window by calling the corresponding Tkinter method returning the path of the
-    # selected file.
-    filename = self.select_file(fileToSerch, format)
+    # Open a file selection window by calling the corresponding Tkinter method
+    # and retrieve the path of the selected file.
+    filename = self.__select_file(fileToSearch, format)
 
     # Do nothing if no file has been selected
     if not filename: return
 
-    # Update the default directory of the open window to the one of the currently opened file
-    self.initial_dir = os.path.dirname(filename)
+    # Update the default directory of the file selection window to the one of the currently opened file
+    self.__initial_dir = os.path.dirname(filename)
 
     # If not already done, set the output directory to the one of the currently opened file
-    if not hasattr(self, 'output_dir'):
-      self.output_dir = self.initial_dir
+    if not self.__output_dir:
+      self.__output_dir = self.__initial_dir
 
-    # Provide a message to the status bar
+    # Provide a message to the status bar and to the log file
     self.status_bar.set_text("Selected .pli file: " + filename)
 
     # Delete any already present path in the given entry
@@ -796,23 +808,23 @@ class TuPostProcessingGui(tk.Tk):
     """
     # If not already done, set the output directory to the one of the currently opened file
     # or its default one
-    if not hasattr(self, 'output_dir'):
-      self.output_dir = self.initial_dir
+    if not self.__output_dir:
+      self.__output_dir = self.__initial_dir
 
     # Open a select folder window by calling the corresponding Tkinter method returning the
     # path of the selected folder.
     foldername = filedialog.askdirectory(
       title = 'Choose folder where output files should be saved',
-      initialdir = self.output_dir,
+      initialdir = self.__output_dir,
       mustexist = True)
 
     # Do nothing if no folder has been selected
     if not foldername: return
 
     # Update the output directory to the one currently selected
-    self.output_dir = foldername
+    self.__output_dir = foldername
 
-    print("Selected output folder:", self.output_dir)
+    print("Selected output folder:", self.__output_dir)
 
   def load_inp_file(self, event: Union[tk.Event, None] = None) -> None:
     """
@@ -821,7 +833,7 @@ class TuPostProcessingGui(tk.Tk):
     Once selected, the '<<InpLoaded>>' virtual event is generated to trigger the plot creation.
     """
     # Ask the user to select a plot configuration .inp file to load
-    filename = self.select_file("Plot configuration file", "inp")
+    filename = self.__select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
     # Check if the selected file has the correct extension
@@ -834,7 +846,7 @@ class TuPostProcessingGui(tk.Tk):
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
     # Change the start directory for the file selection window
-    self.initial_dir = os.path.dirname(filename)
+    self.__initial_dir = os.path.dirname(filename)
 
     # Provide a message to the status bar
     self.status_bar.set_text("Selected .inp file: " + self.loaded_inp_file)
@@ -859,7 +871,7 @@ class TuPostProcessingGui(tk.Tk):
 
     # Ask the user to select the plot configuration .dat and .plt files to load
     filenames = filedialog.askopenfilenames(
-      initialdir=self.initial_dir,
+      initialdir=self.__initial_dir,
       title="Select the files to load",
       filetypes=ftypes)
 
@@ -884,10 +896,10 @@ class TuPostProcessingGui(tk.Tk):
       return
 
     # Change the start directory for the file selection window
-    self.initial_dir = os.path.dirname(filenames[0])
+    self.__initial_dir = os.path.dirname(filenames[0])
 
     # Provide a message to the status bar
-    self.status_bar.set_text("Selected .dat/.plt files from directory: " + self.initial_dir)
+    self.status_bar.set_text("Selected .dat/.plt files from directory: " + self.__initial_dir)
 
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<DatPltLoaded>>')
@@ -905,7 +917,7 @@ class TuPostProcessingGui(tk.Tk):
     # selected file.
     return filedialog.asksaveasfilename(
       title = 'Choose the file',
-      initialdir = self.initial_dir,
+      initialdir = self.__initial_dir,
       filetypes = filetypes)
 
   def save_inp_file(self, event: Union[tk.Event, None] = None) -> None:
@@ -970,7 +982,7 @@ class TuPostProcessingGui(tk.Tk):
 
     # Add the first "File" menu commands
     filemenu.add_command(label="New", accelerator="Ctrl+N", command=self.__reset_main_window)
-    filemenu.add_command(label="Open", accelerator="Ctrl+O", command=self.open_pli_file)
+    filemenu.add_command(label="Open", accelerator="Ctrl+O", command=self.__open_pli_file)
 
     # Create the "Load" sub-menus as sub-items of the "File" item
     loadmenu = tk.Menu(filemenu, tearoff=0)
