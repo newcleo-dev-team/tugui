@@ -788,7 +788,7 @@ class TuPostProcessingGui(tk.Tk):
     # and retrieve the path of the selected file.
     filename = self.__select_file(fileToSearch, format)
 
-    # Delete any already present path in the given entry
+    # Delete the content of the entry, if any
     entry.delete(0, tk.END)
     # Insert the selected file path in the given entry
     entry.insert(0, filename)
