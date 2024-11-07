@@ -50,6 +50,9 @@ class TuPostProcessingGui(tk.Tk):
   # Directory where storing output files
   __output_dir: str = ""
 
+  # Full path of the loaded .inp file
+  __loaded_inp_file: str = ""
+
   def __init__(self, window_title: str, width: int, height: int) -> None:
     # Check whether the OS platform is supported
     self.__check_OS_platform()
@@ -160,8 +163,6 @@ class TuPostProcessingGui(tk.Tk):
     # thus rebuilding the plot settings fields options.
     self.bind('<<Reload>>', func=lambda event: self.__build_tabs_area())
 
-    # Bind the <<InpLoaded>> virtual event to the plot creation
-    self.bind('<<InpLoaded>>', func=lambda event: self.display_inp_plots())
     # Bind the <<DatPltLoaded>> virtual event to the plot creation
     self.bind('<<DatPltLoaded>>', func=lambda event: self.display_plot())
 
@@ -272,7 +273,7 @@ class TuPostProcessingGui(tk.Tk):
       # Plot the i-th diagram
       self.plot_curves(plot_figure, self.loaded_dat_files[i], self.loaded_plt_files[i], "")
 
-  def display_inp_plots(self) -> None:
+  def __display_inp_plots(self) -> None:
     """
     Method that enables the display-only mode for plots provided by reading
     an input .inp file.
@@ -297,7 +298,7 @@ class TuPostProcessingGui(tk.Tk):
 
     # If the output directory has not been specified, use the .inp file folder
     if not self.__output_dir:
-      self.__output_dir = os.path.dirname(self.loaded_inp_file)
+      self.__output_dir = os.path.dirname(self.__loaded_inp_file)
 
     # Declare a style for the CustomNotebook object so to add a bit of margin on the top
     s = ttk.Style()
@@ -309,12 +310,12 @@ class TuPostProcessingGui(tk.Tk):
 
     # Instantiate the class that read and extract the content of the .inp file
     # in order to know how many diagrams need to be produced
-    inpreader = InpHandler(self.loaded_inp_file)
+    inpreader = InpHandler(self.__loaded_inp_file)
     # Read the loaded .inp file and extract its content
     inpreader.read_inp_file()
     # Save the content of the read .inp file into a file whose name complies with
     # what needed by the plotting executables
-    self.loaded_inp_file = inpreader.save_loaded_inp()
+    self.__loaded_inp_file = inpreader.save_loaded_inp()
 
     # Handle the TuPlot and TuStat plot cases differently
     if inpreader.diagrams_list[0].is_tuplot:
@@ -334,7 +335,7 @@ class TuPostProcessingGui(tk.Tk):
     # returned object, are updated.
     inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
       plotexec_path=executable_path,
-      inp_path=self.loaded_inp_file,
+      inp_path=self.__loaded_inp_file,
       plots_num=len(inpreader.diagrams_list),
       cwd=self.__output_dir,
       output_files_name=output_files_name)
@@ -847,33 +848,31 @@ class TuPostProcessingGui(tk.Tk):
 
     print("Selected output folder:", self.__output_dir)
 
-  def load_inp_file(self, event: Union[tk.Event, None] = None) -> None:
+  def __load_inp_file(self) -> None:
     """
     Method for asking the user to select a plot configuration .inp file to load by opening
-    a file selection window.
-    Once selected, the '<<InpLoaded>>' virtual event is generated to trigger the plot creation.
+    a file selection window and for creating the corresponding plot.
     """
     # Ask the user to select a plot configuration .inp file to load
     filename = self.__select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
-    # Check if the selected file has the correct extension
-    if filename.split('.')[-1] != 'inp':
+
+    try:
+      # Check the file extension and existence
+      support.check_file_extension_and_existence(filename, 'inp')
+      # Store the selected file as an instance attribute
+      self.__loaded_inp_file = filename
+      # Update the start directory for the file selection window and the output folder
+      self.__set_dirs(filename)
+      # Provide a message to the status bar
+      self.status_bar.set_text("Selected .inp file: " + self.__loaded_inp_file)
+      # FIXME: to write the above message also into the log file
+      # Create the corresponding plots
+      self.__display_inp_plots()
+    except Exception as e:
       # Pop-up an error message
-      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
-      # Return to avoid loading the wrong file
-      return
-
-    # Store the selected file as an instance attribute
-    self.loaded_inp_file = filename
-    # Change the start directory for the file selection window
-    self.__initial_dir = os.path.dirname(filename)
-
-    # Provide a message to the status bar
-    self.status_bar.set_text("Selected .inp file: " + self.loaded_inp_file)
-
-    # Generate the '<<InpLoaded>>' virtual event
-    self.event_generate('<<InpLoaded>>')
+      messagebox.showerror("Error", str(e))
 
   def load_output_files(self, event: Union[tk.Event, None] = None) -> None:
     """
@@ -922,7 +921,7 @@ class TuPostProcessingGui(tk.Tk):
     # Provide a message to the status bar
     self.status_bar.set_text("Selected .dat/.plt files from directory: " + self.__initial_dir)
 
-    # Generate the '<<InpLoaded>>' virtual event
+    # Generate the '<<DatPltLoaded>>' virtual event
     self.event_generate('<<DatPltLoaded>>')
 
   def save_file(self, fileToSave: str, format: str) -> str:
@@ -1010,7 +1009,7 @@ class TuPostProcessingGui(tk.Tk):
     # Append the "Load" submenu to the "File" menu
     filemenu.add_cascade(menu=loadmenu, label="Load")
     # Add the "Load" submenu commands
-    loadmenu.add_command(label=".inp file", command=self.load_inp_file)
+    loadmenu.add_command(label=".inp file", command=self.__load_inp_file)
     loadmenu.add_command(label=".dat/.plt files", command=self.load_output_files)
 
     # Create the "Load" and "Save" sub-menus as sub-items of the "File" item

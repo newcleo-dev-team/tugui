@@ -106,7 +106,7 @@ def check_file_extension_and_existence(file_path: str,
   """
   # Check the extension
   extension = os.path.splitext(file_path)
-  if not (extension[1] == '.' + file_extension):
+  if extension[1] != '.' + file_extension:
       # The file specified by the given path has not the correct extension
       raise Exception(f"The indicated file with extension '{extension[1]}' is "
                       "not valid. Please provide one with the "
