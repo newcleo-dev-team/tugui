@@ -1,4 +1,5 @@
 import os
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -11,7 +12,8 @@ class EntryVariable:
   Class defining a variable having a corresponding Entry object. Its value
   is validated when set.
   """
-  def __init__(self, frame: tk.Frame, width: int, col: int, row: int, end: str) -> None:
+  def __init__(self, frame: tk.Frame, width: int, col: int, row: int,
+               end: str, validation: Callable) -> None:
     """
     Constructor requiring the Frame object onto which putting the Entry.
     The Entry width, as well as the column and row indices are passed to
@@ -26,6 +28,7 @@ class EntryVariable:
 
     # Register the validation funtion of the Entry widget
     valid_entry = (self.entry.register(self.validate), '%P')
+    self.validation_func: Callable = validation
     # Configure the entry for checking the validity of its content when the
     # widget looses focus
     self.entry.configure(validate='focusout', validatecommand=valid_entry)
@@ -33,28 +36,47 @@ class EntryVariable:
     # Entry file extension
     self.entry_extension: str = end
 
-  def validate(self, event: Union[tk.Event, None] = None, newval: str = "") -> bool:
+  def validate(self, entry_txt: str = "") -> bool:
     """
     Method that checks if the entry is valid. The "end" parameter indicates the
     extension to check against.
     """
-    # Check the entry value against the allowed extension
-    if re.match(r"^.*\." + self.entry_extension + "$", newval) is not None:
-      # The entry is valid if a match is found
+    # Do not check anything if the entry is empty; return immediately
+    if not entry_txt:
+      return True
+    # Check the entry value according to the validation function
+    try:
+      self.validation_func(entry_txt, self.entry_extension)
       print("The entry is valid!")
       self.entry.configure(foreground="#343638")
+      # Generate a virtual event stating that the entry is valid
+      self.entry.event_generate("<<Valid-Entry>>")
       return True
-    else:
-      # If no match is found, handle the invalid case only if the entry value is not empty
-      if newval != "":
-        self.on_invalid()
-        return False
+    except Exception as e:
+      # Get the exception error message
+      error_message = str(e)
+      # Handle the invalid case
+      self.on_invalid(error_message)
+      return False
 
-  def on_invalid(self) -> None:
+    # if re.match(r"^.*\." + self.entry_extension + "$", entry_txt) is not None:
+    #   # The entry is valid if a match is found
+    #   print("The entry is valid!")
+    #   self.entry.configure(foreground="#343638")
+    #   # Generate a virtual event stating that the entry is valid
+    #   self.entry.event_generate("<<Valid-Entry>>")
+    #   return True
+    # else:
+    #   # If no match is found, handle the invalid case only if the entry value is not empty
+    #   if entry_txt != "":
+    #     self.on_invalid()
+    #     return False
+
+  def on_invalid(self, error_message: str) -> None:
     """
     Show the error message if the data is not valid.
     """
-    error_message = "The entry is not valid: please provide a path to a file with the valid \"" + self.entry_extension + "\" extension!"
+    # error_message = "The entry is not valid: please provide a path to a file with the valid \"" + self.entry_extension + "\" extension!"
     print(error_message)
     # Highlight the entry color in red
     self.entry.configure(foreground="red")

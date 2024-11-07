@@ -15,7 +15,7 @@ from tab_builder import TuPlotTabContentBuilder, TuStatTabContentBuilder
 from tu_interface import DatGenerator, InpHandler, MicReader, PliReader, StaReader, TuInp, MacReader
 from gui_configuration import GuiPlotFieldsConfigurator
 from gui_widgets import CustomNotebook, EntryVariable, StatusBar, provide_label_image
-from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS, ICON_PATH
+from support import IANT, ERROR_LEVEL, OS_PLATFORM, SUPPORTED_OS_PLATFORMS, ICON_PATH, check_file_extension_and_existence
 from shutil import copyfile
 from typing import Union
 from sv_ttk import set_theme
@@ -107,7 +107,9 @@ class TuPostProcessingGui(tk.Tk):
     # Instantiate a label for the .pli file entry
     ttk.Label(mainframe, text="Path to the .pli input file").grid(column=0, row=0, sticky='ew')
     # Instantiate the field holding the path to the .pli input file
-    self.pli_entry: EntryVariable = EntryVariable(mainframe, 50, col=1, row=0, end="pli")
+    self.pli_entry: EntryVariable = EntryVariable(
+        mainframe, 50, col=1, row=0, end="pli",
+        validation=check_file_extension_and_existence)
     # Put a button next the the entry for allowing the selection of the .pli file to open
     ttk.Button(mainframe, # width = 80,
                text="Choose file",
@@ -146,7 +148,7 @@ class TuPostProcessingGui(tk.Tk):
     # Bind Ctrl+Q to the request of quitting the application
     self.bind("<Control-q>", func=self.quit_app)
     # Bind the entry "FocusOut" event to the method that retrieves the information from the input .pli file
-    self.pli_entry.entry.bind("<FocusOut>", func=lambda event: self.retrieve_simulation_info())
+    self.pli_entry.entry.bind("<<Valid-Entry>>", func=lambda event: self.retrieve_simulation_info())
     # Bind the activation of the plot tabs to a valid set of the .pli entry field. If this file shows a value of 1
     # for the ISTATI field, both TuPlot and TuStat areas are enabled. If not, only the TuPlot one is available.
     # In the first case, the "ActivateAllTabs" event activates both tabs; in the second case, the "ActivateTuPlotTab"
@@ -167,7 +169,7 @@ class TuPostProcessingGui(tk.Tk):
     """
     Method that checks whether the OS platform is supported:
     for the time being, only Windows and Linux OSs are supported.
-    """    
+    """
     if OS_PLATFORM not in SUPPORTED_OS_PLATFORMS:
       error_message = f"The {OS_PLATFORM} OS is not yet supported!"
       messagebox.showerror("Error", error_message)
@@ -398,6 +400,14 @@ class TuPostProcessingGui(tk.Tk):
       # Extract the information from the .pli file and instantiate the 'PliReader' class
       self.plireader = PliReader.init_PliReader(self.pli_entry.var.get())
       print("Path to the .pli file: " + self.plireader.pli_path)
+
+      # Provide a message to the status bar and to the log file
+      output_message = "Selected .pli file: " + self.plireader.pli_path
+      self.status_bar.set_text(output_message)
+      # FIXME: to print into log file
+      print(output_message)
+      # Set the initial and output directories
+      self.__set_dirs(self.plireader.pli_path)
 
       # Instantiate the MacReader class
       self.macreader = MacReader(
@@ -778,22 +788,6 @@ class TuPostProcessingGui(tk.Tk):
     # and retrieve the path of the selected file.
     filename = self.__select_file(fileToSearch, format)
 
-    # Do nothing if no file has been selected
-    if not filename: return
-
-    # Update the default directory of the file selection window to the one of the currently opened file
-    self.__initial_dir = os.path.dirname(filename)
-
-    # If not already done, set the output directory to the one of the currently opened file
-    if not self.__output_dir:
-      self.__output_dir = self.__initial_dir
-
-    # Provide a message to the status bar and to the log file
-    output_message = "Selected .pli file: " + filename
-    self.status_bar.set_text(output_message)
-    # FIXME: to print into log file
-    print(output_message)
-
     # Delete any already present path in the given entry
     entry.delete(0, tk.END)
     # Insert the selected file path in the given entry
@@ -804,6 +798,30 @@ class TuPostProcessingGui(tk.Tk):
     # Remove focus from the entry (by passing it to the window) in order to trigger the entry
     # content validation
     self.focus()
+
+  def __set_dirs(self, filename: str) -> None:
+    """
+    Method for setting:
+    - the directory to show the next time the file selection window is opened;
+    - the directory where output files will be produced, if it has not been
+      set yet.
+    Both attributes are set to the path of the parent folder of the file
+    provided as input.
+
+    Parameters
+    ----------
+    filename  : str
+        Path of the file whose parent folder has to be used for setting the
+        initial and output folders.
+    """
+    # Update the default directory of the file selection window to the one of
+    # the currently opened file
+    self.__initial_dir = os.path.dirname(filename)
+
+    # If not already done, set the output directory to the one of the
+    # currently opened file
+    if not self.__output_dir:
+      self.__output_dir = self.__initial_dir
 
   def select_output_folder(self, event: Union[tk.Event, None] = None) -> None:
     """

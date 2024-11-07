@@ -10,6 +10,7 @@ import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from gui_configuration import DiagramCharacteristics
+from support import check_file_existence
 from io import TextIOWrapper
 
 
@@ -279,17 +280,6 @@ class InpHandler():
       inp_config.diagram_config += line
 
 
-def check_file_existence(file_path: str, file_extension: str) -> None:
-  """
-  Function that can be accessed globally for checking if the given
-  file path exists and is a file. If not, the function raises an
-  exception.
-  """
-  if not os.path.isfile(file_path):
-    # If the file does not exists, throw an exception
-    raise Exception(f"Error: the .{file_extension} file does not exist at the specified path.")
-
-
 @dataclass
 class DatGenerator():
   """
@@ -461,7 +451,8 @@ class PliReader():
     This method returns the built instance of the 'PliReader' class.
     """
     # Check the .pli file existence
-    check_file_existence(pli_path, 'pli')
+    # FIXME to delete as already performed by the entry widget
+    # check_file_existence(pli_path, 'pli')
     # Get the path to the .pli file directory
     pli_dir = os.path.dirname(pli_path)
     # Instantiate the 'PliReader' class
