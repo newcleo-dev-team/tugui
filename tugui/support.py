@@ -1,3 +1,4 @@
+import os
 import platform
 from enum import Enum
 from typing import List, Tuple, Union
@@ -74,3 +75,41 @@ class IANT(Enum):
     Descriptive string of the element of the enumeration
     """
     return self.value[1]
+
+
+def check_file_existence(file_path: str) -> None:
+  """
+  Function for checking if the given file path exists and is a file.
+  If not, the function raises an exception.
+  """
+  if not os.path.isfile(file_path):
+    # If the file does not exists, throw an exception
+    raise Exception(f"Error: file {file_path} does not exist!")
+
+def check_file_extension_and_existence(file_path: str,
+                                       file_extension: str) -> None:
+  """
+  Function for checking if the given file has the correct extension and
+  exists. If so, True is returned; False otherwise.
+
+  Parameters
+  ----------
+  file_path : str
+      The path to the file to check.
+  file_extension  : str
+      The extension the file must have and is checked for.
+
+  Raises
+  ------
+  An Exception if the file extension does not match with the required
+  one or the file does not exist.
+  """
+  # Check the extension
+  extension = os.path.splitext(file_path)
+  if not (extension[1] == '.' + file_extension):
+      # The file specified by the given path has not the correct extension
+      raise Exception(f"The indicated file with extension '{extension[1]}' is "
+                      "not valid. Please provide one with the "
+                      f"'{file_extension}' extension.")
+  # Check the existence
+  check_file_existence(file_path)
