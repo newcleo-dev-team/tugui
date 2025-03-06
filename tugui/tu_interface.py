@@ -509,7 +509,7 @@ class PliReader():
             pli_reader.sta_dataset = f.readline().split()[0]
 
     # Extract the number of axial sections depending on the ISLICE field
-    if pli_reader.opt_dict['ISLICE'] == 1:
+    if pli_reader.opt_dict['ISLICE'] == '1':
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3'])
     else:
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3']) + 1
