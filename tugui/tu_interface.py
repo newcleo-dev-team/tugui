@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from gui_configuration import DiagramCharacteristics
 from io import TextIOWrapper
 
+from support import get_file_modification_time
+
 
 @dataclass
 class TuInp:
@@ -391,6 +393,10 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
   os.chdir(os.path.dirname(datGen.inp_path))
   print("CURRENT WD: " + os.getcwd())
 
+  # Get the modification time before running the executable; the first
+  # element in the list of .dat files to generate is taken as reference
+  modif_time0 = get_file_modification_time(datGen.dat_paths[0])
+
   # Assemble the command for running the executable
   command = datGen.plotexec_path + " " + os.path.basename(datGen.inp_path).split(os.sep)[-1]
   # Run the tuplotgui executable by passing the input file
@@ -399,18 +405,31 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
 
   # Check for the presence of all of the output files
   for i in range(len(datGen.dat_paths)):
-    if (os.path.isfile(datGen.dat_paths[i]) and os.path.isfile(datGen.plt_paths[i])):
-      # Move the output files into the user-specified working directory
-      shutil.move(datGen.dat_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1]))
-      shutil.move(datGen.plt_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1]))
+    # Check if the files has been created after running the plot executable:
+    # if the time has not changed, it means that either the .dat or the .plt
+    # files have not been generated, hence an exception is raised.
+    if (modif_time0 == get_file_modification_time(datGen.dat_paths[i]) or
+        modif_time0 == get_file_modification_time(datGen.plt_paths[i])):
+      raise RuntimeError(
+        "Something went wrong with the generation of the output "
+        "files for plotting. One or both the .dat and .plt files have "
+        "not been produced.")
+    # Build the paths of the generated plot files from the user-specified
+    # working directory
+    dat_output = os.path.join(
+      datGen.output_path,
+      os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1])
+    plt_output = os.path.join(
+      datGen.output_path,
+      os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1])
+    # Move the output files into the user-specified working directory
+    shutil.move(datGen.dat_paths[i], dat_output)
+    shutil.move(datGen.plt_paths[i], plt_output)
+    # Change the paths of the output files to the ones where they have just
+    # been moved
+    datGen.dat_paths[i] = dat_output
+    datGen.plt_paths[i] = plt_output
 
-      # Change the paths of the output files to the ones where they have just been moved
-      datGen.dat_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1])
-      datGen.plt_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1])
-    else:
-      # If any of the output files does not exist, raise an exception
-      raise Exception("Error: something wrong with the output extraction.\
-                      One of the output files has not been produced.")
     # Handle the .out file case: given how the executables have been compiled, this file could not be present
     if os.path.isfile(datGen.out_paths[i]):
       # Move the output file into the user-specified working directory

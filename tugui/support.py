@@ -1,3 +1,5 @@
+import os
+
 from enum import Enum
 from typing import Tuple
 
@@ -45,3 +47,24 @@ class IANT(Enum):
     Descriptive string of the element of the enumeration
     """
     return self.value[1]
+
+def get_file_modification_time(file_path: str) -> float | None:
+  """
+  Function that returns the last modification time of the file whose
+  path is given as input.
+
+  Parameters
+  ----------
+  file_path : str
+      The path of the file whose last modification time has to be
+      retrieved
+
+  Returns
+  -------
+  The file last modification time, if exists; None otherwise.
+  """
+  try:
+      return os.path.getmtime(file_path)
+  except OSError:
+      # If the file does not exist, an OSError is caught
+      return None
