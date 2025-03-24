@@ -1,7 +1,7 @@
 from enum import Enum
 import tkinter as tk
 from tkinter import ttk
-from typing import Callable, List, Union
+from typing import Callable, List, Tuple, Union
 
 
 class FieldType(Enum):
@@ -163,6 +163,9 @@ class PlotSettingsListBox():
     alternative values. This widget also presents a vertical scrollbar to help the
     inspection of the available values.
   """
+  # Maximum number of items that can be selected in the list box
+  MAX_SELECTABLE_ITEMS: int = 10
+
   def __init__(self, container: ttk.Frame, label_text: str,
                choices: Union[List[str], None], row_index: int) -> None:
     """
@@ -199,6 +202,11 @@ class PlotSettingsListBox():
     # Bind the selection of the listbox items event to a function call that stores the list of items
     self.choice_lb.bind("<<ListboxSelect>>", self.store_selected)
 
+    # Initialize the tuple storing the currently selected indices
+    self.stored_indxs: Tuple[int] = ()
+    # Declare a list holding the values to store, based on the selection
+    self.lb_selected_values: List[str] = []
+
     # Add an X-Y padding to all the widgets herein defined
     self.label.grid_configure(padx=5, pady=2)
     self.choice_lb.grid_configure(padx=5, pady=2)
@@ -220,10 +228,26 @@ class PlotSettingsListBox():
     """
     # Get the indices of the currently selected items
     indexes = self.choice_lb.curselection()
-    # Declare a list holding the values to store, based on the selection
-    self.lb_selected_values = list()
+    # Deselect the items if more than the maximum allowed items have been
+    # selected
+    if len(indexes) > self.MAX_SELECTABLE_ITEMS:
+      print("WARNING: only 10 items can be selected at once.")
+      # Store the first 10 elements
+      if len(self.stored_indxs) == 1:
+        self.stored_indxs = indexes[0:10]
+      # Get the indices of the items to be deselected
+      indxs = set(indexes) - set(self.stored_indxs)
+      if indxs:
+        # Deselect each item one by one
+        for i in indxs:
+          self.choice_lb.selection_clear(i, i)
+    else:
+      self.stored_indxs = indexes
+
+    # Clear the list of selected values
+    self.lb_selected_values.clear()
     # Loop over all the indexes
-    for i in indexes:
+    for i in self.stored_indxs:
       # Fill the list of selected values of the listbox
       self.lb_selected_values.append(self.choice_lb.get(i))
 
