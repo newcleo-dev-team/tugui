@@ -1019,6 +1019,9 @@ class TuPostProcessingGui(tk.Tk):
     self.status_bar.set_text("")
     # Re-build the plot tabs
     self.build_tabs_area()
+    # Delete the output directory attribute, if any
+    if hasattr(self, 'output_dir'):
+      delattr(self, 'output_dir')
 
 
 def new_postprocessing(event: Union[tk.Event, None] = None) -> None:
