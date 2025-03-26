@@ -35,6 +35,10 @@ class TuPostProcessingGui(tk.Tk):
   . the plot area (right side) where the selected curves are shown
   . a status bar (bottom window) showing log messages.
   """
+
+  # Flag stating if the output directory has been set directly
+  __is_dir_directly_set: bool = False
+
   def __init__(self, window_title: str, width: int, height: int) -> None:
     """
     App windows's constructor
@@ -357,6 +361,21 @@ class TuPostProcessingGui(tk.Tk):
       # Extract the information from the .pli file and instantiate the 'PliReader' class
       self.plireader = PliReader.init_PliReader(self.pli_entry.var.get())
       print("Path to the .pli file: " + self.plireader.pli_path)
+
+      # Update the default directory of the file selection window to the one of
+      # the currently opened file
+      self.initial_dir = os.path.dirname(self.plireader.pli_path)
+      # If not already done, set the output directory to the one of the
+      # currently opened file
+      if not hasattr(self, 'output_dir') or not self.__is_dir_directly_set:
+        self.output_dir = self.initial_dir
+
+      # Provide a message to the status bar and to the log file
+      output_message = "Selected .pli file: " + self.plireader.pli_path + \
+          ", Output folder: " + self.output_dir
+      self.status_bar.set_text(output_message)
+      # FIXME: to print into log file
+      print(output_message)
 
       # Instantiate the MacReader class
       self.macreader = MacReader(
@@ -774,6 +793,16 @@ class TuPostProcessingGui(tk.Tk):
 
     # Update the output directory to the one currently selected
     self.output_dir = foldername
+    # Update the output directory to the one currently selected
+    self.__is_dir_directly_set = True
+
+    # Provide a message to the status bar and to the log file
+    mssg = self.status_bar.label.cget('text').split(',')
+    if mssg[0]:
+        output_message = mssg[0] + ", Output folder: " + self.output_dir
+    else:
+        output_message = "Selected output folder: " + self.output_dir
+    self.status_bar.set_text(output_message)
 
     print("Selected output folder:", self.output_dir)
 
@@ -796,11 +825,17 @@ class TuPostProcessingGui(tk.Tk):
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
-    # Change the start directory for the file selection window
+    # Update the default directory of the file selection window to the one of
+    # the currently opened file
     self.initial_dir = os.path.dirname(filename)
-
+    # If not already done, set the output directory to the one of the
+    # currently opened file
+    if not hasattr(self, 'output_dir') or not self.__is_dir_directly_set:
+      self.output_dir = self.initial_dir
     # Provide a message to the status bar
-    self.status_bar.set_text("Selected .inp file: " + self.loaded_inp_file)
+    output_message = "Loaded .inp file: " + self.loaded_inp_file + \
+        ", Output folder: " + self.output_dir
+    self.status_bar.set_text(output_message)
 
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<InpLoaded>>')
