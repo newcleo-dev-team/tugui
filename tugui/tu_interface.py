@@ -485,18 +485,21 @@ class PliReader():
           # Build a dictionary holding the name of the options VS their values
           pli_reader.opt_dict = {options[i]: options_values[i] for i in range(len(options))}
         else:
+          # Pattern specifying any letter, digit, underscore or hyphen to find
+          # in lines
+          pattern = "[a-zA-Z0-9_-]+"
           # Search for the lines where the paths of the .mic and .mac files and their record length are present
-          if (re.search("^\w+.mic\s+", line)):
+          if (re.search("^" + pattern + "\.mic\s+", line)):
             # Save the path to the .mic file
             pli_reader.mic_path = line.split()[0]
             # Advance to the next line to get the .mic record length
             pli_reader.mic_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.mac\s+", line)):
+          elif(re.search("^" + pattern + "\.mac\s+", line)):
             # Save the path to the .mac file
             pli_reader.mac_path = line.split()[0]
             # Advance to the next line to get the .mac record length
             pli_reader.mac_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.sta\s+", line)):
+          elif(re.search("^" + pattern + "\.sta\s+", line)):
             # Save the path to the .sta file
             pli_reader.sta_path = line.split()[0]
             # Advance to the next line to get the .sta record length
