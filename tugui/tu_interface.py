@@ -201,7 +201,7 @@ class InpHandler():
       check_file_existence(os.path.join(self.inp_dir, plireader.mac_path), 'mac')
       check_file_existence(os.path.join(self.inp_dir, plireader.mic_path), 'mic')
       # Check the .sta file existence only if required, i.e if the 'ISTATI' field is '1'
-      if plireader.opt_dict['ISTATI'] == 1:
+      if int(plireader.opt_dict['ISTATI']):
         check_file_existence(os.path.join(self.inp_dir, plireader.sta_path), 'sta')
 
     # Declare a string holding the .inp filename (with default to 'TuPlot')
@@ -512,7 +512,7 @@ class PliReader():
             pli_reader.sta_dataset = f.readline().split()[0]
 
     # Extract the number of axial sections depending on the ISLICE field
-    if pli_reader.opt_dict['ISLICE'] == 1:
+    if int(pli_reader.opt_dict['ISLICE']):
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3'])
     else:
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3']) + 1
