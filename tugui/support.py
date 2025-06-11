@@ -1,3 +1,6 @@
+import errno
+import os
+
 from enum import Enum
 from typing import Tuple
 
@@ -45,3 +48,28 @@ class IANT(Enum):
     Descriptive string of the element of the enumeration
     """
     return self.value[1]
+
+
+def remove_if_file_exists(filename: str) -> None:
+    """
+    Function that removes the file whose path name is given as input. If no
+    file actually exists at the indicated path, no exception is raised unless
+    the error type is different from `ENOENT`, indicating a missing file.
+
+    Parameters
+    ----------
+    filename : str
+        The path name of the file to remove
+
+    Raises
+    ------
+    OSError
+        If the remove operation raised an `OSError` exception with type
+        different from `ENOENT` (indicating a missing file).
+    """
+    try:
+        os.remove(filename)
+    except OSError as e:
+        # Re-raise the exception if an error other than missing file is raised
+        if e.errno != errno.ENOENT:
+            raise

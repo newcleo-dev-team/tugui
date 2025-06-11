@@ -260,37 +260,43 @@ class TuPostProcessingGui(tk.Tk):
     # The tab can span 2 columns so to overlap with the following button
     self.plotTabControl.grid(column=0, row=1, columnspan=2, sticky='nsew')
 
-    # Instantiate the class that read and extract the content of the .inp file
-    # in order to know how many diagrams need to be produced
-    inpreader = InpHandler(self.loaded_inp_file)
-    # Read the loaded .inp file and extract its content
-    inpreader.read_inp_file()
-    # Save the content of the read .inp file into a file whose name complies with
-    # what needed by the plotting executables
-    self.loaded_inp_file = inpreader.save_loaded_inp()
+    try:
+      # Instantiate the class that read and extract the content of the .inp file
+      # in order to know how many diagrams need to be produced
+      inpreader = InpHandler(self.loaded_inp_file)
+      # Read the loaded .inp file and extract its content
+      inpreader.read_inp_file()
+      # Save the content of the read .inp file into a file whose name complies with
+      # what needed by the plotting executables
+      self.loaded_inp_file = inpreader.save_loaded_inp()
 
-    # Handle the TuPlot and TuStat plot cases differently
-    if inpreader.diagrams_list[0].is_tuplot:
-      # Get the path to the TuPlot executable
-      executable_path = self.guiconfig.tuplot_path
-      # Set the default name of the files the plotting executable will create
-      output_files_name = "TuPlot"
-    else:
-      # Get the path to the TuStat executable
-      executable_path = self.guiconfig.tustat_path
-      # Set the default name of the files the plotting executable will create
-      output_files_name = "TuStat"
+      # Handle the TuPlot and TuStat plot cases differently
+      if inpreader.diagrams_list[0].is_tuplot:
+        # Get the path to the TuPlot executable
+        executable_path = self.guiconfig.tuplot_path
+        # Set the default name of the files the plotting executable will create
+        output_files_name = "TuPlot"
+      else:
+        # Get the path to the TuStat executable
+        executable_path = self.guiconfig.tustat_path
+        # Set the default name of the files the plotting executable will create
+        output_files_name = "TuStat"
 
-    # Run the method that deals with instantiating the dataclass storing the needed
-    # information for the plotting executable to be run. The corresponding executable
-    # is run afterwards and the paths to the output .dat and .plt files, stored in the
-    # returned object, are updated.
-    inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
-      plotexec_path=executable_path,
-      inp_path=self.loaded_inp_file,
-      plots_num=len(inpreader.diagrams_list),
-      cwd=self.output_dir,
-      output_files_name=output_files_name)
+      # Run the method that deals with instantiating the dataclass storing
+      # the needed information for the plotting executable to be run. The
+      # corresponding executable is run afterwards and the paths to the output
+      # .dat and .plt files, stored in the returned object, are updated.
+      inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+        plotexec_path=executable_path,
+        inp_path=self.loaded_inp_file,
+        plots_num=len(inpreader.diagrams_list),
+        cwd=self.output_dir,
+        output_files_name=output_files_name)
+    except Exception as e:
+      # Intercept any exception produced while reading/saving the .inp file
+      # or while running the plotting executable and show a pop-up message
+      messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      raise RuntimeError(e)
 
     # For each diagram configuration create a new PlotFigure object and plot the curves
     for i in range(0, len(inpreader.diagrams_list)):
