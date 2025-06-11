@@ -1,3 +1,4 @@
+import math
 import os
 import platform
 import shutil
@@ -12,7 +13,7 @@ from dataclasses import dataclass, field
 from gui_configuration import DiagramCharacteristics
 from io import TextIOWrapper
 
-from support import get_file_modification_time
+from support import remove_if_file_exists
 
 
 @dataclass
@@ -393,9 +394,11 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
   os.chdir(os.path.dirname(datGen.inp_path))
   print("CURRENT WD: " + os.getcwd())
 
-  # Get the modification time before running the executable; the first
-  # element in the list of .dat files to generate is taken as reference
-  modif_time0 = get_file_modification_time(datGen.dat_paths[0])
+  # Given the names of the .dat/.plt files which are expected to be generated,
+  # remove them, if already present, since they will be overwritten in any case
+  for dat, plt in zip(datGen.dat_paths, datGen.plt_paths):
+      remove_if_file_exists(dat)
+      remove_if_file_exists(plt)
 
   # Assemble the command for running the executable
   command = datGen.plotexec_path + " " + os.path.basename(datGen.inp_path).split(os.sep)[-1]
@@ -403,17 +406,16 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
   print("RUN: " + command)
   os.system(command)
 
-  # Check for the presence of all of the output files
+  # Check for the presence of all the output files
   for i in range(len(datGen.dat_paths)):
-    # Check if the files has been created after running the plot executable:
-    # if the time has not changed, it means that either the .dat or the .plt
-    # files have not been generated, hence an exception is raised.
-    if (modif_time0 == get_file_modification_time(datGen.dat_paths[i]) or
-        modif_time0 == get_file_modification_time(datGen.plt_paths[i])):
-      raise RuntimeError(
-        "Something went wrong with the generation of the output "
-        "files for plotting. One or both the .dat and .plt files have "
-        "not been produced.")
+    # Raise an exception if any of the .dat/.plt files has not been generated
+    if any(not os.path.exists(f) for f in [datGen.dat_paths[i],
+                                           datGen.plt_paths[i]]):
+        raise RuntimeError(
+            "Something went wrong with the generation of the output files "
+            "for plotting. One or both the requested .dat/.plt files have "
+            "not been produced.")
+
     # Build the paths of the generated plot files from the user-specified
     # working directory
     dat_output = os.path.join(
