@@ -2,6 +2,7 @@ import errno
 import os
 
 from enum import Enum
+import shutil
 from typing import Tuple
 
 class IDGA(Enum):
@@ -73,3 +74,30 @@ def remove_if_file_exists(filename: str) -> None:
         # Re-raise the exception if an error other than missing file is raised
         if e.errno != errno.ENOENT:
             raise
+
+
+def _move_file_and_update_path(file_path: str, dest_folder_path: str) -> str:
+    """
+    Function that builds the path of the file to a destination folder and
+    moves it into that.
+
+    Parameters
+    ----------
+    file_path : str
+        Path name to the file to move
+    dest_folder_path : str
+        Path name to the destination folder
+
+    Returns
+    -------
+    str
+        The path name of the file moved into the destination folder
+    """
+    # Build the file path to the destination folder
+    out_output = os.path.join(
+        dest_folder_path,
+        os.path.basename(file_path).split(os.sep)[-1])
+    # Move the file into the destination folder
+    shutil.move(file_path, out_output)
+    # Return the file path in the destination folder
+    return out_output

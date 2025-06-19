@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from gui_configuration import DiagramCharacteristics
 from io import TextIOWrapper
 
-from support import remove_if_file_exists
+from support import remove_if_file_exists, _move_file_and_update_path
 
 
 @dataclass
@@ -390,8 +390,10 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
 
   The function hence returns the updated dataclass.
   """
+  # Get the directory of the .inp file
+  inp_dir = os.path.dirname(datGen.inp_path)
   # The current working directory is changed to the one of the .inp file
-  os.chdir(os.path.dirname(datGen.inp_path))
+  os.chdir(inp_dir)
   print("CURRENT WD: " + os.getcwd())
 
   # Given the names of the .dat/.plt files which are expected to be generated,
@@ -415,34 +417,30 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
             "Something went wrong with the generation of the output files "
             "for plotting. One or both the requested .dat/.plt files have "
             "not been produced.")
+    # Flag stating whether the .out file has been produced
+    does_out_exist = os.path.isfile(datGen.out_paths[i])
+    # Set an empty string as the .out file path in case it has not been
+    # produced
+    if not does_out_exist:
+        datGen.out_paths[i] = ""
+    # If the output directory is the same of the .inp file, do not move
+    # anything
+    if inp_dir == datGen.output_path:
+        continue
+    # Move the files and change the paths of the output files to the ones
+    # where they have just been moved
+    datGen.dat_paths[i] = _move_file_and_update_path(
+        datGen.dat_paths[i], datGen.output_path)
+    datGen.plt_paths[i] = _move_file_and_update_path(
+        datGen.plt_paths[i], datGen.output_path)
+    # Handle the .out file case: given how the executables have been compiled,
+    # this file could not be present
+    if does_out_exist:
+        datGen.out_paths[i] = _move_file_and_update_path(
+            datGen.out_paths[i], datGen.output_path)
 
-    # Build the paths of the generated plot files from the user-specified
-    # working directory
-    dat_output = os.path.join(
-      datGen.output_path,
-      os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1])
-    plt_output = os.path.join(
-      datGen.output_path,
-      os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1])
-    # Move the output files into the user-specified working directory
-    shutil.move(datGen.dat_paths[i], dat_output)
-    shutil.move(datGen.plt_paths[i], plt_output)
-    # Change the paths of the output files to the ones where they have just
-    # been moved
-    datGen.dat_paths[i] = dat_output
-    datGen.plt_paths[i] = plt_output
-
-    # Handle the .out file case: given how the executables have been compiled, this file could not be present
-    if os.path.isfile(datGen.out_paths[i]):
-      # Move the output file into the user-specified working directory
-      shutil.move(datGen.out_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.out_paths[i]).split(os.sep)[-1]))
-      # Change the path of the output file to the one where it has just been moved
-      datGen.out_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.out_paths[i]).split(os.sep)[-1])
-    else:
-      # Set an empty string as the .out file path in case it has not been produced
-      datGen.out_paths[i] = ""
-
-    print("OUTPUT FILES: " + datGen.dat_paths[i] + ", " + datGen.plt_paths[i] + ", " + datGen.out_paths[i])
+    print("OUTPUT FILES: " + datGen.dat_paths[i] + ", "
+          + datGen.plt_paths[i] + ", " + datGen.out_paths[i])
 
   # Restore the previous working directory
   os.chdir(datGen.output_path)
