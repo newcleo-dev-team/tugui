@@ -232,15 +232,27 @@ class PlotSettingsListBox():
     # selected
     if len(indexes) > self.MAX_SELECTABLE_ITEMS:
       print("WARNING: only 10 items can be selected at once.")
-      # Store the first 10 elements
-      if len(self.stored_indxs) == 1:
-        self.stored_indxs = indexes[0:10]
       # Get the indices of the items to be deselected
-      indxs = set(indexes) - set(self.stored_indxs)
-      if indxs:
-        # Deselect each item one by one
-        for i in indxs:
-          self.choice_lb.selection_clear(i, i)
+      indxs = list(set(indexes) - set(self.stored_indxs))
+      # Handle the case where the elements of the previous selection were
+      # lesser than the maximum allowable number
+      if len(self.stored_indxs) < self.MAX_SELECTABLE_ITEMS:
+        # Get the indexes to include depending on whether the first element
+        # in the next selection is before or after the last one of the
+        # previous selection
+        if indxs[0] > self.stored_indxs[-1]:
+          indxs_to_add = indxs[
+            0:self.MAX_SELECTABLE_ITEMS-len(self.stored_indxs)]
+        else:
+          indxs_to_add = indxs[
+            len(self.stored_indxs)-self.MAX_SELECTABLE_ITEMS:]
+        # Update the stored indexes
+        self.stored_indxs = set(self.stored_indxs) | set(indxs_to_add)
+        # Get the indexes of the elements to deselect
+        indxs = set(indexes) - set(self.stored_indxs)
+      # Deselect each item one by one
+      for i in indxs:
+        self.choice_lb.selection_clear(i, i)
     else:
       self.stored_indxs = indexes
 
