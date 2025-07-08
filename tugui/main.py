@@ -362,13 +362,11 @@ class TuPostProcessingGui(tk.Tk):
       self.plireader = PliReader.init_PliReader(self.pli_entry.var.get())
       print("Path to the .pli file: " + self.plireader.pli_path)
 
-      # Update the default directory of the file selection window to the one of
-      # the currently opened file
-      self.initial_dir = os.path.dirname(self.plireader.pli_path)
-      # If not already done, set the output directory to the one of the
-      # currently opened file
-      self.__set_output_dir_and_status_message(
-        "Selected .pli file: " + self.plireader.pli_path)
+      # Update the default directory of the file selection window and, if not
+      # already done, set the output directory to the one of the currently
+      # opened file
+      self.__set_directories_and_status_message(
+        self.plireader.pli_path, "Selected .pli file: ")
 
       # Instantiate the MacReader class
       self.macreader = MacReader(
@@ -818,13 +816,11 @@ class TuPostProcessingGui(tk.Tk):
 
     # Store the selected file as an instance attribute
     self.loaded_inp_file = filename
-    # Update the default directory of the file selection window to the one of
-    # the currently opened file
-    self.initial_dir = os.path.dirname(filename)
-    # If not already done, set the output directory to the one of the
-    # currently opened file
-    self.__set_output_dir_and_status_message(
-      "Loaded .inp file: " + self.loaded_inp_file)
+    # Update the default directory of the file selection window and, if not
+    # already done, set the output directory to the one of the currently
+    # opened file
+    self.__set_directories_and_status_message(
+      self.loaded_inp_file, "Loaded .inp file: ")
 
     # Generate the '<<InpLoaded>>' virtual event
     self.event_generate('<<InpLoaded>>')
@@ -1012,24 +1008,35 @@ class TuPostProcessingGui(tk.Tk):
     if hasattr(self, 'output_dir'):
       delattr(self, 'output_dir')
 
-  def __set_output_dir_and_status_message(self, first_text: str) -> None:
+  def __set_directories_and_status_message(
+      self, file_name: str, first_text: str) -> None:
     """
-    Method that updates the output directory with the one of the currently
-    loaded .pli or .inp file, if not already set directly by the user.
+    Method that updates the default directory of the file selection window
+    with the one of the currently loaded .pli or .inp file.
+    The same is performed for the output directory, if it has not already
+    been set directly by the user.
     A descriptive message is assembled by prefixing it with the given string
     and indicating the path of the output folder.
     The status bar widget is updated with the assembled text.
 
     Parameters
     ----------
+    file_name : str
+      The path of the selected file.
     first_text : str
       The first part of the text message shown in the status bar widget.
     """
+    # Update the default directory of the file selection window to the one of
+    # the currently opened file
+    self.initial_dir = os.path.dirname(file_name)
+    # If not already done, set the output directory to the one of the
+    # currently opened file
     if not hasattr(self, 'output_dir') or not self.__is_dir_directly_set:
       self.output_dir = self.initial_dir
 
     # Provide a message to the status bar and to the log file
-    output_message = first_text + ", Output folder: " + self.output_dir
+    output_message = (first_text + file_name + ", Output folder: "
+                      + self.output_dir)
     self.status_bar.set_text(output_message)
     # FIXME: to print into log file
     print(output_message)
