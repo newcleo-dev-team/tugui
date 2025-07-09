@@ -1,3 +1,4 @@
+import math
 import os
 import platform
 import shutil
@@ -12,6 +13,8 @@ from dataclasses import dataclass, field
 from gui_configuration import DiagramCharacteristics
 from support import check_file_existence
 from io import TextIOWrapper
+
+from support import remove_if_file_exists, _move_file_and_update_path
 
 
 @dataclass
@@ -202,8 +205,8 @@ class InpHandler():
       check_file_existence(os.path.join(self.inp_dir, plireader.mac_path))
       check_file_existence(os.path.join(self.inp_dir, plireader.mic_path))
       # Check the .sta file existence only if required, i.e if the 'ISTATI' field is '1'
-      if plireader.opt_dict['ISTATI'] == 1:
-        check_file_existence(os.path.join(self.inp_dir, plireader.sta_path))
+      if int(plireader.opt_dict['ISTATI']):
+        check_file_existence(os.path.join(self.inp_dir, plireader.sta_path), 'sta')
 
     # Declare a string holding the .inp filename (with default to 'TuPlot')
     filename = "TuPlot.inp"
@@ -377,9 +380,17 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
 
   The function hence returns the updated dataclass.
   """
+  # Get the directory of the .inp file
+  inp_dir = os.path.dirname(datGen.inp_path)
   # The current working directory is changed to the one of the .inp file
-  os.chdir(os.path.dirname(datGen.inp_path))
+  os.chdir(inp_dir)
   print("CURRENT WD: " + os.getcwd())
+
+  # Given the names of the .dat/.plt files which are expected to be generated,
+  # remove them, if already present, since they will be overwritten in any case
+  for dat, plt in zip(datGen.dat_paths, datGen.plt_paths):
+      remove_if_file_exists(dat)
+      remove_if_file_exists(plt)
 
   # Assemble the command for running the executable
   command = datGen.plotexec_path + " " + os.path.basename(datGen.inp_path).split(os.sep)[-1]
@@ -387,31 +398,39 @@ def run_plot_files_generation(datGen: DatGenerator) -> Self:
   print("RUN: " + command)
   os.system(command)
 
-  # Check for the presence of all of the output files
+  # Check for the presence of all the output files
   for i in range(len(datGen.dat_paths)):
-    if (os.path.isfile(datGen.dat_paths[i]) and os.path.isfile(datGen.plt_paths[i])):
-      # Move the output files into the user-specified working directory
-      shutil.move(datGen.dat_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1]))
-      shutil.move(datGen.plt_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1]))
+    # Raise an exception if any of the .dat/.plt files has not been generated
+    if any(not os.path.exists(f) for f in [datGen.dat_paths[i],
+                                           datGen.plt_paths[i]]):
+        raise RuntimeError(
+            "Something went wrong with the generation of the output files "
+            "for plotting. One or both the requested .dat/.plt files have "
+            "not been produced.")
+    # Flag stating whether the .out file has been produced
+    does_out_exist = os.path.isfile(datGen.out_paths[i])
+    # Set an empty string as the .out file path in case it has not been
+    # produced
+    if not does_out_exist:
+        datGen.out_paths[i] = ""
+    # If the output directory is the same of the .inp file, do not move
+    # anything
+    if inp_dir == datGen.output_path:
+        continue
+    # Move the files and change the paths of the output files to the ones
+    # where they have just been moved
+    datGen.dat_paths[i] = _move_file_and_update_path(
+        datGen.dat_paths[i], datGen.output_path)
+    datGen.plt_paths[i] = _move_file_and_update_path(
+        datGen.plt_paths[i], datGen.output_path)
+    # Handle the .out file case: given how the executables have been compiled,
+    # this file could not be present
+    if does_out_exist:
+        datGen.out_paths[i] = _move_file_and_update_path(
+            datGen.out_paths[i], datGen.output_path)
 
-      # Change the paths of the output files to the ones where they have just been moved
-      datGen.dat_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.dat_paths[i]).split(os.sep)[-1])
-      datGen.plt_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.plt_paths[i]).split(os.sep)[-1])
-    else:
-      # If any of the output files does not exist, raise an exception
-      raise Exception("Error: something wrong with the output extraction.\
-                      One of the output files has not been produced.")
-    # Handle the .out file case: given how the executables have been compiled, this file could not be present
-    if os.path.isfile(datGen.out_paths[i]):
-      # Move the output file into the user-specified working directory
-      shutil.move(datGen.out_paths[i], os.path.join(datGen.output_path, os.path.basename(datGen.out_paths[i]).split(os.sep)[-1]))
-      # Change the path of the output file to the one where it has just been moved
-      datGen.out_paths[i] = os.path.join(datGen.output_path, os.path.basename(datGen.out_paths[i]).split(os.sep)[-1])
-    else:
-      # Set an empty string as the .out file path in case it has not been produced
-      datGen.out_paths[i] = ""
-
-    print("OUTPUT FILES: " + datGen.dat_paths[i] + ", " + datGen.plt_paths[i] + ", " + datGen.out_paths[i])
+    print("OUTPUT FILES: " + datGen.dat_paths[i] + ", "
+          + datGen.plt_paths[i] + ", " + datGen.out_paths[i])
 
   # Restore the previous working directory
   os.chdir(datGen.output_path)
@@ -474,18 +493,21 @@ class PliReader():
           # Build a dictionary holding the name of the options VS their values
           pli_reader.opt_dict = {options[i]: options_values[i] for i in range(len(options))}
         else:
+          # Pattern specifying any letter, digit, underscore or hyphen to find
+          # in lines
+          pattern = "[a-zA-Z0-9_-]+"
           # Search for the lines where the paths of the .mic and .mac files and their record length are present
-          if (re.search("^\w+.mic\s+", line)):
+          if (re.search("^" + pattern + "\.mic\s+", line)):
             # Save the path to the .mic file
             pli_reader.mic_path = line.split()[0]
             # Advance to the next line to get the .mic record length
             pli_reader.mic_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.mac\s+", line)):
+          elif(re.search("^" + pattern + "\.mac\s+", line)):
             # Save the path to the .mac file
             pli_reader.mac_path = line.split()[0]
             # Advance to the next line to get the .mac record length
             pli_reader.mac_recordLength = f.readline().split()[0]
-          elif(re.search("^\w+.sta\s+", line)):
+          elif(re.search("^" + pattern + "\.sta\s+", line)):
             # Save the path to the .sta file
             pli_reader.sta_path = line.split()[0]
             # Advance to the next line to get the .sta record length
@@ -498,7 +520,7 @@ class PliReader():
             pli_reader.sta_dataset = f.readline().split()[0]
 
     # Extract the number of axial sections depending on the ISLICE field
-    if pli_reader.opt_dict['ISLICE'] == 1:
+    if int(pli_reader.opt_dict['ISLICE']):
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3'])
     else:
       pli_reader.axial_steps = int(pli_reader.opt_dict['M3']) + 1

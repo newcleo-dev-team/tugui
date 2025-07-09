@@ -53,6 +53,9 @@ class TuPostProcessingGui(tk.Tk):
   # Full path of the loaded .inp file
   __loaded_inp_file: str = ""
 
+  # Flag stating if the output directory has been set directly
+  __is_dir_directly_set: bool = False
+
   def __init__(self, window_title: str, width: int, height: int) -> None:
     # Check whether the OS platform is supported
     self.__check_OS_platform()
@@ -308,37 +311,43 @@ class TuPostProcessingGui(tk.Tk):
     # The tab can span 2 columns so to overlap with the following button
     self.__plotTabController.grid(column=0, row=1, columnspan=2, sticky='nsew')
 
-    # Instantiate the class that read and extract the content of the .inp file
-    # in order to know how many diagrams need to be produced
-    inpreader = InpHandler(self.__loaded_inp_file)
-    # Read the loaded .inp file and extract its content
-    inpreader.read_inp_file()
-    # Save the content of the read .inp file into a file whose name complies with
-    # what needed by the plotting executables
-    self.__loaded_inp_file = inpreader.save_loaded_inp()
+    try:
+      # Instantiate the class that read and extract the content of the .inp file
+      # in order to know how many diagrams need to be produced
+      inpreader = InpHandler(self.__loaded_inp_file)
+      # Read the loaded .inp file and extract its content
+      inpreader.read_inp_file()
+      # Save the content of the read .inp file into a file whose name complies with
+      # what needed by the plotting executables
+      self.__loaded_inp_file = inpreader.save_loaded_inp()
 
-    # Handle the TuPlot and TuStat plot cases differently
-    if inpreader.diagrams_list[0].is_tuplot:
-      # Get the path to the TuPlot executable
-      executable_path = self.guiconfig.tuplot_path
-      # Set the default name of the files the plotting executable will create
-      output_files_name = "TuPlot"
-    else:
-      # Get the path to the TuStat executable
-      executable_path = self.guiconfig.tustat_path
-      # Set the default name of the files the plotting executable will create
-      output_files_name = "TuStat"
+      # Handle the TuPlot and TuStat plot cases differently
+      if inpreader.diagrams_list[0].is_tuplot:
+        # Get the path to the TuPlot executable
+        executable_path = self.guiconfig.tuplot_path
+        # Set the default name of the files the plotting executable will create
+        output_files_name = "TuPlot"
+      else:
+        # Get the path to the TuStat executable
+        executable_path = self.guiconfig.tustat_path
+        # Set the default name of the files the plotting executable will create
+        output_files_name = "TuStat"
 
-    # Run the method that deals with instantiating the dataclass storing the needed
-    # information for the plotting executable to be run. The corresponding executable
-    # is run afterwards and the paths to the output .dat and .plt files, stored in the
-    # returned object, are updated.
-    inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
-      plotexec_path=executable_path,
-      inp_path=self.__loaded_inp_file,
-      plots_num=len(inpreader.diagrams_list),
-      cwd=self.__output_dir,
-      output_files_name=output_files_name)
+      # Run the method that deals with instantiating the dataclass storing
+      # the needed information for the plotting executable to be run. The
+      # corresponding executable is run afterwards and the paths to the output
+      # .dat and .plt files, stored in the returned object, are updated.
+      inp_to_dat = DatGenerator.init_DatGenerator_and_run_exec(
+        plotexec_path=executable_path,
+        inp_path=self.__loaded_inp_file,
+        plots_num=len(inpreader.diagrams_list),
+        cwd=self.__output_dir,
+        output_files_name=output_files_name)
+    except Exception as e:
+      # Intercept any exception produced while reading/saving the .inp file
+      # or while running the plotting executable and show a pop-up message
+      messagebox.showerror("Error", type(e).__name__ + "–" + str(e))
+      raise RuntimeError(e)
 
     # For each diagram configuration create a new PlotFigure object and plot the curves
     for i in range(0, len(inpreader.diagrams_list)):
@@ -409,6 +418,12 @@ class TuPostProcessingGui(tk.Tk):
       print(output_message)
       # Set the initial and output directories
       self.__set_dirs(self.plireader.pli_path)
+
+      # Update the default directory of the file selection window and, if not
+      # already done, set the output directory to the one of the currently
+      # opened file
+      self.__set_directories_and_status_message(
+        self.plireader.pli_path, "Selected .pli file: ")
 
       # Instantiate the MacReader class
       self.macreader = MacReader(
@@ -845,6 +860,16 @@ class TuPostProcessingGui(tk.Tk):
 
     # Update the output directory to the one currently selected
     self.__output_dir = foldername
+    # Update the output directory to the one currently selected
+    self.__is_dir_directly_set = True
+
+    # Provide a message to the status bar and to the log file
+    mssg = self.status_bar.label.cget('text').split(',')
+    if mssg[0]:
+        output_message = mssg[0] + ", Output folder: " + self.output_dir
+    else:
+        output_message = "Selected output folder: " + self.output_dir
+    self.status_bar.set_text(output_message)
 
     print("Selected output folder:", self.__output_dir)
 
@@ -857,22 +882,23 @@ class TuPostProcessingGui(tk.Tk):
     filename = self.__select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
-
-    try:
-      # Check the file extension and existence
-      support.check_file_extension_and_existence(filename, 'inp')
-      # Store the selected file as an instance attribute
-      self.__loaded_inp_file = filename
-      # Update the start directory for the file selection window and the output folder
-      self.__set_dirs(filename)
-      # Provide a message to the status bar
-      self.status_bar.set_text("Selected .inp file: " + self.__loaded_inp_file)
-      # FIXME: to write the above message also into the log file
-      # Create the corresponding plots
-      self.__display_inp_plots()
-    except Exception as e:
+    # Check if the selected file has the correct extension
+    if filename.split('.')[-1] != 'inp':
       # Pop-up an error message
-      messagebox.showerror("Error", str(e))
+      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
+      # Return to avoid loading the wrong file
+      return
+
+    # Store the selected file as an instance attribute
+    self.loaded_inp_file = filename
+    # Update the default directory of the file selection window and, if not
+    # already done, set the output directory to the one of the currently
+    # opened file
+    self.__set_directories_and_status_message(
+      self.loaded_inp_file, "Loaded .inp file: ")
+
+    # Generate the '<<InpLoaded>>' virtual event
+    self.event_generate('<<InpLoaded>>')
 
   def load_output_files(self, event: Union[tk.Event, None] = None) -> None:
     """
@@ -1057,6 +1083,42 @@ class TuPostProcessingGui(tk.Tk):
     self.status_bar.set_text("")
     # Re-build the plot tabs
     self.__build_tabs_area()
+    # Delete the output directory attribute, if any
+    if hasattr(self, 'output_dir'):
+      delattr(self, 'output_dir')
+
+  def __set_directories_and_status_message(
+      self, file_name: str, first_text: str) -> None:
+    """
+    Method that updates the default directory of the file selection window
+    with the one of the currently loaded .pli or .inp file.
+    The same is performed for the output directory, if it has not already
+    been set directly by the user.
+    A descriptive message is assembled by prefixing it with the given string
+    and indicating the path of the output folder.
+    The status bar widget is updated with the assembled text.
+
+    Parameters
+    ----------
+    file_name : str
+      The path of the selected file.
+    first_text : str
+      The first part of the text message shown in the status bar widget.
+    """
+    # Update the default directory of the file selection window to the one of
+    # the currently opened file
+    self.initial_dir = os.path.dirname(file_name)
+    # If not already done, set the output directory to the one of the
+    # currently opened file
+    if not hasattr(self, 'output_dir') or not self.__is_dir_directly_set:
+      self.output_dir = self.initial_dir
+
+    # Provide a message to the status bar and to the log file
+    output_message = (first_text + file_name + ", Output folder: "
+                      + self.output_dir)
+    self.status_bar.set_text(output_message)
+    # FIXME: to print into log file
+    print(output_message)
 
 
 def new_postprocessing(event: Union[tk.Event, None] = None) -> None:
