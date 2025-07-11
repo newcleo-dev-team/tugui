@@ -411,14 +411,6 @@ class TuPostProcessingGui(tk.Tk):
       self.plireader = PliReader.init_PliReader(self.pli_entry.var.get())
       print("Path to the .pli file: " + self.plireader.pli_path)
 
-      # Provide a message to the status bar and to the log file
-      output_message = "Selected .pli file: " + self.plireader.pli_path
-      self.status_bar.set_text(output_message)
-      # FIXME: to print into log file
-      print(output_message)
-      # Set the initial and output directories
-      self.__set_dirs(self.plireader.pli_path)
-
       # Update the default directory of the file selection window and, if not
       # already done, set the output directory to the one of the currently
       # opened file
@@ -836,7 +828,7 @@ class TuPostProcessingGui(tk.Tk):
 
     # If not already done, set the output directory to the one of the
     # currently opened file
-    if not self.__output_dir:
+    if not hasattr(self, "__output_dir") and not self.__is_dir_directly_set:
       self.__output_dir = self.__initial_dir
 
   def select_output_folder(self, event: Union[tk.Event, None] = None) -> None:
@@ -866,9 +858,9 @@ class TuPostProcessingGui(tk.Tk):
     # Provide a message to the status bar and to the log file
     mssg = self.status_bar.label.cget('text').split(',')
     if mssg[0]:
-        output_message = mssg[0] + ", Output folder: " + self.output_dir
+        output_message = mssg[0] + ", Output folder: " + self.__output_dir
     else:
-        output_message = "Selected output folder: " + self.output_dir
+        output_message = "Selected output folder: " + self.__output_dir
     self.status_bar.set_text(output_message)
 
     print("Selected output folder:", self.__output_dir)
@@ -882,23 +874,22 @@ class TuPostProcessingGui(tk.Tk):
     filename = self.__select_file("Plot configuration file", "inp")
     # Do nothing if no .inp file has been selected
     if not filename: return
-    # Check if the selected file has the correct extension
-    if filename.split('.')[-1] != 'inp':
+
+    try:
+      # Check the file extension and existence
+      support.check_file_extension_and_existence(filename, 'inp')
+      # Store the selected file as an instance attribute
+      self.__loaded_inp_file = filename
+      # Update the default directory of the file selection window and, if not
+      # already done, set the output directory to the one of the currently
+      # opened file
+      self.__set_directories_and_status_message(
+        self.__loaded_inp_file, "Loaded .inp file: ")
+      # Create the corresponding plots
+      self.__display_inp_plots()
+    except Exception as e:
       # Pop-up an error message
-      messagebox.showerror("Error", "Error: the selected file has not the correct 'inp' extension.")
-      # Return to avoid loading the wrong file
-      return
-
-    # Store the selected file as an instance attribute
-    self.loaded_inp_file = filename
-    # Update the default directory of the file selection window and, if not
-    # already done, set the output directory to the one of the currently
-    # opened file
-    self.__set_directories_and_status_message(
-      self.loaded_inp_file, "Loaded .inp file: ")
-
-    # Generate the '<<InpLoaded>>' virtual event
-    self.event_generate('<<InpLoaded>>')
+      messagebox.showerror("Error", str(e))
 
   def load_output_files(self, event: Union[tk.Event, None] = None) -> None:
     """
@@ -1084,8 +1075,8 @@ class TuPostProcessingGui(tk.Tk):
     # Re-build the plot tabs
     self.__build_tabs_area()
     # Delete the output directory attribute, if any
-    if hasattr(self, 'output_dir'):
-      delattr(self, 'output_dir')
+    if hasattr(self, '__output_dir'):
+      delattr(self, '__output_dir')
 
   def __set_directories_and_status_message(
       self, file_name: str, first_text: str) -> None:
@@ -1105,17 +1096,12 @@ class TuPostProcessingGui(tk.Tk):
     first_text : str
       The first part of the text message shown in the status bar widget.
     """
-    # Update the default directory of the file selection window to the one of
-    # the currently opened file
-    self.initial_dir = os.path.dirname(file_name)
-    # If not already done, set the output directory to the one of the
-    # currently opened file
-    if not hasattr(self, 'output_dir') or not self.__is_dir_directly_set:
-      self.output_dir = self.initial_dir
+    # Set the initial and output directories
+    self.__set_dirs(file_name)
 
     # Provide a message to the status bar and to the log file
     output_message = (first_text + file_name + ", Output folder: "
-                      + self.output_dir)
+                      + self.__output_dir)
     self.status_bar.set_text(output_message)
     # FIXME: to print into log file
     print(output_message)
